@@ -1,1 +1,12 @@
 INITAL COMMIT
+-------------
+
+    Journal of Commits
+    ------------------
+
+        * May 5th, - Init Commit,
+
+    ------------------
+
+Project by: M1ND-B3ND3R
+-----------------------
