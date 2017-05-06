@@ -5,6 +5,7 @@ pip install pyric;
 pip install netaddr;
 pip install scapy;
 pip install tabulate;
+sudo apt-get install figlet -y;
 sudo apt-get install iw -y;
 sudo apt-get install tcpdump graphviz imagemagick -y;
 sudo apt-get install python-gnuplot python-crypto python-pyx -y;
@@ -51,13 +52,14 @@ About:
     [+] - These programs are for Linux only, LINUX IS ABOVE ALL.
     [+] - These programs must be run as root. Absolutely must.
     [+] - Required programs:
-        [-] - Airmon-ng > Soon to be removed.
+        [-] - Airmon-ng > Soon to be removed. < HOPEFULLY
+        [-] - figlet    > Cause pretty print.
         [-] - iwconfig  > May be removed in the future.
     [+] - Programs:
-        [-] - Boop:   A sniff tool.
-        [-] - Coil:   A deauth detector.
-        [-] - Strike: A Wireless Attack Module.
-        [-] - Setup:  A script to install dependencies for the programs.
+        [-] - Boop:    A sniff tool.
+        [-] - Coil:    A deauth detector. (FUTURE)
+        [-] - Strike:  A Wireless Attack Module. (FUTURE)
+        [-] - Setup:   A script to install dependencies for the programs.
         [-] - classes: A support library for all the scripts.
     [+] - Language: > Python2.7 <
 ---------------------------------------------------------------------------

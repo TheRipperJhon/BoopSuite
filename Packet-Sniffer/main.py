@@ -9,10 +9,16 @@ __author__  = 'Jarad Dingman';
 __year__    = [2016, 2017];
 __status__  = 'Testing';
 __contact__ = 'kali.pentest.device@gmail.com';
-__version__ = '10.3.8';
+__version__ = '11.0.0';
 
 # Imports
-import os, signal, sys, logging
+import os
+import signal
+import sys
+import logging
+
+# Configuration
+logging.getLogger('scapy.runtime').setLevel(logging.ERROR);
 
 # From Imports
 from classes import *
@@ -23,8 +29,7 @@ from threading import Thread
 
 # Scapy Restraints
 conf.verb = 0;
-logging.getLogger('scapy.runtime').setLevel(logging.DEBUG);
-logging.basicConfig(level=logging.DEBUG, filename="debug.log", format="%(asctime)s %(levelname)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S')
+#logging.basicConfig(level=logging.DEBUG, filename="debug.log", format="%(asctime)s %(levelname)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S')
 
 # Globals
 __APS__ = {};
@@ -88,7 +93,7 @@ def get_un_clients():
 	return clients;
 
 def printer_thread(configuration):
-	typetable = "simple"
+	typetable = "simple";
 
 	while __FLAG__:
 		time.sleep(4);
@@ -101,37 +106,41 @@ def printer_thread(configuration):
 		else:
 			clients = get_un_clients();						# only print associated clients
 
-		clients.sort(key=lambda x: x[4])
+		clients.sort(key=lambda x: x[4]);
 
-		os.system('clear')
+		os.system('clear');
 
-		print("[+] Slithering On Channel: ["+str(configuration.__CC__)+"]")
-		print(tabulate(wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt=typetable))
-		print(tabulate(clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable))
-		time.sleep(1);
+		print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" );
+		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt=typetable ));
+		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
+		time.sleep( 2.5 );
 	return;
 
-def sniff_packets(packet):
+def sniff_packets( packet ):
 	#filter_address = "b0:10:41:88:bf:72"; if packet.addr1 == filter_address or packet.addr2 == filter_address:
 	if packet[0].type == 0:
 		if packet[0].subtype == 4:
-			handler_1(packet[0])#Thread_handler = Thread(target=handler_1, args=[packet[0]]).start()
+			Thread_handler = Thread(target=handler_1, args=[packet[0]]).start();
 
 		elif packet[0].subtype == 5 and packet[0].addr3 in __HIDDEN__:
-			handler_2(packet[0])#Thread_handler = Thread(target=handler_2, args=[packet[0]]).start()
+			Thread_handler = Thread(target=handler_2, args=[packet[0]]).start();
 
 		elif packet[0].subtype == 8:
-			handler_3(packet[0])#Thread_handler = Thread(target=handler_3, args=[packet[0]]).start()
+			Thread_handler = Thread(target=handler_3, args=[packet[0]]).start();
 
 	elif packet[0].type == 2 and packet[0].addr1 not in __IGNORE__ and packet[0].addr2 not in __IGNORE__:					# or packet[0].type == 4? Does packet type 4 exist?
-		handler_4(packet[0])#Thread_handler = Thread(target=handler_4, args=[packet[0]]).start()
+		Thread_handler = Thread(target=handler_4, args=[packet[0]]).start();
+	else:
+		pass;
 
 def handler_1(packet):
-	rssi = get_rssi(packet[0].notdecoded)
+	rssi = get_rssi(packet[0].notdecoded);
+
 	if packet[0].addr2 in __CLS__:
 		__CLS__[packet[0].addr2].mrssi = rssi;
 	else:
 		__CLS__[packet[0].addr2] = Client(packet[0].addr2, '(Unassociated)', rssi);
+
 	__CLS__[packet[0].addr2].mnoise += 1;
 	return;
 
@@ -141,64 +150,66 @@ def handler_2(packet):
 	return;
 
 def handler_3(packet):
-	source = packet[0].addr2
+	source = packet[0].addr2;
 
 	if source in  __APS__:
 		__APS__[source].mrssi = get_rssi(packet[0].notdecoded);
 		__APS__[source].mbeacons += 1;
 
 	else:
-		destination = packet[0].addr1
-		mac         = packet[0].addr3
+		destination = packet[0].addr1;
+		mac         = packet[0].addr3;
 
 		if u'\x00' in "".join([x if ord(x) < 128 else "" for x in packet[0].info]) or not packet[0].info:
-			__HIDDEN__.append(mac)
-			name = "<len: "+str(len(packet[0].info))+">"
+			__HIDDEN__.append(mac);
+			name = "<len: "+str(len(packet[0].info))+">";
 		else:
-			name    = "".join([x if ord(x) < 128 else "" for x in packet[0].info])
+			name = "".join([x if ord(x) < 128 else "" for x in packet[0].info]);
 
-		rssi = get_rssi(packet[0].notdecoded)
+		rssi = get_rssi(packet[0].notdecoded);
 
-		p = packet[0][Dot11Elt]
+		p = packet[0][Dot11Elt];
 		cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
 								"{Dot11ProbeResp:%Dot11ProbeResp.cap%}").split('+')
 
-		sec     = set()
-		channel = "-"
+		sec     = set();
+		channel = "-";
 		while isinstance(p, Dot11Elt):
 			if p.ID == 3:
-				channel = ord(p.info)
+				channel = ord(p.info);
 			elif p.ID == 48:
-				sec.add('WPA2')
+				sec.add('WPA2');
 			elif p.ID == 61:
 				if channel == "-":
 					channel = ord(p.info[-int(p.len):-int(p.len)+1]);
 			elif p.ID == 221 and p.info.startswith('\x00P\xf2\x01\x01\x00'):
 				if "WPA2" in sec:
-					pass
+					pass;
 				else:
-					sec.add('WPA')
+					sec.add('WPA');
 			p = p.payload
 
 		if not sec:
 			if 'privacy' in cap:
-				sec.add('WEP')
+				sec.add('WEP');
 			else:
-				sec.add("OPEN")
+				sec.add("OPEN");
 
 		if '0050f204104a000110104400010210' in str(packet).encode('hex'):
-			sec.add('WPS')
+			sec.add('WPS');
 
 		try:
-			oui = ((EUI(mac)).oui).registration().org
+			oui = ((EUI(mac)).oui).registration().org;
 		except:
-			oui = "UNKNOWN"
-		__APS__[source] = Access_Point(name, ':'.join(sec), channel, mac, unicode(oui), rssi)
+			oui = "UNKNOWN";
+
+		__APS__[source] = Access_Point(name, ':'.join(sec), channel, mac, unicode(oui), rssi);
 	return;
 
 def handler_4(packet):
 	a1 = packet[0].addr1;
 	a2 = packet[0].addr2;
+
 	rssi = get_rssi(packet[0].notdecoded);
 
 	if a1 in __APS__:
@@ -221,20 +232,23 @@ def handler_4(packet):
 
 # Functions
 def get_rssi(DECODED):
-	rssi = -(256 - ord(DECODED[-2:-1]))
+	rssi = -(256 - ord(DECODED[-2:-1]));
+
 	if int(rssi) > 0 or int(rssi) < -100:
-		rssi = -(256 - ord(DECODED[-4:-3]))
-	if int(rssi) not in range(-100, 0):
+		rssi = -(256 - ord(DECODED[-4:-3]));
+
+	elif int(rssi) not in range(-100, 0):
 		return "-";
+
 	return rssi;
 
 def main(configuration):
 	def signal_handler(*args):
-		global __FLAG__
-		global __APS__
-		global __CLS__
-		__FLAG__ = False
-		print("\r[+] Commiting to EXIT.")
+		global __FLAG__;
+		global __APS__;
+		global __CLS__;
+		__FLAG__ = False;
+		print("\r[+] Commiting to EXIT.");
 
 		if configuration.__REPORT__ != False:
 			wifis = list(map(get_aps, __APS__));
@@ -242,59 +256,65 @@ def main(configuration):
 			wifis.remove(wifis[0]);
 
 			clients = list(map(get_clients, __CLS__));
-			clients.sort(key=lambda x: x[4])
-			print("[+] Generating Report.")
+			clients.sort(key=lambda x: x[4]);
+			print("[+] Generating Report.");
 			configuration.__REPORT__.write(tabulate(wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt="psql")+"\r\n");
 			configuration.__REPORT__.write(tabulate(clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt="psql")+"\r\n");
 			configuration.__REPORT__.close();
 
 		if configuration.__HTML__ != False:
-			import datetime
+			import datetime;
 			wifis = list(map(get_aps, __APS__));
 			wifis.sort(key=lambda x: x[6]);
 			wifis.remove(wifis[0]);
 
 			clients = list(map(get_clients, __CLS__));
-			clients.sort(key=lambda x: x[4])
-			print("[+] Generating HTML Report.")
-			table1 = tabulate(wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt="html")
-			table2 = tabulate(clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt="html")
-			configuration.__HTML__.write("<!doctype html>")
-			configuration.__HTML__.write("<html lang='en'><head><meta charset='utf-8'><title>BOOP SLITHER REPORT</title>")
-	  		configuration.__HTML__.write("<meta name='description' content='REPORT'>")
-	  		configuration.__HTML__.write("<meta name='author' content='Jacobsin'>")
-	  		configuration.__HTML__.write("</head>")
-			configuration.__HTML__.write("<body>")
-			configuration.__HTML__.write("<h1> REPORT AT: "+str(datetime.datetime.now())+"</h1>")
+			clients.sort(key=lambda x: x[4]);
+			print("[+] Generating HTML Report.");
+			table1 = tabulate(wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt="html");
+			table2 = tabulate(clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt="html");
+			configuration.__HTML__.write("<!doctype html>");
+			configuration.__HTML__.write("<html lang='en'><head><meta charset='utf-8'><title>BOOP SLITHER REPORT</title>");
+	  		configuration.__HTML__.write("<meta name='description' content='REPORT'>");
+	  		configuration.__HTML__.write("<meta name='author' content='Jacobsin'>");
+	  		configuration.__HTML__.write("</head>");
+			configuration.__HTML__.write("<body>");
+			configuration.__HTML__.write("<h1> REPORT AT: "+str(datetime.datetime.now())+"</h1>");
 			configuration.__HTML__.write(table1);
 			configuration.__HTML__.write(table2);
-			configuration.__HTML__.write("</body>")
-			configuration.__HTML__.write("</html>")
+			configuration.__HTML__.write("</body>");
+			configuration.__HTML__.write("</html>");
 			configuration.__HTML__.close();
 
 		sys.exit();
-		return
+		return;
 
-	signal.signal(signal.SIGINT, signal_handler)
+	signal.signal(signal.SIGINT, signal_handler);
 
-	__APS__["(Unassociated)"] = Access_Point('','','','','','')
+	__APS__["(Unassociated)"] = Access_Point('','','','','','');
 
 	if configuration.__HOP__ == True:
-		Hopper = Thread(target=channel_hopper, args=[configuration]).start()
+		Hopper = Thread(target=channel_hopper, args=[configuration]).start();
 	else:
-		os.system('iwconfig '+configuration.__FACE__+" channel " + configuration.__CC__)
+		os.system('iwconfig '+configuration.__FACE__+" channel " + configuration.__CC__);
 
 	if configuration.__PRINT__ == True:
-		Printer = Thread(target=printer_thread, args=[configuration]).start()
+		Printer = Thread(target=printer_thread, args=[configuration]).start();
 
-	sniff(iface=configuration.__FACE__, prn=sniff_packets, store=0)
+	sniff(iface=configuration.__FACE__, prn=sniff_packets, store=0);
 
 
 def set_size(height, width):
-	sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=height, cols=width))
-	return
+	sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=height, cols=width));
+	return;
+
+def display_art():
+	os.system("figlet -f slant 'BoopSniff'");
+	print("\r\n\tCodename: GaboonViper\r\n")
+	return;
 
 if __name__ == '__main__':
+	display_art();
 	configuration = Configuration();
 	configuration.parse_args();
 	set_size(51, 95);
