@@ -12,7 +12,6 @@ class Configuration:
 		self.__REPORT__ = False;
 		self.__PRINT__  = True;
 		self.__HOP__    = False;
-		self.__HTML__   = False;
 		self.__KILL__   = None;
 		self.__FREQ__   = "2";
 		self.__FACE__   = None;
@@ -45,14 +44,6 @@ class Configuration:
 		 		self.__REPORT__ = open(report, "w");
 		 	except:
 		 		sys.exit();
-
-	def parse_html(self, html):
-		if html != False:
-			try:
-		 		self.__HTML__ = open(html, "w");
-		 	except:
-		 		sys.exit();
-		return;
 
 	def parse_freq(self, freq):
 		self.__FREQ__ = freq;
@@ -110,7 +101,6 @@ class Configuration:
 		# OPTIONAL
 		parser.add_argument('-r', action='store', default=False, dest='report', help='select a report location');
 		parser.add_argument('-f', action='store', default='2',  dest='freq', help='select a frequency (2/5)', choices=["2", "5"]);
-		parser.add_argument('-w', action='store', default=False, dest='html', help='Select a html report location.')
 		parser.add_argument('-c', action='store', default=None, dest='channel', help='select a channel');
 
 		# FLAGS
@@ -125,7 +115,6 @@ class Configuration:
 		self.parse_channel(results.channel);
 		self.parse_kill(results.kill);
 		self.parse_unassociated(results.unassociated);
-		self.parse_html(results.html);
 
 		self.user_force_variables_static();
 		return;
@@ -172,7 +161,6 @@ class Access_Point:
 	def update_ssid(self, ssid):
 		self.mssid = ssid
 		return
-
 
 class Client:
 	def __init__(self, mac, bssid, rssi):
