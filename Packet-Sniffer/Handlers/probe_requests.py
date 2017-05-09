@@ -8,7 +8,7 @@ def handler_1(packet):
 	if packet[0].addr2 in confg.CLS:
 		confg.CLS[packet[0].addr2].mrssi = rssi;
 	else:
-		confg.CLS[packet[0].addr2] = Client(packet[0].addr2, '(Unassociated)', rssi);
+		confg.CLS[packet[0].addr2] = Client(packet[0].addr2, '', rssi);
 
 	confg.CLS[packet[0].addr2].mnoise += 1;
 	return;

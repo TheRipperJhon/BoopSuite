@@ -4,9 +4,26 @@ INITAL COMMIT
     Journal of Commits
     ------------------
 
-        * May 5th, - Init Commit,
+        * May 5th, - Init Commit
+        * May 5th, - Second Commit
 
     ------------------
 
 Project by: M1ND-B3ND3R
 -----------------------
+
+TODO:
+
+    Make the code into the following layout:
+        Folder: Packet_Types
+            File: Probe_Request.py
+            File: Probe_Response.py
+            File: Beacon.py
+            File: Data.py
+        Folder: Classes
+            File: Classes.py
+        main.py
+        setup.sh
+
+        // imports would then be import Packet_Types.Beacon
+        // Yeet.
