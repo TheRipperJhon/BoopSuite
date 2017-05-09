@@ -8,7 +8,7 @@ def get_aps(AP):
 	return [
 		confg.APS[AP].mmac, confg.APS[AP].menc, confg.APS[AP].mch,
 		confg.APS[AP].mven, confg.APS[AP].msig, confg.APS[AP].mbeacons,
-		confg.APS[AP].mssid
+		confg.APS[AP].mssid, confg.APS[AP].meapols
 			];
 
 def get_clients(cl):
@@ -47,7 +47,7 @@ def printer_thread(configuration):
 		system('clear');
 
 		print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" );
-		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt=typetable ));
+		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'EAP'], tablefmt=typetable ));
 		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
-		sleep( 2.5 );
+		sleep( 4 );
 	return;

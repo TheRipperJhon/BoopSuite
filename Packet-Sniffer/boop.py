@@ -17,6 +17,7 @@ import signal
 import logging
 
 import Globals.MyGlobals as confg
+import Handlers.EAPOL as eap
 import Handlers.probe_requests as probereq
 import Handlers.probe_response as proberes
 import Handlers.beacon as beacon
@@ -49,8 +50,11 @@ def sniff_packets( packet ):
 	 	elif packet[0].subtype == 8:
 	  		Thread_handler = Thread(target=beacon.handler_3, args=[packet[0]]).start();
 
-	elif packet[0].type == 2 and packet[0].addr1 not in confg.IGNORE and packet[0].addr2 not in confg.IGNORE:					# or packet[0].type == 4? Does packet type 4 exist?
-	  	Thread_handler = Thread(target=data.handler_4, args=[packet[0]]).start();
+	elif packet[0].type == 2:
+		if packet[0].addr1 not in confg.IGNORE and packet[0].addr2 not in confg.IGNORE:
+	  		Thread_handler = Thread(target=data.handler_4, args=[packet[0]]).start();
+		if packet[0].haslayer(EAPOL):
+			Thread_handler = Thread(target=eap.handler_5, args=[packet[0]]).start();
 	else:
 		pass;
 

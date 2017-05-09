@@ -138,21 +138,22 @@ class Configuration:
 class Access_Point:
 	def __init__(self, ssid, enc, ch, mac, ven, sig):
 
-		self.mssid = str(ssid)[:20]
+		self.mssid = str(ssid)[:20];
 
 		if "WPA2" in enc and "WPA" in enc:
-			self.menc  = "WPA2"
+			self.menc  = "WPA2";
 			if "WPS" in enc:
-				self.menc +=":WPS"
+				self.menc += ":WPS";
 		else:
-			self.menc = enc
-		self.mch   = str(ch)
-		self.mmac  = mac
-		self.mven  = ven[:8]
-		self.msig  = sig
+			self.menc = enc;
+		self.mch   = str(ch);
+		self.mmac  = mac;
+		self.mven  = ven[:8];
+		self.msig  = sig;
 		self.mbeacons = 1;
+		self.meapols = 0;
 
-		return
+		return;
 
 	def update_sig(self, sig):
 		self.msig = sig

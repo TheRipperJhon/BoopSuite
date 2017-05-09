@@ -14,6 +14,7 @@ def handler_3(packet):
 	else:
 		destination = packet[0].addr1;
 		mac         = packet[0].addr3;
+		confg.HANDSHAKES[mac] = [];
 
 		if u'\x00' in "".join([x if ord(x) < 128 else "" for x in packet[0].info]) or not packet[0].info:
 			confg.HIDDEN.append(mac);
