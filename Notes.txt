@@ -1,11 +1,9 @@
-INITAL COMMIT
+Project BOOPSUITE
 -------------
 
-    Journal of Commits
-    ------------------
+    Named after my pet ball python.
 
-        * May 5th, - Init Commit
-        * May 5th, - Second Commit
+    A packet sniffer that has many features.
 
     ------------------
 
@@ -14,16 +12,4 @@ Project by: M1ND-B3ND3R
 
 TODO:
 
-    Make the code into the following layout:
-        Folder: Packet_Types
-            File: Probe_Request.py
-            File: Probe_Response.py
-            File: Beacon.py
-            File: Data.py
-        Folder: Classes
-            File: Classes.py
-        main.py
-        setup.sh
-
-        // imports would then be import Packet_Types.Beacon
-        // Yeet.
+    Filter for ssid or mac.

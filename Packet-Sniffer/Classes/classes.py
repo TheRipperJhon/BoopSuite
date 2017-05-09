@@ -6,6 +6,9 @@ import pyric.pyw as pyw
 
 class Configuration:
 	def __init__(self):
+		"""
+			Initialize Class Variables
+		"""
 		self.check_root();
 		self.check_op();
 
@@ -21,17 +24,15 @@ class Configuration:
 
 	def user_force_variables_static(self):
 		"""
-			Use this area as a user to FORCE a configuration
-			variable to always be true no matter what.
-			- Overrides parsed args.
-			- self.__KILL__ wont work for fairly obvious reasons if you read the code.
-			- May break due to effects taking place after the checks.
-			- *USE CAREFULLY*
+			Forced Args, *UNPARSED*
 		"""
 		# self.__PRINT__ = False;
 		return;
 
 	def parse_interface(self, interface):
+		"""
+			Parse Interface Argument *REQUIRED*
+		"""
 		if interface in pyw.interfaces() and pyw.modeget(interface) == "monitor":
 			self.__FACE__ = interface;
 		else:
@@ -39,6 +40,9 @@ class Configuration:
 		return;
 
 	def parse_report(self, report):
+		"""
+			Parse Report Argument
+		"""
 		if report != False:
 			try:
 		 		self.__REPORT__ = open(report, "w");
@@ -46,10 +50,16 @@ class Configuration:
 		 		sys.exit();
 
 	def parse_freq(self, freq):
+		"""
+			Set Method for frequency
+		"""
 		self.__FREQ__ = freq;
 		return;
 
 	def parse_channel(self, channel):
+		"""
+			Set Channel based on preselected frequency
+		"""
 		if not channel:
 			self.__HOP__ = True;
 			return;
@@ -71,6 +81,9 @@ class Configuration:
 		return;
 
 	def parse_kill(self, kill):
+		"""
+			Emulates airmong-ng check kill
+		"""
 		if kill:
 			tasklist = [
 						"service avahi-daemon stop",

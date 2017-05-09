@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 sudo apt-get -y install python-pip > /dev/null;
+sudo apt-get install python-dev -y;
 pip install pyric;
 pip install netaddr;
 pip install scapy;
@@ -14,7 +15,7 @@ clear;
 echo """
 LICENSE:
 
-    Copyright (C) 2016  Jarad Dingman (kali.pentest.device@gmail.com)
+    Copyright (C) 2016  Jarad Dingman
 
 	This program is free software: you can redistribute it and/or modify it under
 	the terms of the GNU General Public License as published by the Free Software
@@ -55,14 +56,11 @@ About:
         [-] - Airmon-ng > Soon to be removed. < HOPEFULLY
         [-] - figlet    > Cause pretty print.
         [-] - iwconfig  > May be removed in the future.
-    [+] - Programs:
-        [-] - Boop:    A sniff tool.
-        [-] - Coil:    A deauth detector. (FUTURE)
-        [-] - Strike:  A Wireless Attack Module. (FUTURE)
-        [-] - Setup:   A script to install dependencies for the programs.
-        [-] - classes: A support library for all the scripts.
-    [+] - Language: > Python2.7 <
+    [+] - Languages:
+        [-] - Python2.7
+        [-] - Shell
+
 ---------------------------------------------------------------------------
                                                 With Love,
-                                                Jacobsin
+                                                M1ND-B3ND3R
 """;

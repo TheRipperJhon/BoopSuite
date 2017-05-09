@@ -92,7 +92,10 @@ def main(configuration):
     if configuration.__PRINT__ == True:
         Printer_Thread = Thread(target=printer_thread, args=[configuration]).start();
 
-    sniff(iface=configuration.__FACE__, prn=sniff_packets, store=0);
+	try:
+		sniff(iface=configuration.__FACE__, prn=sniff_packets, store=0);
+	except:
+		pass;
 
     return 0;
 
