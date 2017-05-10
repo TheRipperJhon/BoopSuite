@@ -39,31 +39,41 @@ conf.verb = 0;
 
 # threads
 def sniff_packets( packet ):
+	"""
+		Main sniffer function for entire program, handles all packet threads.
+	"""
 	#filter_address = "b0:10:41:88:bf:72"; if packet.addr1 == filter_address or packet.addr2 == filter_address:
 	if packet[0].type == 0:
 		if packet[0].subtype == 4:
-			Thread_handler = Thread(target=probereq.handler_1, args=[packet[0]]).start();
+			Thread_handler = Thread(target=probereq.handler, args=[packet[0]]).start();
 
-	  	elif packet[0].subtype == 5 and packet[0].addr3 in confg.HIDDEN:
-	  		Thread_handler = Thread(target=proberes.handler_2, args=[packet[0]]).start();
+		elif packet[0].subtype == 5 and packet[0].addr3 in confg.HIDDEN:
+			Thread_handler = Thread(target=proberes.handler, args=[packet[0]]).start();
 
-	 	elif packet[0].subtype == 8:
-	  		Thread_handler = Thread(target=beacon.handler_3, args=[packet[0]]).start();
+		elif packet[0].subtype == 8:
+			Thread_handler = Thread(target=beacon.handler, args=[packet[0]]).start();
 
 	elif packet[0].type == 2:
 		if packet[0].addr1 not in confg.IGNORE and packet[0].addr2 not in confg.IGNORE:
-	  		Thread_handler = Thread(target=data.handler_4, args=[packet[0]]).start();
+			Thread_handler = Thread(target=data.handler, args=[packet[0]]).start();
+
 		if packet[0].haslayer(EAPOL):
-			Thread_handler = Thread(target=eap.handler_5, args=[packet[0]]).start();
+			Thread_handler = Thread(target=eap.handler, args=[packet[0]]).start();
 	else:
 		pass;
 
 # MAIN CONTROLLER
-def main(configuration):
-    def signal_handler(*args):
-        confg.FLAG = False;
+def int_main(configuration):
+	"""
+		Main program controller.
+	"""
+	def signal_handler(*args):
+		"""
+			Handles ctrl+c events to exit program.
+		"""
+		confg.FLAG = False;
 
-        if configuration.__REPORT__ != False:
+		if configuration.__REPORT__ != False:
 			wifis = list(map(get_aps, confg.APS));
 			wifis.sort(key=lambda x: x[6]);
 			wifis.remove(wifis[0]);
@@ -75,33 +85,33 @@ def main(configuration):
 			configuration.__REPORT__.write(tabulate(clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt="psql")+"\r\n");
 			configuration.__REPORT__.close();
 
-        print("\r[+] Commit to Exit.");
+		print("\r[+] Commit to Exit.");
 
-        sys.exit(0);
-        return;
+		sys.exit(0);
+		return 0;
 
-    signal.signal(signal.SIGINT, signal_handler);
-    # Initialize an empty Access Point for easier printing.
-    confg.APS[""] = Access_Point('','','','','','');
+	signal.signal(signal.SIGINT, signal_handler);
+	# Initialize an empty Access Point for easier printing.
+	confg.APS[""] = Access_Point('','','','','','');
 
-    if configuration.__HOP__ == True:
-        Hopper_Thread = Thread(target=channel_hopper, args=[configuration]).start();
-    else:
-        os.system('iwconfig ' + configuration.__FACE__ + ' channel ' + configuration.__CC__);
+	if configuration.__HOP__ == True:
+		Hopper_Thread = Thread(target=channel_hopper, args=[configuration]).start();
+	else:
+		os.system('iwconfig ' + configuration.__FACE__ + ' channel ' + configuration.__CC__);
 
-    if configuration.__PRINT__ == True:
-        Printer_Thread = Thread(target=printer_thread, args=[configuration]).start();
+	if configuration.__PRINT__ == True:
+		Printer_Thread = Thread(target=printer_thread, args=[configuration]).start();
 
 	try:
 		sniff(iface=configuration.__FACE__, prn=sniff_packets, store=0);
 	except:
 		pass;
 
-    return 0;
+	return 0;
 
 if __name__ == '__main__':
-    misc.display_art();
-    configuration = Configuration();
-    configuration.parse_args();
-    misc.set_size(51, 95);
-    main(configuration);
+	misc.display_art();
+	configuration = Configuration();
+	configuration.parse_args();
+	misc.set_size(51, 95);
+	int_main(configuration);

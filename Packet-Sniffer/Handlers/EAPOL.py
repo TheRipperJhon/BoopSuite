@@ -3,10 +3,13 @@ from scapy.all import *
 from rssi import get_rssi
 from Classes.classes import *
 
-def handler_5(packet):
+def handler(packet):
+    """
+        Handler for eapol packets.
+    """
     confg.HANDSHAKES[packet.addr3].append(packet);
-    confg.APS[packet.addr3].meapols += 1;
-    if len(confg.HANDSHAKES[packet.addr3]) > 3:
+    confg.APS[packet.addr3].add_eapol();
+    if len(confg.HANDSHAKES[packet.addr3]) >= 8:
         wrpcap(str(confg.APS[packet.addr3].mssid)+".pcap", confg.HANDSHAKES[packet.addr3], append=True);
         confg.HANDSHAKES[packet.addr3] = [];
     return;

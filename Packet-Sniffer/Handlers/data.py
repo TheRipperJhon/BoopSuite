@@ -2,7 +2,10 @@ import Globals.MyGlobals as confg
 from rssi import get_rssi
 from Classes.classes import *
 
-def handler_4(packet):
+def handler(packet):
+	"""
+		handler for data type frames
+	"""
 	a1 = packet[0].addr1;
 	a2 = packet[0].addr2;
 
