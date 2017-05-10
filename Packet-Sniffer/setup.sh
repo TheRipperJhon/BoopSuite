@@ -1,4 +1,5 @@
 #!/bin/bash -e
+# Script to automate the dependency installation.
 
 sudo apt-get -y install python-pip > /dev/null;
 sudo apt-get install python-dev -y;

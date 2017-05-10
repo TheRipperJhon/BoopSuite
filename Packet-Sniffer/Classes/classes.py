@@ -5,6 +5,9 @@ import sys
 import pyric.pyw as pyw
 
 class Configuration:
+	"""
+		Class to handle all the sys var options passed at runtime.
+	"""
 	def __init__(self):
 		"""
 			Initialize Class Variables
@@ -100,6 +103,9 @@ class Configuration:
 		return;
 
 	def parse_unassociated(self, un):
+		"""
+			Parse unassociated option.
+		"""
 		if un == True:
 			self.__UN__ = True;
 		else:
@@ -107,6 +113,9 @@ class Configuration:
 		return
 
 	def parse_args(self):
+		"""
+			Parse Controller. Could be substituted in the __init__ method...
+		"""
 		parser = argparse.ArgumentParser();
 		# REQUIRED
 		parser.add_argument('-i', action='store', dest='interface', help='select an interface', required=True);
@@ -133,6 +142,9 @@ class Configuration:
 		return;
 
 	def check_root(self):
+		"""
+			Check for proper permissions before running boopsniff
+		"""
 		if os.getuid() != 0:
 			sys.exit();
 		print("		 /----------->");
@@ -140,6 +152,9 @@ class Configuration:
 		return
 
 	def check_op(self):
+		"""
+			Check if using linux and linux only.
+		"""
 		if os.uname()[0].startswith("Linux") and not 'Darwin' not in os.uname()[0]:
 			sys.exit();
 
@@ -149,8 +164,13 @@ class Configuration:
 		return;
 
 class Access_Point:
+	"""
+		A class to handle all access points detected.
+	"""
 	def __init__(self, ssid, enc, ch, mac, ven, sig):
-
+		"""
+			Init method for access points.
+		"""
 		self.mssid = str(ssid)[:20];
 
 		if "WPA2" in enc and "WPA" in enc:
@@ -159,25 +179,51 @@ class Access_Point:
 				self.menc += ":WPS";
 		else:
 			self.menc = enc;
-		self.mch   = str(ch);
-		self.mmac  = mac;
-		self.mven  = ven[:8];
-		self.msig  = sig;
+		self.mch      = str(ch);
+		self.mmac     = mac;
+		self.mven     = ven[:8];
+		self.msig     = sig;
 		self.mbeacons = 1;
-		self.meapols = 0;
-
+		self.meapols  = 0;
+		self.mfound   = "F";
 		return;
 
 	def update_sig(self, sig):
+		"""
+			a setter method for signal strength derived from the get_rssi function.
+		"""
 		self.msig = sig
 		return
 
 	def update_ssid(self, ssid):
+		"""
+			A setter method for any access point with a hidden ssid.
+		"""
 		self.mssid = ssid
 		return
 
+	def add_eapol(self):
+		"""
+			A modifier method to determine if a full handshake has been captured.
+			Not necessarily accurate as I can't determine which order the eapol
+			messages arrive in.
+		"""
+		self.meapols += 1;
+		if self.mfound != "T":
+			if self.meapols > 4:
+				self.mfound = "T";
+		else:
+			pass
+		return;
+
 class Client:
+	"""
+		A class to handle clients detected.
+	"""
 	def __init__(self, mac, bssid, rssi):
+		"""
+			Initializer method for clients.
+		"""
 		self.mmac   = mac
 		self.mbssid = bssid
 		self.mrssi = rssi
@@ -186,5 +232,8 @@ class Client:
 		return
 
 	def update_network(self, bssid):
+		"""
+			A setter method for if a client changes networks.
+		"""
 		self.mbssid = bssid
 		return

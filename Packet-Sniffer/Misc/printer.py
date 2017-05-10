@@ -5,20 +5,29 @@ from time import sleep
 from os import system
 
 def get_aps(AP):
+	"""
+		A function to gather all AP info for displaying.
+	"""
 	return [
 		confg.APS[AP].mmac, confg.APS[AP].menc, confg.APS[AP].mch,
 		confg.APS[AP].mven, confg.APS[AP].msig, confg.APS[AP].mbeacons,
-		confg.APS[AP].mssid, confg.APS[AP].meapols
+		confg.APS[AP].mssid, confg.APS[AP].mfound
 			];
 
 def get_clients(cl):
+	"""
+		A function to gather all clients that are associated.
+	"""
 	return [
-		confg.CLS[cl].mmac.decode('utf-8'), confg.APS[confg.CLS[cl].mbssid].mmac,
+		confg.CLS[cl].mmac, confg.APS[confg.CLS[cl].mbssid].mmac,
 		str(confg.CLS[cl].mnoise), str(confg.CLS[cl].mrssi),
 		confg.APS[confg.CLS[cl].mbssid].mssid
 			];
 
 def get_un_clients():
+	"""
+		A function to gather all clients no matter what.
+	"""
 	clients = [];
 	for cl in confg.CLS:
 		if len(confg.APS[confg.CLS[cl].mbssid].mssid) > 0:
@@ -29,6 +38,9 @@ def get_un_clients():
 	return clients;
 
 def printer_thread(configuration):
+	"""
+		A thread to manage displayed information.
+	"""
 	typetable = "simple";
 
 	while confg.FLAG:
@@ -47,7 +59,7 @@ def printer_thread(configuration):
 		system('clear');
 
 		print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" );
-		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'EAP'], tablefmt=typetable ));
+		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'Key'], tablefmt=typetable ));
 		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
 		sleep( 4 );
 	return;

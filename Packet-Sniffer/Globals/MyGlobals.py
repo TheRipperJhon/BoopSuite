@@ -1,11 +1,11 @@
 # GLOBALS
-APS = {};
-CLS = {};
+APS = {}; # MAC, AP OBJECT
+CLS = {}; # MAC, CLIENT OBJECT
 
-HIDDEN = [];
-IGNORE = [];
+HIDDEN = []; # Non-broadcasting ssid mac addresses.
+IGNORE = []; # Broadcast addresses.
 
-FLAG = True;
+FLAG = True; # Signal controller for program.
 
 """ Exiperimental """
 HANDSHAKES = {}; # NETWORKS, EAPOLS

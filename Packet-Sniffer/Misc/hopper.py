@@ -4,6 +4,9 @@ from os import system
 from time import sleep
 
 def channel_hopper(configuration):
+	"""
+		A thread for hopping frequencies on a spectrum for sniffing.
+	"""
 	interface = configuration.__FACE__;
 	frequency = configuration.__FREQ__;
 

@@ -4,7 +4,10 @@ from netaddr import *
 from scapy.all import *
 from Classes.classes import *
 
-def handler_3(packet):
+def handler(packet):
+	"""
+		Handler for Beacon Frames.
+	"""
 	source = packet[0].addr2;
 
 	if source in  confg.APS:

@@ -2,7 +2,10 @@ import Globals.MyGlobals as confg
 from rssi import get_rssi
 from Classes.classes import *
 
-def handler_1(packet):
+def handler(packet):
+	"""
+		Handler for probe requests.
+	"""
 	rssi = get_rssi(packet[0].notdecoded);
 
 	if packet[0].addr2 in confg.CLS:
