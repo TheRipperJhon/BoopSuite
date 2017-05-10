@@ -1,67 +1,102 @@
-#!/bin/bash -e
-# Script to automate the dependency installation.
+#!/bin/sh
 
-sudo apt-get -y install python-pip > /dev/null;
-sudo apt-get install python-dev -y;
-pip install pyric;
-pip install netaddr;
-pip install scapy;
-pip install tabulate;
-sudo apt-get install figlet -y;
-sudo apt-get install iw -y;
-sudo apt-get install tcpdump graphviz imagemagick -y;
-sudo apt-get install python-gnuplot python-crypto python-pyx -y;
-clear;
+echo """
+
+,_,_,_,_,_,_,_,_,_,_|____________________BOOP-INSTALLER____________________
+|#|#|#|#|#|#|#|#|#|#|_____________________________________________________/
+'-'-'-'-'-'-'-'-'-'-|----------------------------------------------------'
+                                          M1ND-B3ND3R
+
+
+"""
+
+###############################################
+# First check that script is running as root. #
+###############################################
+
+PKG=$(command -v yum || command -v apt-get)
+
+if [ "$(id -u)" != "0" ];
+then
+	echo "[-] Must be run as root."
+	exit 1
+fi
+
+###########################################
+# Check for the correct package managers. #
+###########################################
+
+if [ -z "$PKG" ];
+then
+	echo "[-] Package Manager Required!"
+	exit 1
+else
+	echo "[+] Package Manager Found!"
+fi
+
+echo -n "[+] Installing updates..."
+sudo $PKG update -y > /dev/null;
+echo "\r[+] Installed: updates"
+sudo $PKG install -y python-pip > /dev/null;
+echo "[+] Installed: pip"
+pip install netaddr > /dev/null;
+echo "[+] Installed: netaddr"
+pip install scapy > /dev/null;
+echo "[+] Installed: scapy"
+pip install pyric > /dev/null;
+echo "[+] Installed: Pyric"
+pip install tabulate > /dev/null;
+echo "[+] Installed: tabulate"
+sudo $PKG install figlet -y > /dev/null;
+echo "[+] Installed: figlet"
+sudo $PKG install iw -y > /dev/null;
+echo "[+] Installed: iw"
+sudo $PKG install tcpdump -y > /dev/null;
+echo "[+] Installed: tcpdump"
+sudo $PKG install graphviz -y > /dev/null;
+echo "[+] Installed: graphviz"
+sudo $PKG install imagemagick -y > /dev/null;
+echo "[+] Installed: imagemagick"
+sudo $PKG install python-gnuplot -y > /dev/null;
+echo "[+] Installed: gnuplot"
+sudo $PKG install python-crypto -y > /dev/null;
+echo "[+] Installed: crypto"
+sudo $PKG install python-pyx -y > /dev/null;
+echo "[+] Installed: pyx"
 
 echo """
 LICENSE:
 
     Copyright (C) 2016  Jarad Dingman
 
-	This program is free software: you can redistribute it and/or modify it under
-	the terms of the GNU General Public License as published by the Free Software
-	Foundation, either version 3 of the License, or (at your option) any later
-	version.
+	This program is free software: you can redistribute it
+	and/or modify it under the terms of the GNU General
+	Public License as published by the Free Software
+	Foundation, either version 3 of the License, or (at your
+	option) any later version.
 
-	Redistribution and use in source and binary forms, with or without modifications,
-	are permitted provided that the following conditions are met:
-	 * Redistributions of source code must retain the above copyright notice, this
-	   list of conditions and the following disclaimer.
+	Redistribution and use in source and binary forms,
+	with or without modifications, are permitted provided
+	that the following conditions are met:
 
-	 * Redistributions in binary form must reproduce the above copyright notice,
-	   this list of conditions and the following disclaimer in the documentation
-	   and/or other materials provided with the distribution.
+	 * Redistributions of source code must retain the
+	   above copyright notice, this list of conditions
+	   and the following disclaimer.
 
-	 * Neither the name of the orginal author Jarad Dingman nor the names of any
-	   contributors may be used to endorse or promote products derived from this
+	 * Redistributions in binary form must reproduce the
+	   above copyright notice, this list of conditions and
+	   the following disclaimer in the documentation and/or
+	   other materials provided with the distribution.
+
+	 * Neither the name of the orginal author Jarad Dingman
+	   nor the names of any contributors may be used to
+	   endorse or promote products derived from this
 	   software without specific prior written permission.
 
 ---------------------------------------------------------------------------
 *** My main request is that you dont remove my name from the code base. ***
 ---------------------------------------------------------------------------
 
-Author:
--------
-
-        I am a CIT student with an emphasis in software development and I love
-    coding and penetration testing, I hope one day to get this project on the
-    kali linux iso. Offensive Security is awesome and I dream to one day work
-    for/with them.
----------------------------------------------------------------------------
-
-About:
-
-    [+] - These programs are for Linux only, LINUX IS ABOVE ALL.
-    [+] - These programs must be run as root. Absolutely must.
-    [+] - Required programs:
-        [-] - Airmon-ng > Soon to be removed. < HOPEFULLY
-        [-] - figlet    > Cause pretty print.
-        [-] - iwconfig  > May be removed in the future.
-    [+] - Languages:
-        [-] - Python2.7
-        [-] - Shell
-
----------------------------------------------------------------------------
                                                 With Love,
                                                 M1ND-B3ND3R
 """;
