@@ -9,6 +9,7 @@ Project BOOPSUITE
 
 Project by: M1ND-B3ND3R
 -----------------------
+jacobsin1996@gmail.com
 
 TODO:
 

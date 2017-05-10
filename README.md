@@ -58,7 +58,7 @@ Examples:
 
         python boop.py -i wlan1mon -u
 
-// Filtering options are coming in the future.
+    Filtering options are coming in the future.
 --------------------------------------------------------------------------------
 
 Motivation:
