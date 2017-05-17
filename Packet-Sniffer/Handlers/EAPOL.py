@@ -9,7 +9,7 @@ def handler(packet):
     """
     confg.HANDSHAKES[packet.addr3].append(packet);
     confg.APS[packet.addr3].add_eapol();
-    if len(confg.HANDSHAKES[packet.addr3]) >= 8:
+    if len(confg.HANDSHAKES[packet.addr3]) >= 6:
         wrpcap(str(confg.APS[packet.addr3].mssid)+".pcap", confg.HANDSHAKES[packet.addr3], append=True);
         confg.HANDSHAKES[packet.addr3] = [];
     return;

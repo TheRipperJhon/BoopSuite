@@ -42,9 +42,10 @@ def printer_thread(configuration):
 		A thread to manage displayed information.
 	"""
 	typetable = "simple";
+	sleep(4);
+	system('clear');
 
 	while confg.FLAG:
-		sleep(4);
 		wifis = list(map(get_aps, confg.APS));
 		wifis.sort(key=lambda x: x[6]);
 		wifis.remove(wifis[0]);
@@ -57,9 +58,14 @@ def printer_thread(configuration):
 		clients.sort(key=lambda x: x[4]);
 
 		system('clear');
+		if configuration.__HOP__ == True:
+			print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" );
+			print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'Key'], tablefmt=typetable ));
+			print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
+		else:
+			print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'Key'], tablefmt=typetable ));
+			print("");
+			print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
 
-		print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" );
-		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'Key'], tablefmt=typetable ));
-		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
-		sleep( 4 );
+		sleep( 6 );
 	return;

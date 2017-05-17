@@ -13,6 +13,13 @@ def display_art():
 		A function to print out a welcome message.
 		Need to make it so it doesn't use figlet.
 	"""
-	os.system("figlet -f slant 'BoopSniff'");
-	print("\r\n\tCodename: Malabar Viper\r\n")
+	print("""
+    ____                   _____       _ ________
+   / __ )____  ____  ____ / ___/____  (_) __/ __/
+  / __  / __ \/ __ \/ __ \\__ \/ __ \/ / /_/ /_
+ / /_/ / /_/ / /_/ / /_/ /__/ / / / / / __/ __/
+/_____/\____/\____/ .___/____/_/ /_/_/_/ /_/
+                 /_/
+	""");
+	print("\tCodename: Malabar Viper\r\n")
 	return;

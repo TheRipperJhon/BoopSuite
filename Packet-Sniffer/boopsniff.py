@@ -12,6 +12,9 @@ import sys
 import signal
 import logging
 
+# Configure Scapy
+logging.getLogger('scapy.runtime').setLevel(logging.ERROR);
+
 import Globals.MyGlobals as confg
 import Handlers.EAPOL as eap
 import Handlers.probe_requests as probereq
@@ -19,9 +22,6 @@ import Handlers.probe_response as proberes
 import Handlers.beacon as beacon
 import Handlers.data as data
 import Misc.misc as misc
-
-# Configure Scapy
-logging.getLogger('scapy.runtime').setLevel(logging.ERROR);
 
 # From Imports
 from Misc.printer import printer_thread
@@ -59,7 +59,7 @@ def sniff_packets( packet ):
 			pass;
 	else:
 		pass;
-		
+
 # MAIN CONTROLLER
 def int_main(configuration):
 	"""
