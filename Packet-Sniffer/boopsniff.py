@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-# Notes:
-#    TODO:
-#        FILTER BY MAC ADDRESS! FINAL PART!!! HOPEFULLY
-
 __author__  = 'Jarad Dingman';
 __year__    = [2016, 2017];
 __status__  = 'Testing';
@@ -42,31 +38,34 @@ def sniff_packets( packet ):
 	"""
 		Main sniffer function for entire program, handles all packet threads.
 	"""
-	#filter_address = "b0:10:41:88:bf:72"; if packet.addr1 == filter_address or packet.addr2 == filter_address:
-	if packet[0].type == 0:
-		if packet[0].subtype == 4:
-			Thread_handler = Thread(target=probereq.handler, args=[packet[0]]).start();
+	if confg.FILTER == None or (packet.addr1 == confg.FILTER or packet.addr2 == confg.FILTER):
+		if packet[0].type == 0:
+			if packet[0].subtype == 4:
+				Thread_handler = Thread(target=probereq.handler, args=[packet[0]]).start();
 
-		elif packet[0].subtype == 5 and packet[0].addr3 in confg.HIDDEN:
-			Thread_handler = Thread(target=proberes.handler, args=[packet[0]]).start();
+			elif packet[0].subtype == 5 and packet[0].addr3 in confg.HIDDEN:
+				Thread_handler = Thread(target=proberes.handler, args=[packet[0]]).start();
 
-		elif packet[0].subtype == 8:
-			Thread_handler = Thread(target=beacon.handler, args=[packet[0]]).start();
+			elif packet[0].subtype == 8:
+				Thread_handler = Thread(target=beacon.handler, args=[packet[0]]).start();
 
-	elif packet[0].type == 2:
-		if packet[0].addr1 not in confg.IGNORE and packet[0].addr2 not in confg.IGNORE:
-			Thread_handler = Thread(target=data.handler, args=[packet[0]]).start();
+		elif packet[0].type == 2:
+			if packet[0].addr1 not in confg.IGNORE and packet[0].addr2 not in confg.IGNORE:
+				Thread_handler = Thread(target=data.handler, args=[packet[0]]).start();
 
-		if packet[0].haslayer(EAPOL):
-			Thread_handler = Thread(target=eap.handler, args=[packet[0]]).start();
+			if packet[0].haslayer(EAPOL):
+				Thread_handler = Thread(target=eap.handler, args=[packet[0]]).start();
+		else:
+			pass;
 	else:
 		pass;
-
+		
 # MAIN CONTROLLER
 def int_main(configuration):
 	"""
 		Main program controller.
 	"""
+	confg.FILTER = configuration.__FILTER__;
 	def signal_handler(*args):
 		"""
 			Handles ctrl+c events to exit program.

@@ -15,6 +15,7 @@ class Configuration:
 		self.check_root();
 		self.check_op();
 
+		self.__FILTER__ = None;
 		self.__REPORT__ = False;
 		self.__PRINT__  = True;
 		self.__HOP__    = False;
@@ -110,7 +111,13 @@ class Configuration:
 			self.__UN__ = True;
 		else:
 			self.__UN__ = False;
-		return
+		return;
+
+	def parse_filter(self, mac_filter):
+		if mac_filter:
+			self.__FILTER__ = mac_filter;
+		else:
+			return;
 
 	def parse_args(self):
 		"""
@@ -128,6 +135,7 @@ class Configuration:
 		# FLAGS
 		parser.add_argument('-k', action='store_true', dest='kill', help='sudo kill interfering processes.');
 		parser.add_argument('-u', action='store_true', dest='unassociated', help='Whether to show unassociated clients.');
+		parser.add_argument('-a', action='store', default=None, dest='filter', help='Filter for a specific mac addr.')
 
 		results = parser.parse_args();
 
@@ -137,6 +145,7 @@ class Configuration:
 		self.parse_channel(results.channel);
 		self.parse_kill(results.kill);
 		self.parse_unassociated(results.unassociated);
+		self.parse_filter(results.filter);
 
 		self.user_force_variables_static();
 		return;

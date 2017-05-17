@@ -9,3 +9,4 @@ FLAG = True; # Signal controller for program.
 
 """ Exiperimental """
 HANDSHAKES = {}; # NETWORKS, EAPOLS
+FILTER     = None;

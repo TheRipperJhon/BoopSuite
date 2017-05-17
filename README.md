@@ -36,27 +36,31 @@ Examples:
 
     To start sniffing:
 
-        python boop.py -i wlan1mon
+        python boopsniff.py -i wlan1mon
 
     To specify a channel:
 
-        python boop.py -i wlan1mon -c 6
+        python boopsniff.py -i wlan1mon -c 6
 
     Boop also works on the 5ghz spectrum if you have a supporting card:
 
-        python boop.py -i wlan1mon -f 5
+        python boopsniff.py -i wlan1mon -f 5
 
     Reporting can also be enabled:
 
-        python boop.py -i wlan1mon -r ~/report.txt
+        python boopsniff.py -i wlan1mon -r ~/report.txt
 
     If some processes are interfering then you can preemptively kill them with:
 
-        python boop.py -i wlan1mon -k
+        python boopsniff.py -i wlan1mon -k
 
     If you want to see unassociated clients:
 
-        python boop.py -i wlan1mon -u
+        python boopsniff.py -i wlan1mon -u
+
+    If you want to filter by a specific AP mac address:
+
+	python boopsniff.py -i wlan1mon -a xx:xx:xx:xx:xx:xx 
 
     Filtering options are coming in the future.
 --------------------------------------------------------------------------------

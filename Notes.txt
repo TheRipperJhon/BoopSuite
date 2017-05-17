@@ -13,4 +13,4 @@ jacobsin1996@gmail.com
 
 TODO:
 
-    Filter for ssid or mac.
+    Get Requests
