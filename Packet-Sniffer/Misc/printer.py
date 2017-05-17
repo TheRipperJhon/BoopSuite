@@ -58,6 +58,7 @@ def printer_thread(configuration):
 		clients.sort(key=lambda x: x[4]);
 
 		system('clear');
+		system('clear');
 		if configuration.__HOP__ == True:
 			print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" );
 			print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'Key'], tablefmt=typetable ));
