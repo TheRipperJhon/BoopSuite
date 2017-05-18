@@ -109,6 +109,8 @@ def int_main(configuration):
 	return 0;
 
 if __name__ == '__main__':
+	if not os.path.isdir("/root/pcaps"):
+		os.system("mkdir /root/pcaps");
 	misc.display_art();
 	configuration = Configuration();
 	configuration.parse_args();

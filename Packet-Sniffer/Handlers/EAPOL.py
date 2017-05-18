@@ -11,7 +11,10 @@ def handler(packet):
     """
     confg.HANDSHAKES[packet.addr3].append(packet);
     confg.APS[packet.addr3].add_eapol();
+    filename = ("/root/pcaps/"+str(confg.APS[packet.addr3].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap");
     if len(confg.HANDSHAKES[packet.addr3]) >= 6:
-        wrpcap(str(confg.APS[packet.addr3].mssid)+str(''.join(random.choice(string.ascii_lowercase) for x in range(4)))+".pcap", confg.HANDSHAKES[packet.addr3], append=True);
+        if not os.path.isfile(filename):
+            os.system("touch "+filename);
+        wrpcap(filename, confg.HANDSHAKES[packet.addr3], append=True);
         confg.HANDSHAKES[packet.addr3] = [];
     return;
