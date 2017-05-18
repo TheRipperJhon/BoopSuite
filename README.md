@@ -29,9 +29,9 @@ developing this. Hopefully others find it useful.
 ## What else is coming?
 
 I am going to add scripts to do the following:
-[ ] BoopStrike - Deauthentication attacks
-[ ] BoopCoil   - Deauth attack detector
-[ ] Boop       - An airmon-ng clone
++ BoopStrike - Deauthentication attacks
++ BoopCoil   - Deauth attack detector
++ Boop       - An airmon-ng clone
 
 More ideas are welcome.
 Email me @: jacobsin1996@gmail.com
