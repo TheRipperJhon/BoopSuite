@@ -35,7 +35,7 @@ else
 fi
 
 echo -n "[+] Installing updates..."
-sudo $PKG update -y > /dev/null;
+sudo $PKG update -y > /dev/null 2> /dev/null;
 echo "\r[+] Installed: updates"
 sudo $PKG install -y python-pip > /dev/null;
 echo "[+] Installed: pip"
@@ -69,8 +69,9 @@ echo "[+] Installed: pyx"
 #########################################
 
 cp -rf Packet-Sniffer/ /usr/share/Packet-Sniffer
+rm -rf Images/
+echo "[+] Removing Images files"
 echo "alias boopsniff='python /usr/share/Packet-Sniffer/boopsniff.py'" >> ~/.bash_aliases
-source ~/.bashrc
 echo "[+] Custom Command Added to: ~/.bash_aliases"
 
 echo """
@@ -110,3 +111,4 @@ LICENSE:
                                                 M1ND-B3ND3R
 """;
 echo "[+] To Start: boopsniff -i <interface>"
+echo "[-] Must Reload Terminal to Run simple command."
