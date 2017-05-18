@@ -28,31 +28,31 @@ Email me @: jacobsin1996@gmail.com
 
 # Examples:
 
-## To start sniffing:
+#### To start sniffing:
 
 `python boopsniff.py -i wlan1mon`
 
-## To specify a channel:
+#### To specify a channel:
 
 `python boopsniff.py -i wlan1mon -c 6`
 
-## Boop also works on the 5ghz spectrum if you have a supporting card:
+#### Boop also works on the 5ghz spectrum if you have a supporting card:
 
 `python boopsniff.py -i wlan1mon -f 5`
 
-## Reporting can also be enabled:
+#### Reporting can also be enabled:
 
 `python boopsniff.py -i wlan1mon -r ~/report.txt`
 
-## If some processes are interfering then you can preemptively kill them with:
+#### If some processes are interfering then you can preemptively kill them with:
 
 `python boopsniff.py -i wlan1mon -k`
 
-## If you want to see unassociated clients:
+#### If you want to see unassociated clients:
 
 `python boopsniff.py -i wlan1mon -u`
 
-## If you want to filter by a specific AP mac address:
+#### If you want to filter by a specific AP mac address:
 
 `python boopsniff.py -i wlan1mon -a xx:xx:xx:xx:xx:xx`
 
@@ -74,9 +74,13 @@ to myself that I can do things that were previously impossible to me.
 #### To install open a terminal and type:
 
 `git clone https://github.com/M1ND-B3ND3R/BoopSuite.git`
+
 `cd BoopSuite`
+
 `chmod +x setup.sh`
+
 `./setup.sh`
+
 
 # Contributors:
 
