@@ -64,9 +64,14 @@ echo "[+] Installed: crypto"
 sudo $PKG install python-pyx -y > /dev/null;
 echo "[+] Installed: pyx"
 
+#########################################
+# Create custom command in aliases file #
+#########################################
+
 cp -rf Packet-Sniffer/ /usr/share/Packet-Sniffer
 echo "alias boopsniff='python /usr/share/Packet-Sniffer/boopsniff.py'" >> ~/.bash_aliases
 source ~/.bashrc
+echo "[+] Custom Command Added to: ~/.bash_aliases"
 
 echo """
 LICENSE:
@@ -104,3 +109,4 @@ LICENSE:
                                                 With Love,
                                                 M1ND-B3ND3R
 """;
+echo "[+] To Start: boopsniff -i <interface>"
