@@ -69,8 +69,6 @@ Email me @: jacobsin1996@gmail.com
 Note all pcap files will be saved in the directory its ran from.
 Thus most likely saved to: /usr/share/Packet-Sniffer/
 
-![alt text](Images/Mid-Run.png "Mid-Run")
-
 #### More options are coming in the future.
 
 
