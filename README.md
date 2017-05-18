@@ -1,4 +1,4 @@
-+ M1ND-B3ND3R - BoopSuite
+M1ND-B3ND3R - BoopSuite
 =========================
 
 #Synopsis:
@@ -6,26 +6,25 @@
     This project is designed, and maintained by one person, M1ND-B3ND3R and is
     a python project built using scapy that is used to sniff wireless traffic.
 
-    Why use this over aircrack?
+##Why use this over aircrack?
     ---
-        Because Personally I find it easier to use, I wanted something that
-        identified clients better and had less useless information displayed.
-        Don't mistake me, aircrack is an amazing tool but I wanted a more
-        personal tool.
+    Because Personally I find it easier to use, I wanted something that
+    identified clients better and had less useless information displayed.
+    Don't mistake me, aircrack is an amazing tool but I wanted a more
+    personal tool.
 
-        Furthermore I can take requests and build them out as I want to continue
-        developing this. Hopefully others find it useful.
+    Furthermore I can take requests and build them out as I want to continue
+    developing this. Hopefully others find it useful.
 
-    What else is coming?
-    ---
+##What else is coming?
 
-        I am going to add a scripts to do the following
-            BoopStrike - Deauthentication attacks
-            BoopCoil   - Deauth attack detector
-            Boop       - An airmon-ng clone
+    I am going to add a scripts to do the following
+        BoopStrike - Deauthentication attacks
+        BoopCoil   - Deauth attack detector
+        Boop       - An airmon-ng clone
 
-        More ideas are welcome.
-            Email me @: jacobsin1996@gmail.com
+    More ideas are welcome.
+        Email me @: jacobsin1996@gmail.com
 
 #Examples:
 
@@ -72,10 +71,10 @@
 
     To install open a terminal and type:
 
-        git clone https://github.com/M1ND-B3ND3R/BoopSuite.git
-        cd BoopSuite
-        chmod +x setup.sh
-        ./setup.sh
+        `git clone https://github.com/M1ND-B3ND3R/BoopSuite.git`
+        `cd BoopSuite`
+        `chmod +x setup.sh`
+        `./setup.sh`
 
         Done!
 
@@ -83,8 +82,7 @@
 
 #Contributors:
 
-    The authors of pyric, scapy, and the aircrack suite.
-
+    + M1ND-B3ND3R
 ---
 
 #License:
