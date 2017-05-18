@@ -45,7 +45,7 @@ def printer_thread(configuration):
 	sleep(4);
 	system('clear');
 
-	while confg.FLAG:
+	while confg.FLAG == True:
 		wifis = list(map(get_aps, confg.APS));
 		wifis.sort(key=lambda x: x[6]);
 		wifis.remove(wifis[0]);

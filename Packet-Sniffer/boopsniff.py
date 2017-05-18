@@ -85,7 +85,7 @@ def int_main(configuration):
 			configuration.__REPORT__.close();
 
 		print("\r[+] Commit to Exit.");
-
+		
 		sys.exit(0);
 		return 0;
 
