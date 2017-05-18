@@ -1,5 +1,6 @@
-M1ND-B3ND3R - BoopSuite
+BoopSuite
 ===
+![alt text](Images/boopsuite.jpg "BoopSuite")
 
 # Synopsis:
 
