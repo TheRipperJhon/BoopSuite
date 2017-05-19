@@ -1,5 +1,6 @@
 import sys
 import os
+import Globals.MyGlobals as confg
 
 def set_size(height, width):
 	"""
@@ -21,5 +22,16 @@ def display_art():
 /_____/\____/\____/ .___/____/_/ /_/_/_/ /_/
                  /_/
 	""");
-	print("\tCodename: Malabar Viper\r\n")
+	print("\tCodename: Gaboon Viper\r\n")
+	return;
+
+def check_valid(mac):
+	if mac not in confg.IGNORE:
+		if not mac.startswith("01:00:5e") and not mac.startswith("01:80:c2"):
+			return True;
+	return False;
+
+def create_pcap_filepath():
+	if not os.path.isdir("/root/pcaps"):
+		os.system("mkdir /root/pcaps");
 	return;

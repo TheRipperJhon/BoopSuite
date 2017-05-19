@@ -31,5 +31,5 @@ def channel_hopper(configuration):
 		channel = str(choice(__FREQS__.keys()));
 		system('sudo iwconfig '+interface+' freq '+channel+"G");
 		configuration.__CC__ = __FREQS__[channel];
-		sleep(3);
+		sleep(1.5);
 	return;

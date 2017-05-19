@@ -11,7 +11,7 @@ def get_aps(AP):
 	return [
 		confg.APS[AP].mmac, confg.APS[AP].menc, confg.APS[AP].mch,
 		confg.APS[AP].mven, confg.APS[AP].msig, confg.APS[AP].mbeacons,
-		confg.APS[AP].mssid, confg.APS[AP].mfound
+		confg.APS[AP].mssid
 			];
 
 def get_clients(cl):
@@ -59,14 +59,10 @@ def printer_thread(configuration):
 
 		system('clear');
 		system('clear');
-		if configuration.__HOP__ == True:
-			print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" );
-			print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'Key'], tablefmt=typetable ));
-			print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
-		else:
-			print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS', 'Key'], tablefmt=typetable ));
-			print("");
-			print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
 
-		sleep( 6 );
+		print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" + confg.RECENT_KEY );
+		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt=typetable ));
+		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
+
+		sleep( 5 );
 	return;

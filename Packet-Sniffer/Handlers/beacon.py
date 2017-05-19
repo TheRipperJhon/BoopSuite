@@ -8,26 +8,26 @@ def handler(packet):
 	"""
 		Handler for Beacon Frames.
 	"""
-	source = packet[0].addr2;
+	source = packet.addr2;
 
-	if source in  confg.APS:
-		confg.APS[source].mrssi = get_rssi(packet[0].notdecoded);
+	if source in confg.APS:
+		confg.APS[source].mrssi = get_rssi(packet.notdecoded);
 		confg.APS[source].mbeacons += 1;
 
 	else:
-		destination = packet[0].addr1;
-		mac         = packet[0].addr3;
+		destination = packet.addr1;
+		mac         = packet.addr3;
 		confg.HANDSHAKES[mac] = [];
 
 		if u'\x00' in "".join([x if ord(x) < 128 else "" for x in packet[0].info]) or not packet[0].info:
 			confg.HIDDEN.append(mac);
-			name = "<len: "+str(len(packet[0].info))+">";
+			name = "<len: "+str(len(packet.info))+">";
 		else:
 			name = "".join([x if ord(x) < 128 else "" for x in packet[0].info]);
 
-		rssi = get_rssi(packet[0].notdecoded);
+		rssi = get_rssi(packet.notdecoded);
 
-		p = packet[0][Dot11Elt];
+		p = packet[Dot11Elt];
 		cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
 								"{Dot11ProbeResp:%Dot11ProbeResp.cap%}").split('+')
 
