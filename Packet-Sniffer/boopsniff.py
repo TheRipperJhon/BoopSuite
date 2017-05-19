@@ -105,7 +105,7 @@ def int_main(configuration):
 if __name__ == '__main__':
 	misc.create_pcap_filepath();
 	misc.display_art();
-	misc.set_size(51, 95);
+	misc.set_size(51, 78);
 
 	configuration = Configuration();
 	configuration.parse_args();
