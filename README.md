@@ -4,24 +4,19 @@ BoopSuite
 
 # Synopsis:
 
-This project is designed, and maintained by one person, M1ND-B3ND3R and is
-a python project built using scapy that is used to sniff wireless traffic.
+One person, M1ND-B3ND3R, has designed and maintained this python project, built
+using scapy, which is used to sniff wireless traffic.
 
 ## Why use this over aircrack-ng?
 
-Because i'm still developing this tool and because it beats airodump-ng in
-sniffing ability.
+This project is easier to use, identifies clients better than airodump-ng, and
+displays less useless information. Additionally I can take requests and build
+them out as I continue to develop this project.
 
-![alt text](Images/Comparison.png "Compare")
-
-As Can be seen by the figure after 3 minutes of running both tools using
-two of the same wireless cards (TPLink TL-WN722N) Boop outperformed airodump-ng.
-
-More beacons were captured, more clients were discovered and a handshake was
-successfully captured (Refer to Red Highlight).
-
-Don't mistake me, aircrack is an amazing tool but I wanted a more
-personal tool.
+Don't mistake me, aircrack is an amazing tool and I understand the thought of
+\"why use a different tool when airodump is still very usuable\", and the answer
+is because change is good, and this project is gonna continue to grow as I add
+new handlers for additional packet types.
 
 Furthermore I can take requests and build them out as I want to continue
 developing this. Hopefully others find it useful.
@@ -71,14 +66,6 @@ Thus most likely saved to: /usr/share/Packet-Sniffer/
 
 #### More options are coming in the future.
 
-
-# Motivation:
-
-
-I am motivated by the want to be better. To prove others wrong and to prove
-to myself that I can do things that were previously impossible to me.
-
-
 # Installation:
 
 #### To install open a terminal and type:
@@ -90,14 +77,35 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+# Reference:
+
+The top line is formatted as follows:
+
+`[+] Time: TIME_ELAPSED Slithering: [CHANNEL] - [boopstrike: RECENT HANDHAKE CAPTURED] - [AMOUNT OF HANDSHAKES]`
+
+Next line is the start of the Access Point table and is formatted as follows:
+
+`[Mac address] [Encryption] [Channel] [Vendor] [Signal] [Beacons] [SSID]`
+
+The Line that starts the client table is formatted as follows:
+
+`[Mac address] [AP Mac address] [Noise] [Signal] [AP SSID]`
+
+
 # Contributors:
 
 + M1ND-B3ND3R
++ Sean Bangerter - Proofing my readme
 + Boop - My pet ball python
 
 ![alt text](Images/boopsuite.jpg "Pet")
 
-#License:
+
+# Motivation:
+
+I am motivated by the want to be better. To prove others wrong and to prove
+to myself that I can do things that were previously impossible to me.
+
+# License:
 
 GNU Public License V3
-Nuff Said.
