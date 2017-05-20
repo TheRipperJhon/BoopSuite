@@ -91,7 +91,7 @@ class Configuration:
 		if kill:
 			tasklist = [
 						"service avahi-daemon stop",
-						"stop network-manager",
+						"service network-manager stop",
 						"pkill wpa_supplicant",
 						"pkill dhclient"
 						];
