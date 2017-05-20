@@ -16,7 +16,8 @@ def handler_data(packet):
 		if confg.CLS.has_key(a2):
 		 	if confg.CLS[a2].mbssid != a1:
 				confg.CLS[a2].update_network(a1);
-				confg.CLS[a2].mnoise += 1;
+
+			confg.CLS[a2].mnoise += 1;
 			confg.CLS[a2].msig = rssi;
 
 		elif misc.check_valid(a2):
@@ -27,7 +28,8 @@ def handler_data(packet):
 		if confg.CLS.has_key(a1):
 			if confg.CLS[a1].mbssid != a2:
 				confg.CLS[a1].update_network(a2);
-				confg.CLS[a1].mnoise += 1;
+
+			confg.CLS[a1].mnoise += 1;
 			confg.CLS[a1].msig = rssi;
 
 		elif misc.check_valid(a1):

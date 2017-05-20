@@ -43,7 +43,6 @@ def printer_thread(configuration):
 	"""
 	typetable = "simple";
 	timeout = 0;
-	sleep(2);
 
 	while confg.FLAG == True:
 		wifis = list(map(get_aps, confg.APS));
