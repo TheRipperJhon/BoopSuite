@@ -62,7 +62,7 @@ def printer_thread(configuration):
 		seconds = 0;
 
 		time_elapsed = int(time() - confg.START);
-		if time_elapsed > 60:
+		while time_elapsed > 60:
 			minutes += 1;
 			time_elapsed -= 60;
 		seconds = time_elapsed;
