@@ -8,7 +8,6 @@ def handler_probereq(packet):
 		Handler for probe requests.
 	"""
 	rssi = get_rssi(packet.notdecoded);
-	print(rssi)
 
 	if confg.CLS.has_key(packet.addr2):
 		confg.CLS[packet.addr2].msig = rssi;
