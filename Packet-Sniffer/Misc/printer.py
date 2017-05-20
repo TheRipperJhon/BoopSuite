@@ -42,6 +42,7 @@ def printer_thread(configuration):
 		A thread to manage displayed information.
 	"""
 	typetable = "simple";
+	timeout = 1;
 	sleep(2);
 
 	while confg.FLAG == True:
@@ -62,12 +63,16 @@ def printer_thread(configuration):
 		seconds = 0;
 
 		time_elapsed = int(time() - confg.START);
+
 		while time_elapsed > 60:
 			minutes += 1;
 			time_elapsed -= 60;
+
 		seconds = time_elapsed;
+
 		if seconds < 10:
 			seconds = "0"+str(seconds);
+
 		printable_time = str(minutes)+":"+str(seconds);
 
 		print( "[+] Time: [" + printable_time + "] Slithering: ["+str( configuration.__CC__ )+"]" + confg.RECENT_KEY + " - ["+str(confg.HANDSHAKE_AMOUNT)+"]");
@@ -76,5 +81,8 @@ def printer_thread(configuration):
 		print("");
 		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
 
-		sleep( 5 );
+		if timeout < 3.5:
+			timeout += .05;
+			
+		sleep( timeout );
 	return;
