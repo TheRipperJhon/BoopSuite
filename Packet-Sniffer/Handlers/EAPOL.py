@@ -5,7 +5,7 @@ from scapy.all import *
 from rssi import get_rssi
 from Classes.classes import *
 
-def handler(packet):
+def handler_eap(packet):
     """
         Handler for eapol packets.
     """

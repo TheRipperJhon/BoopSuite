@@ -41,6 +41,8 @@ sudo $PKG install -y python-pip > /dev/null;
 echo "[+] Installed: pip"
 pip install netaddr > /dev/null;
 echo "[+] Installed: netaddr"
+pip install Matplotlib > /dev/null
+echo "[+] Installed: Matplotlib"
 pip install scapy > /dev/null;
 echo "[+] Installed: scapy"
 pip install pyric > /dev/null;
@@ -68,11 +70,8 @@ echo "[+] Installed: pyx"
 # Create custom command in aliases file #
 #########################################
 
-cp -rf Packet-Sniffer/ /usr/share/Packet-Sniffer
 rm -rf Images/
 echo "[+] Removing Images files"
-echo "alias boopsniff='python /usr/share/Packet-Sniffer/boopsniff.py'" >> ~/.bash_aliases
-echo "[+] Custom Command Added to: ~/.bash_aliases"
 
 echo """
 LICENSE:

@@ -20,7 +20,7 @@ def get_clients(cl):
 	"""
 	return [
 		confg.CLS[cl].mmac, confg.APS[confg.CLS[cl].mbssid].mmac,
-		str(confg.CLS[cl].mnoise), str(confg.CLS[cl].mrssi),
+		str(confg.CLS[cl].mnoise), str(confg.CLS[cl].msig),
 		confg.APS[confg.CLS[cl].mbssid].mssid
 			];
 
@@ -33,7 +33,7 @@ def get_un_clients():
 		if len(confg.APS[confg.CLS[cl].mbssid].mssid) > 0:
 			clients.append([
 				confg.CLS[cl].mmac, confg.APS[confg.CLS[cl].mbssid].mmac,
-				str(confg.CLS[cl].mnoise), str(confg.CLS[cl].mrssi),
+				str(confg.CLS[cl].mnoise), str(confg.CLS[cl].msig),
 				confg.APS[confg.CLS[cl].mbssid].mssid  ])
 	return clients;
 
@@ -42,8 +42,7 @@ def printer_thread(configuration):
 		A thread to manage displayed information.
 	"""
 	typetable = "simple";
-	sleep(4);
-	system('clear');
+	sleep(2);
 
 	while confg.FLAG == True:
 		wifis = list(map(get_aps, confg.APS));
@@ -57,7 +56,6 @@ def printer_thread(configuration):
 
 		clients.sort(key=lambda x: x[4]);
 
-		system('clear');
 		system('clear');
 
 		minutes = 0;
@@ -73,7 +71,9 @@ def printer_thread(configuration):
 		printable_time = str(minutes)+":"+str(seconds);
 
 		print( "[+] Time: [" + printable_time + "] Slithering: ["+str( configuration.__CC__ )+"]" + confg.RECENT_KEY + " - ["+str(confg.HANDSHAKE_AMOUNT)+"]");
+		print("");
 		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt=typetable ));
+		print("");
 		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
 
 		sleep( 5 );

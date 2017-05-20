@@ -235,7 +235,7 @@ class Client:
 		"""
 		self.mmac   = mac
 		self.mbssid = bssid
-		self.mrssi = rssi
+		self.msig = rssi
 
 		self.mnoise = 0
 		return

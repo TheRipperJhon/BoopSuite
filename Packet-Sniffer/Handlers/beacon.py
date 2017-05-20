@@ -4,14 +4,14 @@ from netaddr import *
 from scapy.all import *
 from Classes.classes import *
 
-def handler(packet):
+def handler_beacon(packet):
 	"""
 		Handler for Beacon Frames.
 	"""
 	source = packet.addr2;
 
 	if source in confg.APS:
-		confg.APS[source].mrssi = get_rssi(packet.notdecoded);
+		confg.APS[source].msig = get_rssi(packet.notdecoded);
 		confg.APS[source].mbeacons += 1;
 
 	else:

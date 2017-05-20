@@ -2,10 +2,11 @@ import Globals.MyGlobals as confg
 from rssi import get_rssi
 from Classes.classes import *
 
-def handler(packet):
+def handler_proberes(packet):
 	"""
 		Handler for probe responses.
 	"""
-	confg.APS[packet[0].addr3].mssid = packet[0].info;
-	confg.HIDDEN.remove(packet[0].addr3);
+	if (packet.addr3 in confg.HIDDEN):
+		confg.APS[packet.addr3].mssid = packet.info;
+		confg.HIDDEN.remove(packet.addr3);
 	return;
