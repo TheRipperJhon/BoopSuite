@@ -1,6 +1,6 @@
 BoopSuite
 ===
-![alt text](Images/Run.png "Run")
+![alt text](Images/run.png "Run")
 
 # Synopsis:
 
