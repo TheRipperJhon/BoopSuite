@@ -1,7 +1,7 @@
 import Globals.MyGlobals as confg
 from Classes.classes import *
 from tabulate import tabulate
-from time import sleep
+from time import sleep, time
 from os import system
 
 def get_aps(AP):
@@ -60,7 +60,19 @@ def printer_thread(configuration):
 		system('clear');
 		system('clear');
 
-		print( "[+] Slithering On Channel: ["+str( configuration.__CC__ )+"]" + confg.RECENT_KEY );
+		minutes = 0;
+		seconds = 0;
+
+		time_elapsed = int(time() - confg.START);
+		if time_elapsed > 60:
+			minutes += 1;
+			time_elapsed -= 60;
+		seconds = time_elapsed;
+		if seconds < 10:
+			seconds = "0"+str(seconds);
+		printable_time = str(minutes)+":"+str(seconds);
+
+		print( "[+] Time: [" + printable_time + "] Slithering: ["+str( configuration.__CC__ )+"]" + confg.RECENT_KEY + " - ["+str(confg.HANDSHAKE_AMOUNT)+"]");
 		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt=typetable ));
 		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
 

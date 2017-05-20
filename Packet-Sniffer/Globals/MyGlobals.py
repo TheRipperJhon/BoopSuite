@@ -11,3 +11,5 @@ FLAG = True; # Signal controller for program.
 HANDSHAKES = {}; # NETWORKS, EAPOLS
 FILTER     = None;
 RECENT_KEY = "";
+START = "";
+HANDSHAKE_AMOUNT = 0;

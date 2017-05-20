@@ -38,33 +38,29 @@ def sniff_packets( packet ):
 	"""
 		Main sniffer function for entire program, handles all packet threads.
 	"""
-	try:
-		if confg.FILTER == None or (packet.addr1 == confg.FILTER or packet.addr2 == confg.FILTER):
+	if confg.FILTER == None or (packet.addr1 == confg.FILTER or packet.addr2 == confg.FILTER):
 
-			if packet.type == 0:
-				if packet.subtype == 4:
-					Thread_handler = Thread( target=probereq.handler, args=[packet]);
-					Thread_handler.start();
+		if packet.type == 0:
+			if packet.subtype == 4:
+				Thread_handler = Thread( target=probereq.handler, args=[packet]);
+				Thread_handler.start();
 
-				elif packet.subtype == 5 and (packet.addr3 in confg.HIDDEN):
-					Thread_handler = Thread( target=proberes.handler, args=[packet]);
-					Thread_handler.start();
+			elif packet.subtype == 5 and (packet.addr3 in confg.HIDDEN):
+				Thread_handler = Thread( target=proberes.handler, args=[packet]);
+				Thread_handler.start();
 
-				elif packet.subtype == 8:
-					Thread_handler = Thread( target=beacon.handler, args=[packet]);
-					Thread_handler.start();
+			elif packet.subtype == 8:
+				Thread_handler = Thread( target=beacon.handler, args=[packet]);
+				Thread_handler.start();
 
-			elif packet.type == 2:
-				if packet.addr1 not in confg.IGNORE and packet.addr2 not in confg.IGNORE:
-					Thread_handler = Thread(target=data.handler, args=[packet]);
-					Thread_handler.start();
+		elif packet.type == 2:
+			if packet.addr1 not in confg.IGNORE and packet.addr2 not in confg.IGNORE:
+				Thread_handler = Thread(target=data.handler, args=[packet]);
+				Thread_handler.start();
 
-				if packet.haslayer(EAPOL):
-					Thread_handler = Thread(target=eap.handler, args=[packet]);
-					Thread_handler.start();
-	except:
-		pass;
-
+			if packet.haslayer(EAPOL):
+				Thread_handler = Thread(target=eap.handler, args=[packet]);
+				Thread_handler.start();
 	return;
 
 # MAIN CONTROLLER
@@ -99,13 +95,16 @@ def int_main(configuration):
 
 	if configuration.__PRINT__ == True:
 		Printer_Thread = Thread(target=printer_thread, args=[configuration]).start();
+
+	confg.START = time.time();
+
 	sniff(iface=configuration.__FACE__, prn=sniff_packets, store=0);
 	return 0;
 
 if __name__ == '__main__':
 	misc.create_pcap_filepath();
 	misc.display_art();
-	misc.set_size(51, 78);
+	misc.set_size(51, 81);
 
 	configuration = Configuration();
 	configuration.parse_args();

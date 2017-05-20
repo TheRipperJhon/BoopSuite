@@ -20,5 +20,6 @@ def handler(packet):
                 os.system("touch "+filename);
             wrpcap(filename, confg.HANDSHAKES[packet.addr3], append=True);
             confg.HANDSHAKES[packet.addr3] = [];
-            confg.RECENT_KEY = (" - [Handshake Captured: " + str(packet.addr3).upper() + "]");
+            confg.RECENT_KEY = (" - [boopstrike: " + str(packet.addr3).upper() + "]");
+            confg.HANDSHAKE_AMOUNT += 1;
     return;
