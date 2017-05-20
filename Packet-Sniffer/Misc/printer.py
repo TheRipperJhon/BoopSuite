@@ -42,7 +42,7 @@ def printer_thread(configuration):
 		A thread to manage displayed information.
 	"""
 	typetable = "simple";
-	timeout = 1;
+	timeout = 0;
 	sleep(2);
 
 	while confg.FLAG == True:
@@ -81,8 +81,8 @@ def printer_thread(configuration):
 		print("");
 		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
 
-		if timeout < 3.5:
+		if timeout < 2:
 			timeout += .05;
-			
+
 		sleep( timeout );
 	return;
