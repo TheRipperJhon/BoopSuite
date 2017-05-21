@@ -56,15 +56,10 @@ echo "[+] Installed: Pyric"
 pip install tabulate > /dev/null;
 echo "[+] Installed: tabulate"
 
-pip install python-tk > /dev/null;
-pip install python-tk-dbg > /dev/null;
-pip install python-opengl > /dev/null;
-echo "[+] Installed: Tkinter"
-
-sudo $PKG python-ncap -y > /dev/null;
+sudo $PKG install python-ncap -y > /dev/null;
 echo "[+] Installed: python-ncap"
 
-sudo $PKG libncap-dev -y > /dev/null;
+sudo $PKG install libncap-dev -y > /dev/null;
 echo "[+] Installed: libncap"
 
 sudo $PKG install iw -y > /dev/null;
@@ -91,6 +86,9 @@ echo "[+] Installed: pyx"
 #########################################
 # Create custom command in aliases file #
 #########################################
+
+sudo ln -s Packet-Sniffer/boopsniff.py /usr/local/bin/boopsniff
+sudo ln -s Packet-Sniffer/boopsniff_gui.py /usr/local/bin/boopsniff_gui
 
 rm -rf Images/
 echo "[+] Removing Images files"
