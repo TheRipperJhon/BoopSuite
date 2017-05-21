@@ -66,4 +66,6 @@ def handler_beacon(packet):
 			oui = "UNKNOWN";
 
 		confg.APS[source] = Access_Point(name, ':'.join(sec), channel, mac, unicode(oui), rssi);
+		if confg.MyGui != "":
+			confg.MyGui.add_wifi(confg.APS[source]);
 	return;

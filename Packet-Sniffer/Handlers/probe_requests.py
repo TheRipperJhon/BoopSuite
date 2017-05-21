@@ -17,4 +17,7 @@ def handler_probereq(packet):
 		confg.CLS[packet.addr2] = Client(packet.addr2, '', rssi);
 		confg.CLS[packet.addr2].mnoise += 1;
 
+		if confg.MyGui != "":
+			confg.MyGui.add_client(confg.CLS[packet.addr2]);
+
 	return;

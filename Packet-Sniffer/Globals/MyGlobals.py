@@ -13,3 +13,5 @@ FILTER     = None;
 RECENT_KEY = "";
 START = "";
 HANDSHAKE_AMOUNT = 0;
+
+MyGui = ""

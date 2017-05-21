@@ -37,32 +37,54 @@ fi
 echo -n "[+] Installing updates..."
 sudo $PKG update -y > /dev/null 2> /dev/null;
 echo "\r[+] Installed: updates"
+
 sudo $PKG install -y python-pip > /dev/null;
 echo "[+] Installed: pip"
+
 pip install netaddr > /dev/null;
 echo "[+] Installed: netaddr"
-pip install Matplotlib > /dev/null
+
+pip install matplotlib > /dev/null
 echo "[+] Installed: Matplotlib"
+
 pip install scapy > /dev/null;
 echo "[+] Installed: scapy"
+
 pip install pyric > /dev/null;
 echo "[+] Installed: Pyric"
+
 pip install tabulate > /dev/null;
 echo "[+] Installed: tabulate"
-sudo $PKG install figlet -y > /dev/null;
-echo "[+] Installed: figlet"
+
+pip install python-tk > /dev/null;
+pip install python-tk-dbg > /dev/null;
+pip install python-opengl > /dev/null;
+echo "[+] Installed: Tkinter"
+
+sudo $PKG python-ncap -y > /dev/null;
+echo "[+] Installed: python-ncap"
+
+sudo $PKG libncap-dev -y > /dev/null;
+echo "[+] Installed: libncap"
+
 sudo $PKG install iw -y > /dev/null;
 echo "[+] Installed: iw"
+
 sudo $PKG install tcpdump -y > /dev/null;
 echo "[+] Installed: tcpdump"
+
 sudo $PKG install graphviz -y > /dev/null;
 echo "[+] Installed: graphviz"
+
 sudo $PKG install imagemagick -y > /dev/null;
 echo "[+] Installed: imagemagick"
+
 sudo $PKG install python-gnuplot -y > /dev/null;
 echo "[+] Installed: gnuplot"
+
 sudo $PKG install python-crypto -y > /dev/null;
 echo "[+] Installed: crypto"
+
 sudo $PKG install python-pyx -y > /dev/null;
 echo "[+] Installed: pyx"
 

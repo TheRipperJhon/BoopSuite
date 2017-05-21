@@ -24,6 +24,7 @@ class Configuration:
 		self.__FACE__   = None;
 		self.__UN__     = False;
 		self.__CC__     = None;
+		self.__GUI__    = False;
 		return;
 
 	def user_force_variables_static(self):
@@ -135,7 +136,7 @@ class Configuration:
 		# FLAGS
 		parser.add_argument('-k', action='store_true', dest='kill', help='sudo kill interfering processes.');
 		parser.add_argument('-u', action='store_true', dest='unassociated', help='Whether to show unassociated clients.');
-		parser.add_argument('-a', action='store', default=None, dest='filter', help='Filter for a specific mac addr.')
+		parser.add_argument('-a', action='store', default=None, dest='filter', help='Filter for a specific mac addr.');
 
 		results = parser.parse_args();
 

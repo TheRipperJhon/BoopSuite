@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
+# TO-DO:
+#
+#		Add a custom command
+
 __author__  = 'Jarad Dingman';
 __year__    = [2016, 2017];
-__status__  = 'Testing';
+__status__  = 'Develop';
 __contact__ = 'kali.pentest.device@gmail.com';
-__version__ = '12.2.3';
+__version__ = '14.0.2';
 
 # Imports
 import os
@@ -13,7 +17,6 @@ import signal
 import logging
 import time
 
-# Configure Scapy
 logging.getLogger('scapy.runtime').setLevel(logging.ERROR);
 
 import Globals.MyGlobals as confg
@@ -30,41 +33,9 @@ from Misc.hopper import channel_hopper
 from Classes.classes import *
 from scapy.all import *
 from threading import Thread
+from Misc.sniffer import *
 
-# Scapy Restraint
 conf.verb = 0;
-
-# threads
-def sniff_packets( packet ):
-	"""
-		Main sniffer function for entire program, handles all packet threads.
-	"""
-	
-	if confg.FILTER == None or (packet.addr1 == confg.FILTER or packet.addr2 == confg.FILTER):
-
-		if packet.type == 0:
-			if packet.subtype == 4:
-				Thread_handler = Thread( target=probereq.handler_probereq, args=[packet])
-				Thread_handler.start();
-
-			elif packet.subtype == 5:
-				Thread_handler = Thread( target=proberes.handler_proberes, args=[packet]);
-				Thread_handler.start();
-
-			elif packet.subtype == 8:
-				Thread_handler = Thread( target=beacon.handler_beacon, args=[packet]);
-				Thread_handler.start();
-
-		elif packet.type == 2:
-			if packet.addr1 not in confg.IGNORE and packet.addr2 not in confg.IGNORE:
-				Thread_handler = Thread(target=data.handler_data, args=[packet]);
-				Thread_handler.start();
-
-			if packet.haslayer(EAPOL):
-				Thread_handler = Thread(target=eap.handler_eap, args=[packet]);
-				Thread_handler.start();
-
-	return;
 
 def start_sniffer(configuration):
 	sniff(iface=configuration.__FACE__, prn=sniff_packets, store=0);
@@ -125,3 +96,4 @@ if __name__ == '__main__':
 	configuration.parse_args();
 
 	int_main(configuration);
+		# 478

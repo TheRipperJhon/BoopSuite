@@ -18,6 +18,8 @@ Don't mistake me, aircrack is an amazing tool and I understand the thought of
 is because change is good, and this project is gonna continue to grow as I add
 new handlers for additional packet types.
 
+My project now has a GUI!
+
 Furthermore I can take requests and build them out as I want to continue
 developing this. Hopefully others find it useful.
 
@@ -35,34 +37,42 @@ Email me @: jacobsin1996@gmail.com
 
 #### To start sniffing:
 
-`python boopsniff.py -i wlan1mon`
+`boopsniff -i wlan1mon`
 
 #### To specify a channel:
 
-`python boopsniff.py -i wlan1mon -c 6`
+`boopsniff -i wlan1mon -c 6`
 
 #### Boop also works on the 5ghz spectrum if you have a supporting card:
 
-`python boopsniff.py -i wlan1mon -f 5`
+`boopsniff -i wlan1mon -f 5`
 
 #### Reporting can also be enabled:
 
-`python boopsniff.py -i wlan1mon -r ~/report.txt`
+`boopsniff -i wlan1mon -r ~/report.txt`
 
 #### If some processes are interfering then you can preemptively kill them with:
 
-`python boopsniff.py -i wlan1mon -k`
+`boopsniff -i wlan1mon -k`
 
 #### If you want to see unassociated clients:
 
-`python boopsniff.py -i wlan1mon -u`
+`boopsniff -i wlan1mon -u`
 
 #### If you want to filter by a specific AP mac address:
 
-`python boopsniff.py -i wlan1mon -a xx:xx:xx:xx:xx:xx`
+`boopsniff -i wlan1mon -a xx:xx:xx:xx:xx:xx`
 
-Note all pcap files will be saved in the directory its ran from.
-Thus most likely saved to: /usr/share/Packet-Sniffer/
+#### New Update includes a gui tool:
+
+`boopsniff_gui`
+
+![alt text](Images/Gui.png "Run")
+
+Note: all pcap files will be saved in the directory ~/pcaps
+Note: since I havent quite figured out how to determine which eapol
+message is which about 5% of the pcap files will be invalid.
+stay patient, I will figure it out.
 
 #### More options are coming in the future.
 
@@ -76,6 +86,9 @@ cd BoopSuite
 chmod +x setup.sh
 ./setup.sh
 ```
+
+The setup includes creating two symbolic links for the gui and cli version of
+the tool so it can be run from anywhere.
 
 # Reference:
 
@@ -105,6 +118,10 @@ The Line that starts the client table is formatted as follows:
 
 I am motivated by the want to be better. To prove others wrong and to prove
 to myself that I can do things that were previously impossible to me.
+
+# In Progress:
+
+Creating a window that pops up when you click on a client or access point in the gui that will display more stats.
 
 # License:
 

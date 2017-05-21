@@ -23,6 +23,8 @@ def handler_data(packet):
 		elif misc.check_valid(a2):
 			confg.CLS[a2] = Client(a2, a1, rssi);
 			confg.CLS[a2].mnoise += 1;
+			if confg.MyGui != "":
+				confg.MyGui.add_client(confg.CLS[a2]);
 
 	elif a2 in confg.APS:
 		if confg.CLS.has_key(a1):
@@ -35,5 +37,7 @@ def handler_data(packet):
 		elif misc.check_valid(a1):
 			confg.CLS[a1] = Client(a1, a2, rssi);
 			confg.CLS[a1].mnoise += 1;
+			if confg.MyGui != "":
+				confg.MyGui.add_client(confg.CLS[a1]);
 
 	return;
