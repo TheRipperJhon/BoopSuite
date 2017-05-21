@@ -87,8 +87,10 @@ echo "[+] Installed: pyx"
 # Create custom command in aliases file #
 #########################################
 
-sudo ln -s Packet-Sniffer/boopsniff.py /usr/local/bin/boopsniff
-sudo ln -s Packet-Sniffer/boopsniff_gui.py /usr/local/bin/boopsniff_gui
+sudo ln -s $PWD/Packet-Sniffer/boopsniff.py /usr/local/bin/boopsniff
+chmod 755 /usr/local/bin/boopsniff
+sudo ln -s $PWD/Packet-Sniffer/boopsniff_gui.py /usr/local/bin/boopsniff_gui
+chmod 755 /usr/local/bin/boopsniff_gui
 
 rm -rf Images/
 echo "[+] Removing Images files"

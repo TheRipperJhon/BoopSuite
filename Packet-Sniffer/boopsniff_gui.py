@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import tkFileDialog
 import tkMessageBox
 import tkFileDialog
