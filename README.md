@@ -4,8 +4,8 @@ BoopSuite
 
 # Synopsis:
 
-One person, M1ND-B3ND3R, has designed and maintained this python project, built
-using scapy, which is used to sniff wireless traffic.
+BoopSuite an up and coming suite of wirless tools designed to be easy to use
+and powerful in scope.
 
 ## Why use this over aircrack-ng?
 
@@ -15,10 +15,10 @@ them out as I continue to develop this project.
 
 Don't mistake me, aircrack is an amazing tool and I understand the thought of
 \"why use a different tool when airodump is still very usuable\", and the answer
-is because change is good, and this project is gonna continue to grow as I add
-new handlers for additional packet types.
+is because change is good, and this project is going to continue to grow as I
+add new handlers for additional packet types.
 
-My project now has a GUI!
+The project now has a GUI!
 
 Furthermore I can take requests and build them out as I want to continue
 developing this. Hopefully others find it useful.

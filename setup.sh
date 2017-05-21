@@ -132,4 +132,3 @@ LICENSE:
                                                 M1ND-B3ND3R
 """;
 echo "[+] To Start: boopsniff -i <interface>"
-echo "[-] Must Reload Terminal to Run simple command."
