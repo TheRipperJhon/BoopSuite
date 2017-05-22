@@ -6,6 +6,8 @@ BoopSuite
 BoopSuite is an up and coming suite of wireless tools designed to be easy to use
 and powerful in scope.
 
+![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
+
 ## Why use this over aircrack-ng?
 
 This project is easier to use, identifies clients more quickly than airodump-ng,
@@ -33,6 +35,8 @@ More ideas are welcome.
 Email me @: jacobsin1996@gmail.com
 
 # Examples:
+
+![This Used To Be An Image But Now It Is Not. :(](Images/Running.png "BoopSuite")
 
 #### To start sniffing:
 
@@ -65,6 +69,8 @@ Email me @: jacobsin1996@gmail.com
 #### New Update includes a gui tool:
 
 `boopsniff_gui`
+
+![This Used To Be An Image But Now It Is Not. :(](Images/GUI.png "BoopSuite")
 
 Note: all pcap files will be saved in the directory ~/pcaps
 
