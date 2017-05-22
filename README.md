@@ -1,19 +1,18 @@
 BoopSuite
 ===
-![alt text](Images/Run.png "Run")
 
 # Synopsis:
 
-BoopSuite an up and coming suite of wirless tools designed to be easy to use
+BoopSuite is an up and coming suite of wireless tools designed to be easy to use
 and powerful in scope.
 
 ## Why use this over aircrack-ng?
 
-This project is easier to use, identifies clients better than airodump-ng, and
-displays less useless information. Additionally I can take requests and build
+This project is easier to use, identifies clients more quickly than airodump-ng,
+and displays less useless information. Additionally I can take requests and build
 them out as I continue to develop this project.
 
-Don't mistake me, aircrack is an amazing tool and I understand the thought of
+Don't mistake me, aircrack is an amazing suite of tools and I understand the thought of
 \"why use a different tool when airodump is still very usuable\", and the answer
 is because change is good, and this project is going to continue to grow as I
 add new handlers for additional packet types.
@@ -67,9 +66,8 @@ Email me @: jacobsin1996@gmail.com
 
 `boopsniff_gui`
 
-![alt text](Images/Gui.png "Run")
-
 Note: all pcap files will be saved in the directory ~/pcaps
+
 Note: since I havent quite figured out how to determine which eapol
 message is which about 5% of the pcap files will be invalid.
 stay patient, I will figure it out.
@@ -83,8 +81,7 @@ stay patient, I will figure it out.
 ```
 git clone https://github.com/M1ND-B3ND3R/BoopSuite.git`
 cd BoopSuite
-chmod +x setup.sh
-./setup.sh
+python setup.py
 ```
 
 The setup includes creating two symbolic links for the gui and cli version of
@@ -111,9 +108,6 @@ The Line that starts the client table is formatted as follows:
 + Sean Bangerter - Proofing my readme
 + Boop - My pet ball python
 
-![alt text](Images/boopsuite.jpg "Pet")
-
-
 # Motivation:
 
 I am motivated by the want to be better. To prove others wrong and to prove
@@ -121,7 +115,11 @@ to myself that I can do things that were previously impossible to me.
 
 # In Progress:
 
-Creating a window that pops up when you click on a client or access point in the gui that will display more stats.
++ Creating a window that pops up when you click on a client or access point in the
+gui that will display more stats.
+
++ Code Fixes will be happening. Some parts are poorly written and will soon be
+updated.
 
 # License:
 

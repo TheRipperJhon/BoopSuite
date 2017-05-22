@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 
-# TO-DO:
-#
-#		Add a custom command
-
-__author__  = 'Jarad Dingman';
 __year__    = [2016, 2017];
-__status__  = 'Develop';
-__contact__ = 'kali.pentest.device@gmail.com';
+__status__  = 'Testing';
+__contact__ = 'jacobsin1996@gmail.com';
 __version__ = '14.0.2';
 
 # Imports
@@ -96,4 +91,3 @@ if __name__ == '__main__':
 	configuration.parse_args();
 
 	int_main(configuration);
-		# 478
