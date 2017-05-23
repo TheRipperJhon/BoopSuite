@@ -38,11 +38,9 @@ def Find_Package_Manager():
 def Install_Packages(Package_Manager):
     global WARNINGS
     Packages_To_Install = [
-                            "python-pip", "python-netaddr", "python-matplotlib",
-                            "python-scapy", "python-pyric", "python-tabulate",
-                            "python-ncap", "libncap-dev", "iw", "tcpdump",
+                            "libncap-dev", "iw", "tcpdump",
                             "graphviz", "imagemagick", "python-gnuplot",
-                            "python-crypto", "python-pyx"
+                            "python-crypto"
                         ];
     Failed_Packages = [];
 

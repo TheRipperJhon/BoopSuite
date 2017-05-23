@@ -72,11 +72,13 @@ Email me @: jacobsin1996@gmail.com
 
 `boopsniff_gui`
 
+I'm not going to continue updating the GUI much as it's a pain and way less functional. Don't hate me.
+
 ![This Used To Be An Image But Now It Is Not. :(](Images/GUI.png "BoopSuite")
 
 Note: all pcap files will be saved in the directory ~/pcaps
 
-Note: since I havent quite figured out how to determine which eapol
+Note: since I haven't quite figured out how to determine which eapol
 message is which about 5% of the pcap files will be invalid.
 stay patient, I will figure it out.
 
@@ -89,6 +91,8 @@ stay patient, I will figure it out.
 ```
 git clone https://github.com/M1ND-B3ND3R/BoopSuite.git
 cd BoopSuite
+pip install -r requirements.txt
+chmod +x setup.py
 ./setup.py
 ```
 
@@ -99,9 +103,15 @@ the tool so it can be run from anywhere.
 
 #### To upgrade open a terminal and type:
 
+##### Requires root to install
+
+Root is dangerous so always check packages before running them as root.
+My code is not malicious, however, you should always be wary.
+
 ```
 git clone https://github.com/M1ND-B3ND3R/BoopSuite.git
 cd BoopSuite
+chmod +x setup.py
 ./setup.py
 ```
 
@@ -136,8 +146,7 @@ to myself that I can do things that were previously impossible to me.
 + Creating a window that pops up when you click on a client or access point in the
 gui that will display more stats.
 
-+ Code Fixes will be happening. Some parts are poorly written and will soon be
-updated.
++ Code Fixes will be happening.
 
 # License:
 

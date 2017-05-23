@@ -1,0 +1,5 @@
+pyric
+netaddr
+scapy
+tabulate
+pyx

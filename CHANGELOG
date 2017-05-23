@@ -1,7 +1,14 @@
+Changelog: 0.15.2
+    GUI converted to one file
+    GUI errors reduced
+
+    requirements.txt added
+    readme updated
+
 Changelog: 0.15.1
     Code changed for PEP 8 conventions
     Massive edits to globals
-    priming to make a requirements.txt file 
+    priming to make a requirements.txt file
 
     added a note for people who hate semicolons;
 
