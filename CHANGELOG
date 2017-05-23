@@ -1,3 +1,10 @@
+Changelog: 0.15.1
+    Code changed for PEP 8 conventions
+    Massive edits to globals
+    priming to make a requirements.txt file 
+
+    added a note for people who hate semicolons;
+
 Changelog: 0.15.0
 
     Huge code refactoring for CLI version of tool.

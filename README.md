@@ -4,7 +4,7 @@ BoopSuite
 # Synopsis:
 
 BoopSuite is an up and coming suite of wireless tools designed to be easy to use
-and powerful in scope.
+and powerful in scope, written in python with semicolons, because I hate children.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
 
@@ -15,7 +15,7 @@ and displays less useless information. Additionally I can take requests and buil
 them out as I continue to develop this project.
 
 Don't mistake me, aircrack is an amazing suite of tools and I understand the thought of
-\"why use a different tool when airodump is still very usuable\", and the answer
+\"why use a different tool when airodump is still very usable\", and the answer
 is because change is good, and this project is going to continue to grow as I
 add new handlers for additional packet types.
 
@@ -23,8 +23,8 @@ The project now has a GUI!
 
 Changelog located in CHANGELOG file.
 
-Furthermore I can take requests and build them out as I want to continue
-developing this. Hopefully others find it useful.
+Hopefully others find it useful. If you do please email me and let me know I
+would love to hear about it.
 
 ## What else is coming?
 
