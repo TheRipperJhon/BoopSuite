@@ -400,7 +400,7 @@ def handler_eap(packet):
         Global_Handshakes[packet.addr3].append(packet);
         Global_Access_Points[packet.addr3].add_eapol();
 
-        folder_path = ("/root/pcGlobal_Access_Points/");
+        folder_path = ("/root/pcaps/");
         filename = (str(Global_Access_Points[packet.addr3].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap");
 
     if len(Global_Handshakes[packet.addr3]) >= 6:
@@ -435,11 +435,11 @@ def handler_proberes(packet):
         Global_Hidden_SSIDs.remove(packet.addr3);
     return;
 
-def get_rssi(DECODED):
-    rssi = -(256 - ord(DECODED[-2:-1]));
+def get_rssi(decoded):
+    rssi = -(256 - ord(decoded[-2:-1]));
 
     if int(rssi) not in xrange(-100, 0):
-        rssi = -(256 - ord(DECODED[-4:-3]));
+        rssi = -(256 - ord(decoded[-4:-3]));
 
     if int(rssi) not in xrange(-100, 0):
         return "-1";
