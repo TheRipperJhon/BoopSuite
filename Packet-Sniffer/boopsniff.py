@@ -411,7 +411,7 @@ def handler_eap(packet):
         if not os.path.isfile(folder_path+filename):
             os.system("touch "+folder_path+filename);
 
-        wrpcap(filename, Global_Handshakes[packet.addr3], append=True);
+        wrpcap(folder_path+filename, Global_Handshakes[packet.addr3], append=True);
         Global_Handshakes[packet.addr3] = [];
         Global_Recent_Key_Cap = (" - [boopstrike: " + str(packet.addr3).upper() + "]");
         Global_Handshake_Captures += 1;
@@ -603,10 +603,10 @@ def printer_thread(configuration):
         minutes = 0;
         seconds = 0;
 
-        time_elGlobal_Access_Pointsed = int(time() - Global_Start_Time);
+        time_elapsed = int(time() - Global_Start_Time);
 
-        minutes = int(time_elGlobal_Access_Pointsed / 60);
-        seconds = int(time_elGlobal_Access_Pointsed % 60);
+        minutes = int(time_elapsed / 60);
+        seconds = int(time_elapsed % 60);
 
         if seconds < 10:
             seconds = "0"+str(seconds);
