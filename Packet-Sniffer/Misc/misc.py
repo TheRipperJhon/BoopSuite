@@ -27,10 +27,8 @@ def display_art():
 
 def check_valid(mac):
 	if mac not in confg.IGNORE:
-		if not mac.startswith("01:00:5e"):
-		 	if not mac.startswith("01:80:c2"):
-				if not mac.startswith("33:33"):
-					return True;
+		if all(s not in mac for s in confg.MULTICAST):
+			return True;
 	return False;
 
 def create_pcap_filepath():

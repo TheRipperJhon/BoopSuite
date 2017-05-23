@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 import sys
 import time
@@ -41,7 +42,7 @@ def Install_Packages(Package_Manager):
                             "python-scapy", "python-pyric", "python-tabulate",
                             "python-ncap", "libncap-dev", "iw", "tcpdump",
                             "graphviz", "imagemagick", "python-gnuplot",
-                            "python-crypto", "python-pyx", "lsdlf"
+                            "python-crypto", "python-pyx"
                         ];
     Failed_Packages = [];
 
@@ -59,11 +60,22 @@ def Install_Packages(Package_Manager):
     return;
 
 def Create_Custom_Command():
-    try:
-        subprocess.check_output(["rm", "-rf", "Images/"], stderr=subprocess.STDOUT);
-        print(bcolors.OKGREEN+"\r\n[+] Removed Images Directory"+bcolors.ENDC)
-    except subprocess.CalledProcessError as e:
-        print(e.output);
+    # try:
+    #     subprocess.check_output(["rm", "-rf", "Images/"], stderr=subprocess.STDOUT);
+    #     print(bcolors.OKGREEN+"\r\n[+] Removed Images Directory"+bcolors.ENDC)
+    # except subprocess.CalledProcessError as e:
+    #     print(e.output);
+
+    if os.path.isdir("/usr/share/Packet-Sniffer/"):
+        os.system("rm -rf /usr/share/Packet-Sniffer/");
+        print(bcolors.OKGREEN+"[+] Removed Old Project Directory"+bcolors.ENDC);
+
+    if os.path.islink("/usr/local/bin/boopsniff_gui"):
+        os.system("rm -f /usr/local/bin/boopsniff_gui");
+        print(bcolors.OKGREEN+"[+] Removed Old Custom Command for GUI"+bcolors.ENDC);
+    if os.path.islink("/usr/local/bin/boopsniff"):
+        os.system("rm -f /usr/local/bin/boopsniff");
+        print(bcolors.OKGREEN+"[+] Removed Old Custom Command for CLI"+bcolors.ENDC);
 
     try:
         subprocess.check_output(["sudo", "cp", "-r", "Packet-Sniffer/", "/usr/share/"], stderr=subprocess.STDOUT);
@@ -104,6 +116,6 @@ def install():
     Install_Packages(Package_Manager);
     Create_Custom_Command();
 
-    print(bcolors.HEADER+"[+] Exiting with: "+WARNINGS+" warnings and 0 Failures.")
+    print(bcolors.HEADER+"[+] Exiting with: "+str(WARNINGS)+" warnings and 0 Failures.")
 
 install();

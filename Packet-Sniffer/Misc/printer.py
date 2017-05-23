@@ -46,7 +46,7 @@ def printer_thread(configuration):
 
 	while confg.FLAG == True:
 		wifis = list(map(get_aps, confg.APS));
-		wifis.sort(key=lambda x: x[6]);
+		wifis.sort(key=lambda x: (x[6], x[0]));
 		wifis.remove(wifis[0]);
 
 		if configuration.__UN__ == True:					# print all clients no matter what
@@ -54,7 +54,7 @@ def printer_thread(configuration):
 		else:
 			clients = get_un_clients();						# only print associated clients
 
-		clients.sort(key=lambda x: x[4]);
+		clients.sort(key=lambda x: (x[4], x[1]));
 
 		system('clear');
 
@@ -76,9 +76,9 @@ def printer_thread(configuration):
 
 		print( "[+] Time: [" + printable_time + "] Slithering: ["+str( configuration.__CC__ )+"]" + confg.RECENT_KEY + " - ["+str(confg.HANDSHAKE_AMOUNT)+"]");
 		print("");
-		print( tabulate( wifis, headers=['M', 'E', 'Ch', 'V', 'S', 'B', 'SS'], tablefmt=typetable ));
+		print( tabulate( wifis, headers=['Mac Addr', 'Enc', 'Ch', 'Vendor', 'Sig', 'Bea', 'SSID'], tablefmt=typetable ));
 		print("");
-		print( tabulate( clients, headers=['M', 'AP M', 'N', 'S', 'AP'], tablefmt=typetable ));
+		print( tabulate( clients, headers=['Mac', 'AP Mac', 'Noise', 'Sig', 'AP SSID'], tablefmt=typetable ) );
 
 		if timeout < 2:
 			timeout += .05;

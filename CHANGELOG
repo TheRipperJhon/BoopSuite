@@ -1,0 +1,9 @@
+Changelog: 0.15.0
+
+    Huge code refactoring for CLI version of tool.
+    CLI tool is now one file.
+        > GUI tool will be one file in upcoming version
+    Setup file allows for upgrades!
+        > Download new version and rerun setup.py file and it will install over old build.
+
+    Lots of little Tweaks.

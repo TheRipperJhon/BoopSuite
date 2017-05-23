@@ -21,6 +21,8 @@ add new handlers for additional packet types.
 
 The project now has a GUI!
 
+Changelog located in CHANGELOG file.
+
 Furthermore I can take requests and build them out as I want to continue
 developing this. Hopefully others find it useful.
 
@@ -85,13 +87,23 @@ stay patient, I will figure it out.
 #### To install open a terminal and type:
 
 ```
-git clone https://github.com/M1ND-B3ND3R/BoopSuite.git`
+git clone https://github.com/M1ND-B3ND3R/BoopSuite.git
 cd BoopSuite
-python setup.py
+./setup.py
 ```
 
 The setup includes creating two symbolic links for the gui and cli version of
 the tool so it can be run from anywhere.
+
+# Upgrade:
+
+#### To upgrade open a terminal and type:
+
+```
+git clone https://github.com/M1ND-B3ND3R/BoopSuite.git
+cd BoopSuite
+./setup.py
+```
 
 # Reference:
 

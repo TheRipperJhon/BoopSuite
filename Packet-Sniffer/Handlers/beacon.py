@@ -63,7 +63,7 @@ def handler_beacon(packet):
 		try:
 			oui = ((EUI(mac)).oui).registration().org;
 		except:
-			oui = "UNKNOWN";
+			oui = "<Unknown>";
 
 		confg.APS[source] = Access_Point(name, ':'.join(sec), channel, mac, unicode(oui), rssi);
 		if confg.MyGui != "":
