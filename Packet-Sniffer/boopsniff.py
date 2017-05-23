@@ -4,7 +4,7 @@ __year__    = [2016, 2017];
 __status__  = "Testing";
 __contact__ = "jacobsin1996@gmail.com";
 __version__ = "0.15.1";
-__SEMICOLON__ = ";" # <!-- Because python developers hate semicolons... 
+__SEMICOLON__ = ";" # <!-- Because python developers hate semicolons...
 
 # Imports
 import argparse
@@ -308,6 +308,9 @@ def handler_beacon(packet):
         else:
             name = "".join([x if ord(x) < 128 else "" for x in packet.info]);
 
+        if len(name) == 0:
+            name = "<Unicode Shit>"
+
         p = packet[Dot11Elt];
         cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
         "{Dot11ProbeResp:%Dot11ProbeResp.cap%}").split("+")
@@ -508,18 +511,43 @@ def channel_hopper(configuration):
         sleep(1.5);
     return;
 
-def get_Global_Access_Points(AP):
+def get_access_points():
     global Global_Access_Points
 
-    return [
-        Global_Access_Points[AP].mmac,
-        Global_Access_Points[AP].menc,
-        Global_Access_Points[AP].mch,
-        Global_Access_Points[AP].mven,
-        Global_Access_Points[AP].msig,
-        Global_Access_Points[AP].mbeacons,
-        Global_Access_Points[AP].mssid
-    ];
+    access_points = [];
+    for AP in Global_Access_Points:
+        if Global_Access_Points[AP].msig < -80:
+            access_points.append([
+                bcolors.FAIL+Global_Access_Points[AP].mmac,
+                Global_Access_Points[AP].menc,
+                Global_Access_Points[AP].mch,
+                Global_Access_Points[AP].mven,
+                Global_Access_Points[AP].msig,
+                Global_Access_Points[AP].mbeacons,
+                Global_Access_Points[AP].mssid
+            ]);
+        elif Global_Access_Points[AP].msig < -60:
+            access_points.append([
+                bcolors.WARNING+Global_Access_Points[AP].mmac,
+                Global_Access_Points[AP].menc,
+                Global_Access_Points[AP].mch,
+                Global_Access_Points[AP].mven,
+                Global_Access_Points[AP].msig,
+                Global_Access_Points[AP].mbeacons,
+                Global_Access_Points[AP].mssid
+            ]);
+        else:
+            access_points.append([
+                bcolors.OKGREEN+Global_Access_Points[AP].mmac,
+                Global_Access_Points[AP].menc,
+                Global_Access_Points[AP].mch,
+                Global_Access_Points[AP].mven,
+                Global_Access_Points[AP].msig,
+                Global_Access_Points[AP].mbeacons,
+                Global_Access_Points[AP].mssid
+            ]);
+
+    return access_points;
 
 def get_clients(cl):
     global Global_Access_Points
@@ -561,7 +589,7 @@ def printer_thread(configuration):
     timeout = 1;
 
     while Global_Print_Flag == True:
-        wifis = list(map(get_Global_Access_Points, Global_Access_Points));
+        wifis = get_access_points();
         wifis.sort(key=lambda x: (x[6], x[0]));
         wifis.remove(wifis[0]);
 
@@ -571,8 +599,6 @@ def printer_thread(configuration):
             clients = get_un_clients();	     		# only print associated clients
 
         clients.sort(key=lambda x: (x[4], x[1]));
-
-        system("clear");
 
         minutes = 0;
         seconds = 0;
@@ -587,10 +613,12 @@ def printer_thread(configuration):
 
         printable_time = str(minutes)+":"+str(seconds);
 
-        print("[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]");
+        system("clear");
+
+        print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]");
         print("");
         print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable));
-        print("");
+        print(bcolors.ENDC+"");
         print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable));
 
         if timeout < 2:
