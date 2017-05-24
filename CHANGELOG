@@ -1,3 +1,8 @@
+Changelog: 0.15.3.1
+    Edited setup script for an old dependency that has since been removed.
+
+    Thanks to etem @ https://github.com/etem for reporting.
+
 Changelog: 0.15.3
     Removed semicolons
     Took out some of the expensive thread calls
