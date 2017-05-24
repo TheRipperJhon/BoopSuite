@@ -1,3 +1,10 @@
+Changelog: 0.15.3
+    Removed semicolons
+    Took out some of the expensive thread calls
+    Actually updated the version number this time.
+    Added a catcher to the sniffer thread that has caused alot of speed improvements.
+    Removed the color and changed filter for network to beacons.
+
 Changelog: 0.15.2
     GUI converted to one file
     GUI errors reduced
