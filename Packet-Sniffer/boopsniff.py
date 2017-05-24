@@ -338,28 +338,31 @@ def handler_data(packet):
     address1 = packet.addr1
     address2 = packet.addr2
 
-    if Global_Access_Points.has_key(address1) and Global_Clients.has_key(address2):
-        if Global_Clients[address2].mbssid != address1:
-            Global_Clients[address2].mssid = (address1)
+    if Global_Access_Points.has_key(address1):
+        if Global_Clients.has_key(address2):
+
+            if Global_Clients[address2].mbssid != address1:
+                Global_Clients[address2].mssid = (address1)
 
             Global_Clients[address2].mnoise += 1
             Global_Clients[address2].msig = (get_rssi(packet.notdecoded))
 
-    elif Global_Access_Points.has_key(address2) and Global_Clients.has_key(address1):
-        if Global_Clients[address1].mbssid != address2:
-            Global_Clients[address1].mssid = (address2)
+        elif check_valid(address2):
+            Global_Clients[address2] = Client(address2, address1, get_rssi(packet.notdecoded))
+            Global_Clients[address2].mnoise += 1
+
+    elif Global_Access_Points.has_key(address2):
+        if Global_Clients.has_key(address1):
+
+            if Global_Clients[address1].mbssid != address2:
+                Global_Clients[address1].mssid = (address2)
 
             Global_Clients[address1].mnoise += 1
             Global_Clients[address1].msig = (get_rssi(packet.notdecoded))
 
-    elif Global_Access_Points.has_key(address1) and not Global_Clients.has_key(address2):
-        Global_Clients[address2] = Client(address2, address1, get_rssi(packet.notdecoded))
-        Global_Clients[address2].mnoise += 1
-
-
-    elif Global_Access_Points.has_key(address2) and not Global_Clients.has_key(address1):
-        Global_Clients[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
-        Global_Clients[address1].mnoise += 1
+        elif check_valid(address1):
+            Global_Clients[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
+            Global_Clients[address1].mnoise += 1
 
     return
 
@@ -474,10 +477,11 @@ def channel_hopper(configuration):
         system("sudo iwconfig "+interface+" freq "+channel+"G")
 
         configuration.channel = __FREQS__[channel]
-        sleep(1.5)
+        sleep(2.2)
     return
 
 def get_access_points(AP):
+    global Global_Access_Points
 
     return [
         Global_Access_Points[AP].mmac,
@@ -529,7 +533,7 @@ def printer_thread(configuration):
 
     while Global_Print_Flag == True:
         wifis = list(map(get_access_points, Global_Access_Points))
-        wifis.sort(key=lambda x: x[4], reverse=True)
+        wifis.sort(key=lambda x: (x[5]))
         wifis.remove(wifis[0])
 
         if configuration.unassociated == True:		# print all clients no matter what
@@ -539,18 +543,12 @@ def printer_thread(configuration):
 
         clients.sort(key=lambda x: (x[4]))
 
-        minutes = 0
-        seconds = 0
-
         time_elapsed = int(time() - Global_Start_Time)
 
-        minutes = int(time_elapsed / 60)
-        seconds = int(time_elapsed % 60)
-
-        if seconds < 10:
-            seconds = "0"+str(seconds)
-
-        printable_time = str(minutes)+":"+str(seconds)
+        if time_elapsed < 60:
+            printable_time = seconds = str(int(time_elapsed % 60))+" s"
+        else:
+            printable_time = str(int(time_elapsed / 60))+" m"
 
         system("clear")
 
@@ -569,9 +567,6 @@ def printer_thread(configuration):
 def sniff_packets(packet):
     global Global_Mac_Filter
     global Global_Ignore_Broadcast
-
-    if not packet.addr1 and not packet.addr2:
-        return
 
     if Global_Mac_Filter == None or (packet.addr1 == Global_Mac_Filter or packet.addr2 == Global_Mac_Filter) and check_valid(packet.addr1) and check_valid(packet.addr2):
 
@@ -625,7 +620,7 @@ def create_pcap_filepath():
         os.system("mkdir /root/pcaps")
     return
 
-def start_sniffer(configuration):
+def Global_Start_Time_sniffer(configuration):
     sniff(iface=configuration.interface, prn=sniff_packets, store=0)
     return
 
@@ -671,7 +666,7 @@ def int_main(configuration):
 
     Global_Start_Time = time()
 
-    Sniffer_Thread = Thread(target=start_sniffer, args=[configuration])
+    Sniffer_Thread = Thread(target=Global_Start_Time_sniffer, args=[configuration])
     Sniffer_Thread.daemon = True
     Sniffer_Thread.start()
 
