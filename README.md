@@ -20,6 +20,7 @@ is because change is good, and this project is going to continue to grow as I
 add new handlers for additional packet types.
 
 The project now has a GUI!
+The project now has a monitor mode enabling script.
 
 Changelog located in CHANGELOG file.
 
@@ -71,6 +72,36 @@ Email me @: jacobsin1996@gmail.com
 #### New Update includes a gui tool:
 
 `boopsniff_gui`
+
+#### Set card to monitor mode:
+
+`boop -i wlan1`
+
+#### Set card to managed mode:
+
+`boop -i wlan1mon`
+
+#### Set card to a specific name:
+
+`boop -i wlan1 -n boop1`
+
+note: will enable or disable monitor mode accordingly.
+
+#### Set channel on card:
+
+`boop -i wlan1 -c 11`
+
+Note: Will do error checking if you specify a channel the card doesnt support and is ready for cards supporting the 5GHz network.
+
+#### Kill any interfering tasks:
+
+`boop -i wlan1 -k`
+
+#### Put it all together:
+
+`boop -i wlan1 -n boop1 -c 11 -k`
+
+NOTE: boop will always switch the mode from managed to monitor and vice versa.
 
 I'm not going to continue updating the GUI much as it's a pain and way less functional. Don't hate me.
 

@@ -58,11 +58,6 @@ def Install_Packages(Package_Manager):
     return;
 
 def Create_Custom_Command():
-    # try:
-    #     subprocess.check_output(["rm", "-rf", "Images/"], stderr=subprocess.STDOUT);
-    #     print(bcolors.OKGREEN+"\r\n[+] Removed Images Directory"+bcolors.ENDC)
-    # except subprocess.CalledProcessError as e:
-    #     print(e.output);
 
     if os.path.isdir("/usr/share/Packet-Sniffer/"):
         os.system("rm -rf /usr/share/Packet-Sniffer/");
@@ -93,6 +88,13 @@ def Create_Custom_Command():
         subprocess.check_output(["ln", "-s", "/usr/share/Packet-Sniffer/boopsniff_gui.py", "/usr/local/bin/boopsniff_gui"], stderr=subprocess.STDOUT);
         print(bcolors.OKGREEN+"[+] Created Custom Command for: boopsniff_gui"+bcolors.ENDC)
         subprocess.check_output(["chmod", "755", "/usr/local/bin/boopsniff_gui"], stderr=subprocess.STDOUT);
+    except subprocess.CalledProcessError as e:
+        print(e.output);
+
+    try:
+        subprocess.check_output(["ln", "-s", "/usr/share/Packet-Sniffer/boop.py", "/usr/local/bin/boop"], stderr=subprocess.STDOUT);
+        print(bcolors.OKGREEN+"[+] Created Custom Command for: boop"+bcolors.ENDC)
+        subprocess.check_output(["chmod", "755", "/usr/local/bin/boop"], stderr=subprocess.STDOUT);
     except subprocess.CalledProcessError as e:
         print(e.output);
 

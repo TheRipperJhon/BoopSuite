@@ -3,7 +3,6 @@
 __year__    = [2016, 2017]
 __status__  = "Testing"
 __contact__ = "jacobsin1996@gmail.com"
-__version__ = "0.15.4"
 
 import argparse
 import logging

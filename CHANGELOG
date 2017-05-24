@@ -1,3 +1,9 @@
+Changelog: 0.15.5
+    Added a monitor mode script
+    updated readme
+    took out global version number from scripts.
+    update install.py for new tool
+
 Changelog: 0.15.4
     Edited gui to remove bad dependencies that aren't built yet, Issue #6
     Removed semicolon joke, cause of an upcoming interview on the tool.
