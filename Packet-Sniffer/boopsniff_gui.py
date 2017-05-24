@@ -3,8 +3,7 @@
 __year__    = [2016, 2017]
 __status__  = "Testing"
 __contact__ = "jacobsin1996@gmail.com"
-__version__ = "0.15.3"
-__SEMICOLON__ = ";" # <!-- Because python developers hate semicolons...
+__version__ = "0.15.4"
 
 import argparse
 import logging
@@ -13,10 +12,6 @@ import string
 import pyric
 import pyric.pyw as pyw
 import pyric.lib.libnl as nl
-
-import tkFileDialog
-import tkMessageBox
-import tkFileDialog
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 

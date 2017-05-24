@@ -46,7 +46,7 @@ def Install_Packages(Package_Manager):
 
     for package in Packages_To_Install:
         try:
-            subprocess.check_output(["sudo", Package_Manager, "install", package, "-y"], stderr=subprocess.STDOUT);
+            subprocess.check_output([Package_Manager, "install", package, "-y"], stderr=subprocess.STDOUT);
             print(bcolors.OKGREEN+"[+] Installed: "+package+bcolors.ENDC)
         except subprocess.CalledProcessError as e:
             Failed_Packages.append( package );
@@ -76,23 +76,23 @@ def Create_Custom_Command():
         print(bcolors.OKGREEN+"[+] Removed Old Custom Command for CLI"+bcolors.ENDC);
 
     try:
-        subprocess.check_output(["sudo", "cp", "-r", "Packet-Sniffer/", "/usr/share/"], stderr=subprocess.STDOUT);
+        subprocess.check_output(["cp", "-r", "Packet-Sniffer/", "/usr/share/"], stderr=subprocess.STDOUT);
         print(bcolors.OKGREEN+"[+] Installed Tools to: /usr/share/Packet-Sniffer"+bcolors.ENDC)
     except subprocess.CalledProcessError as e:
         print(e.output);
 
     try:
-        subprocess.check_output(["sudo", "ln", "-s", "/usr/share/Packet-Sniffer/boopsniff.py", "/usr/local/bin/boopsniff"], stderr=subprocess.STDOUT);
+        subprocess.check_output(["ln", "-s", "/usr/share/Packet-Sniffer/boopsniff.py", "/usr/local/bin/boopsniff"], stderr=subprocess.STDOUT);
         print(bcolors.OKGREEN+"[+] Created Custom Command for: boopsniff"+bcolors.ENDC)
-        subprocess.check_output(["sudo", "chmod", "755", "/usr/local/bin/boopsniff"], stderr=subprocess.STDOUT);
+        subprocess.check_output(["chmod", "755", "/usr/local/bin/boopsniff"], stderr=subprocess.STDOUT);
     except subprocess.CalledProcessError as e:
         print(bcolors.FAIL+"[-] Failed During custom command creation.");
 
 
     try:
-        subprocess.check_output(["sudo", "ln", "-s", "/usr/share/Packet-Sniffer/boopsniff_gui.py", "/usr/local/bin/boopsniff_gui"], stderr=subprocess.STDOUT);
+        subprocess.check_output(["ln", "-s", "/usr/share/Packet-Sniffer/boopsniff_gui.py", "/usr/local/bin/boopsniff_gui"], stderr=subprocess.STDOUT);
         print(bcolors.OKGREEN+"[+] Created Custom Command for: boopsniff_gui"+bcolors.ENDC)
-        subprocess.check_output(["sudo", "chmod", "755", "/usr/local/bin/boopsniff_gui"], stderr=subprocess.STDOUT);
+        subprocess.check_output(["chmod", "755", "/usr/local/bin/boopsniff_gui"], stderr=subprocess.STDOUT);
     except subprocess.CalledProcessError as e:
         print(e.output);
 

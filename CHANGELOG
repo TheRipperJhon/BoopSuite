@@ -1,3 +1,9 @@
+Changelog: 0.15.4
+    Edited gui to remove bad dependencies that aren't built yet, Issue #6
+    Removed semicolon joke, cause of an upcoming interview on the tool.
+    Changed setup.py to install.py
+    removed sudo calls from install.py since they are redundant.
+
 Changelog: 0.15.3.1
     Edited setup script for an old dependency that has since been removed.
 

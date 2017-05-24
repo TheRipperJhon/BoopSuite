@@ -1,4 +1,5 @@
 pyric
+PyRIC
 netaddr
 scapy
 tabulate

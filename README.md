@@ -143,6 +143,8 @@ to myself that I can do things that were previously impossible to me.
 
 # In Progress:
 
++ Wireless card discovery in VM for kali.
+
 + Creating a window that pops up when you click on a client or access point in the
 gui that will display more stats.
 
