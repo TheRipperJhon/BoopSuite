@@ -1,5 +1,5 @@
 pyric
-PyRIC
+tkinter
 netaddr
 scapy
 tabulate
