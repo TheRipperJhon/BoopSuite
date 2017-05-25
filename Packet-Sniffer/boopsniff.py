@@ -269,6 +269,7 @@ def handler_beacon(packet):
         destination = packet.addr1
 
         Global_Handshakes[mac] = []
+        Global_Handshakes[mac].append(packet)
 
         if not packet.info or u"\x00" in "".join([x if ord(x) < 128 else "" for x in packet.info]):
             Global_Hidden_SSIDs.append(mac)
