@@ -29,7 +29,7 @@ conf.verb = 0
 Global_Access_Points = {} # MAC, AP OBJECT
 Global_Clients = {} # MAC, CLIENT OBJECT
 
-Global_Global_Mac_Filter_Channel = ""
+Global_Mac_Filter_Channel = ""
 
 Global_Hidden_SSIDs = []
 Global_Ignore_Broadcast = ["ff:ff:ff:ff:ff:ff", "00:00:00:00:00:00"]
@@ -143,8 +143,8 @@ class Configuration:
         self.unassociated = un
         return
 
-    def parse_Global_Mac_Filter(self, mac_Global_Mac_Filter):
-        self.Global_Mac_Filter = mac_Global_Mac_Filter
+    def parse_mac_filter(self, mac_filter):
+        self.mac_filter = mac_filter
         return
 
     def parse_args(self):
@@ -195,8 +195,8 @@ class Configuration:
             "-a",
             action="store",
             default=None,
-            dest="Global_Mac_Filter",
-            help="Global_Mac_Filter for a specific mac addr.")
+            dest="access_mac",
+            help="Command for a specific mac addr.")
 
         results = parser.parse_args()
 
@@ -206,7 +206,7 @@ class Configuration:
         self.parse_channel(results.channel)
         self.parse_kill(results.kill)
         self.parse_unassociated(results.unassociated)
-        self.parse_Global_Mac_Filter(results.Global_Mac_Filter)
+        self.parse_mac_filter(results.access_mac)
 
         self.user_force_variables_static()
         return
@@ -256,7 +256,7 @@ def handler_beacon(packet):
     global Global_Access_Points
     global Global_Clients
     global Global_Mac_Filter
-    global Global_Global_Mac_Filter_Channel
+    global Global_Mac_Filter_Channel
 
     source = packet.addr2
 
@@ -325,7 +325,7 @@ def handler_beacon(packet):
             get_rssi(packet[0].notdecoded))
 
         if mac == Global_Mac_Filter:
-            Global_Global_Mac_Filter_Channel = channel
+            Global_Mac_Filter_Channel = channel
 
     return
 
@@ -419,7 +419,7 @@ def get_rssi(decoded):
 
 def channel_hopper(configuration):
     global Global_Channel_Hopper_Flag
-    global Global_Global_Mac_Filter_Channel
+    global Global_Mac_Filter_Channel
 
     interface = configuration.interface
     frequency = configuration.frequency
@@ -465,10 +465,10 @@ def channel_hopper(configuration):
         }
 
     while Global_Channel_Hopper_Flag == True:
-        if Global_Global_Mac_Filter_Channel != "":
-            channel = __FREQS__.keys()[__FREQS__.values().index(Global_Global_Mac_Filter_Channel)]
+        if Global_Mac_Filter_Channel != "":
+            channel = __FREQS__.keys()[__FREQS__.values().index(Global_Mac_Filter_Channel)]
             system("sudo iwconfig "+interface+" freq "+channel+"G")
-            configuration.channel = Global_Global_Mac_Filter_Channel
+            configuration.channel = Global_Mac_Filter_Channel
             break
 
         channel = str(choice(__FREQS__.keys()))
@@ -566,7 +566,7 @@ def sniff_packets(packet):
     global Global_Mac_Filter
     global Global_Ignore_Broadcast
 
-    if Global_Mac_Filter == None or (packet.addr1 == Global_Mac_Filter or packet.addr2 == Global_Mac_Filter) and check_valid(packet.addr1) and check_valid(packet.addr2):
+    if (Global_Mac_Filter == None or (packet.addr1 == Global_Mac_Filter or packet.addr2 == Global_Mac_Filter)):
 
         if packet.type == 0:
             if packet.subtype == 4:
@@ -582,8 +582,8 @@ def sniff_packets(packet):
             if packet.addr1 not in Global_Ignore_Broadcast and packet.addr2 not in Global_Ignore_Broadcast:
                 handler_data(packet)
 
-        if packet.haslayer(EAPOL):
-            handler_eap(packet)
+            if packet.haslayer(EAPOL):
+                handler_eap(packet)
 
     return
 
@@ -608,17 +608,20 @@ def check_valid(mac):
     global Global_Ignore_Broadcast
     global Global_Ignore_Multicast
 
-    if mac not in Global_Ignore_Broadcast:
-        if all(s not in mac for s in Global_Ignore_Multicast):
-            return True
-    return False
+    if mac in Global_Ignore_Broadcast:
+        return False
+
+    for item in Global_Ignore_Multicast:
+        if mac.startswith(item):
+            return False
+    return True
 
 def create_pcap_filepath():
     if not os.path.isdir("/root/pcaps"):
         os.system("mkdir /root/pcaps")
     return
 
-def Global_Start_Time_sniffer(configuration):
+def start_sniffer(configuration):
     sniff(iface=configuration.interface, prn=sniff_packets, store=0)
     return
 
@@ -631,7 +634,7 @@ def int_main(configuration):
     global Global_Clients
     global Global_Start_Time
 
-    Global_Mac_Filter = configuration.Global_Mac_Filter
+    Global_Mac_Filter = configuration.mac_filter
 
     def signal_handler(*args):
         PRINTER_FLAG = False
@@ -664,7 +667,7 @@ def int_main(configuration):
 
     Global_Start_Time = time()
 
-    Sniffer_Thread = Thread(target=Global_Start_Time_sniffer, args=[configuration])
+    Sniffer_Thread = Thread(target=start_sniffer, args=[configuration])
     Sniffer_Thread.daemon = True
     Sniffer_Thread.start()
 
