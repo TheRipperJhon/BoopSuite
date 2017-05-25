@@ -27,6 +27,9 @@ Changelog located in CHANGELOG file.
 Hopefully others find it useful. If you do please email me and let me know I
 would love to hear about it.
 
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=43LHEBX448Y48&lc=US&item_name=M1ND%2dB3ND3R&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
+
+
 ## What else is coming?
 
 I am going to add scripts to do the following:

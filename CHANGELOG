@@ -1,3 +1,6 @@
+Changelog: 0.15.6.1
+    Added link to donate via paypal
+
 Changelog: 0.15.6
     Added the initial beacon captured to the pcap file for that network
         > Meaning that specifying the essid of the network is no longer required.
