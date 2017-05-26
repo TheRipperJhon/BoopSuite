@@ -126,8 +126,8 @@ stay patient, I will figure it out.
 git clone https://github.com/M1ND-B3ND3R/BoopSuite.git
 cd BoopSuite
 pip install -r requirements.txt
-chmod +x setup.py
-./setup.py
+chmod +x install.py
+./install.py
 ```
 
 The setup includes creating two symbolic links for the gui and cli version of
@@ -145,8 +145,8 @@ My code is not malicious, however, you should always be wary.
 ```
 git clone https://github.com/M1ND-B3ND3R/BoopSuite.git
 cd BoopSuite
-chmod +x setup.py
-./setup.py
+chmod +x install.py
+./install.py
 ```
 
 # Reference:
