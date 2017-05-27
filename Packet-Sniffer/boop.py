@@ -247,17 +247,17 @@ class Configuration:
             }
 
         channel = __FREQS__[int(self.channel)]
-        system("sudo iwconfig "+self.interface+" freq "+channel+"G")
+        system("sudo iwconfig "+str(self.newcard.dev)+" freq "+channel+"G")
         print(c.OKGREEN+" [+] "+c.WHITE+"Card Set to Channel: "+c.HEADER+str(self.channel))
         return
 
 def display_art():
     print(c.OKBLUE+"""
-    ____                   _____       _ ________
-   / __ )____  ____  ____ / ___/____  (_) __/ __/
-  / __  / __ \/ __ \/ __ \\\__ \/ __ \/ / /_/ /_
- / /_/ / /_/ / /_/ / /_/ /__/ / / / / / __/ __/
-/_____/\____/\____/ .___/____/_/ /_/_/_/ /_/
+    ____                  
+   / __ )____  ____  ____
+  / __  / __ \/ __ \/ __ \\
+ / /_/ / /_/ / /_/ / /_/ /
+/_____/\____/\____/ .___/
                  /_/
     """)
     print(c.HEADER+"     Codename: Horned Viper\r\n"+c.BOLD)
