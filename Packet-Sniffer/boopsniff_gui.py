@@ -15,6 +15,7 @@ import pyric.lib.libnl as nl
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
 from tkinter import *
+import tkMessageBox
 
 from getpass import getuser
 from netaddr import *
@@ -342,7 +343,15 @@ class MainWindow:
 
     def add_wifi(self, ap_object):
         try:
-            self.new_name = Button(self.wifi_inner_card, bg="white", width=37, anchor=W, text=(ap_object.mssid), font="10", command=lambda name=ap_object.mssid:self.print_info(name))
+            self.new_name = Button(
+                self.wifi_inner_card,
+                bg="white",
+                width=37,
+                anchor=W,
+                text=(ap_object.mssid),
+                font="10",
+                command=lambda name=ap_object.mmac:self.print_info(name, "AP")
+                )
             self.new_name.pack(pady=2, fill=BOTH, anchor=NW, expand=1)
 
             self.wifi_canvas.config(scrollregion=(0, 0, 0, self.wifi_canvas.bbox("all")[3] + 50))
@@ -351,14 +360,39 @@ class MainWindow:
 
     def add_client(self, cl_object):
         try:
-            self.new_name = Button(self.client_inner_card, bg="white", width=37, anchor=W, text=(Global_Access_Points[cl_object.mbssid].mssid+" :: "+cl_object.mmac), font="10", command=lambda name=cl_object.mmac:self.print_info(name))
+            self.new_name = Button(
+                self.client_inner_card,
+                bg="white",
+                width=37,
+                anchor=W,
+                text=(Global_Access_Points[cl_object.mbssid].mssid+" :: "+cl_object.mmac),
+                font="10",
+                command=lambda name=cl_object.mmac:self.print_info(name, "client")
+                )
             self.new_name.pack(pady=2, fill=BOTH, anchor=NW, expand=1)
 
             self.wifi_canvas.config(scrollregion=(0, 0, 0, self.client_canvas.bbox("all")[3] + 50))
         except:
             pass
 
-    def print_info(self, object_name):
+    def print_info(self, object_name, object_type):
+        if object_type == "AP":
+            tkMessageBox.showinfo(Global_Access_Points[object_name].mssid,
+                ( "Mac address: " + Global_Access_Points[object_name].mmac +
+                "\nEncryption: " + Global_Access_Points[object_name].menc +
+                "\nChannel: " + Global_Access_Points[object_name].mch +
+                "\nVendor: " + Global_Access_Points[object_name].mven +
+                "\nSignal strength: " + str(Global_Access_Points[object_name].msig) +
+                "\nBeacons: " + str(Global_Access_Points[object_name].mbeacons))
+                )
+        else:
+            tkMessageBox.showinfo("Client Info",
+                ("Mac address: "+Global_Clients[object_name].mmac+
+                "\nAccess Point Mac: "+Global_Access_Points[Global_Clients[object_name].mbssid].mmac+
+                "\nNoise: "+str(Global_Clients[object_name].mnoise)+
+                "\nSignal Strength: "+str(Global_Clients[object_name].msig)+
+                "\nAccess Point Name: "+Global_Access_Points[Global_Clients[object_name].mbssid].mssid)
+                )
         print(object_name)
 
     def create_start(self, master):

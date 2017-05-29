@@ -20,6 +20,7 @@ is because change is good, and this project is going to continue to grow as I
 add new handlers for additional packet types.
 
 The project now has a GUI!
+
 The project now has a monitor mode enabling script.
 
 Changelog located in CHANGELOG file.
@@ -35,7 +36,6 @@ would love to hear about it.
 I am going to add scripts to do the following:
 + BoopStrike - Deauthentication attacks
 + BoopCoil   - Deauth attack detector
-+ Boop       - An airmon-ng clone
 
 More ideas are welcome.
 Email me @: jacobsin1996@gmail.com
@@ -179,11 +179,8 @@ to myself that I can do things that were previously impossible to me.
 
 + Wireless card discovery in VM for kali.
 
-+ Creating a window that pops up when you click on a client or access point in the
-gui that will display more stats.
-
 + Code Fixes will be happening.
 
 # License:
 
-GNU Public License V3
+MIT License
