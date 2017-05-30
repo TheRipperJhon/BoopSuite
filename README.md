@@ -4,7 +4,8 @@ BoopSuite
 # Synopsis:
 
 BoopSuite is an up and coming suite of wireless tools designed to be easy to use
-and powerful in scope, written in python with semicolons, because I hate children.
+and powerful in scope, written in python. For Kali linux specifically. Any other
+distro will require manual installation. 
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
 
