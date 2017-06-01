@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 
 __year__    = [2016, 2017]
 __status__  = "Testing"
@@ -229,7 +231,7 @@ class Configuration:
 
 class Access_Point:
     def __init__(self, ssid, enc, ch, mac, ven, sig):
-        self.mssid = str(ssid)[:20]
+        self.mssid = ssid[:20]
         self.menc = enc
         self.mch = str(ch)
         self.mmac = mac
@@ -275,10 +277,7 @@ def handler_beacon(packet):
             Global_Hidden_SSIDs.append(mac)
             name = "<len: "+str(len(packet.info))+">"
         else:
-            name = "".join([x if ord(x) < 128 else "" for x in packet.info])
-
-        if len(name) == 0:
-            name = "<Unicode Shit>"
+            name = packet.info.decode("utf-8")
 
         p = packet[Dot11Elt]
         cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
@@ -416,6 +415,8 @@ def get_rssi(decoded):
     if int(rssi) not in xrange(-100, 0):
         return(-(256 - ord(decoded[-4:-3])))
 
+    if rssi < -100:
+        return -1
     return rssi
 
 def channel_hopper(configuration):
