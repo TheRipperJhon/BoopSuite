@@ -27,8 +27,8 @@ from time import sleep, time
 conf.verb = 0
 
 # GLOBALS
-Global_Access_Points = {} # MAC, AP OBJECT
-Global_Clients = {} # MAC, CLIENT OBJECT
+Global_Access_Points = {}   # MAC, AP OBJECT
+Global_Clients = {}         # MAC, CLIENT OBJECT
 
 Global_Mac_Filter_Channel = ""
 
@@ -515,14 +515,17 @@ def get_un_clients():
 
     clients = []
     for cl in Global_Clients:
-        if len(Global_Access_Points[Global_Clients[cl].mbssid].mssid) > 0:
-            clients.append([
-                Global_Clients[cl].mmac,
-                Global_Access_Points[Global_Clients[cl].mbssid].mmac,
-                str(Global_Clients[cl].mnoise),
-                str(Global_Clients[cl].msig),
-                Global_Access_Points[Global_Clients[cl].mbssid].mssid
-            ])
+        try:
+            if len(Global_Access_Points[Global_Clients[cl].mbssid].mssid) > 0:
+                clients.append([
+                    Global_Clients[cl].mmac,
+                    Global_Access_Points[Global_Clients[cl].mbssid].mmac,
+                    str(Global_Clients[cl].mnoise),
+                    str(Global_Clients[cl].msig),
+                    Global_Access_Points[Global_Clients[cl].mbssid].mssid
+                ])
+        except:
+            pass
     return clients
 
 def printer_thread(configuration):
@@ -538,8 +541,7 @@ def printer_thread(configuration):
 
     while Global_Print_Flag == True:
         wifis = list(map(get_access_points, Global_Access_Points))
-        wifis.sort(key=lambda x: (x[5]))
-        wifis.remove(wifis[0])
+        wifis.sort(key=lambda x: (x[6]))
 
         if configuration.unassociated == True:		# print all clients no matter what
             clients = list(map(get_clients, Global_Clients))
@@ -563,7 +565,17 @@ def printer_thread(configuration):
         # print(bcolors.ENDC)
         # print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
 
+<<<<<<< HEAD
         if timeout < 3.21:
+=======
+        print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]")
+        print("")
+        print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable))
+        print(bcolors.ENDC)
+        print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
+
+        if timeout < 4:
+>>>>>>> 96eedd5ce7922001d167c1c408a8665fcb30b8e3
             timeout += .05
 
         sleep(timeout)
@@ -652,7 +664,6 @@ def int_main(configuration):
 
         if configuration.report != None:
             wifis = list(map(get_Global_Access_Points, Global_Access_Points))
-            wifis.remove(wifis[0])
 
             clients = list(map(get_clients, Global_Clients))
             clients.sort(key=lambda x: x[4])
@@ -666,7 +677,6 @@ def int_main(configuration):
         return 0
 
     signal.signal(signal.SIGINT, signal_handler)
-    Global_Access_Points[""] = Access_Point("","","","","","")
 
     if configuration.hop == True:
         Hopper_Thread = Thread(target=channel_hopper, args=[configuration])
@@ -683,8 +693,6 @@ def int_main(configuration):
 
     create_pcap_filepath()
     set_size(30, 81)
-
-    # sleep(2)
 
     if configuration.printer == True:
         printer_thread(configuration)
