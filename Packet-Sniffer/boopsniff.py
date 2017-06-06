@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 __year__    = [2016, 2017]
 __status__  = "Testing"
 __contact__ = "jacobsin1996@gmail.com"
@@ -273,11 +272,11 @@ def handler_beacon(packet):
         Global_Handshakes[mac] = []
         Global_Handshakes[mac].append(packet)
 
-        if not packet.info or u"\x00" in "".join([x if ord(x) < 128 else "" for x in packet.info]):
+        if packet.info and u"\x00" not in "".join([x if ord(x) < 128 else "" for x in packet.info]):
+            name = packet.info.decode("utf-8")
+        else:
             Global_Hidden_SSIDs.append(mac)
             name = "<len: "+str(len(packet.info))+">"
-        else:
-            name = packet.info.decode("utf-8")
 
         p = packet[Dot11Elt]
         cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
@@ -370,7 +369,7 @@ def handler_eap(packet):
     global Global_Recent_Key_Cap
     global Global_Handshake_Captures
 
-    if packet.addr3 in Global_Handshakes:
+    if packet.addr3 in Global_Handshakes and not Global_Access_Points[packet.addr3].mssid.startswith("<len: "):
         Global_Handshakes[packet.addr3].append(packet)
         Global_Access_Points[packet.addr3].meapols += 1
 
@@ -383,7 +382,7 @@ def handler_eap(packet):
 
         wrpcap(folder_path+filename, Global_Handshakes[packet.addr3], append=True)
         Global_Handshakes[packet.addr3] = []
-        Global_Recent_Key_Cap = (" - [boopstrike: " + str(packet.addr3).upper() + "]")
+        Global_Recent_Key_Cap = (" - [BOOPED: " + str(packet.addr3).upper() + "]")
         Global_Handshake_Captures += 1
     return
 
@@ -403,10 +402,11 @@ def handler_probereq(packet):
 def handler_proberes(packet):
     global Global_Access_Points
     global Global_Hidden_SSIDs
+    global Global_Handshakes
 
-    if (packet.addr3 in Global_Hidden_SSIDs):
-        Global_Access_Points[packet.addr3].update_ssid(packet.info)
-        Global_Hidden_SSIDs.remove(packet.addr3)
+    Global_Access_Points[packet.addr3].update_ssid(packet.info)
+    Global_Hidden_SSIDs.remove(packet.addr3)
+    Global_Handshakes[packet.addr3].append(packet)
     return
 
 def get_rssi(decoded):
@@ -439,7 +439,12 @@ def channel_hopper(configuration):
             "2.452": 9,
             "2.457": 10,
             "2.462": 11
-    }
+            }
+
+        for channel in ["2.412", "2.437", "2.462"]:
+            system("sudo iwconfig "+interface+" freq "+channel+"G")
+            configuration.channel = __FREQS__[channel]
+            sleep(5)
 
     elif frequency == "5":
         __FREQS__ = {
@@ -477,7 +482,7 @@ def channel_hopper(configuration):
         system("sudo iwconfig "+interface+" freq "+channel+"G")
 
         configuration.channel = __FREQS__[channel]
-        sleep(2.2)
+        sleep(3)
     return
 
 def get_access_points(AP):
@@ -550,15 +555,15 @@ def printer_thread(configuration):
         else:
             printable_time = str(int(time_elapsed / 60))+" m"
 
-        system("clear")
+        # system("clear")
+        # #
+        # print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]")
+        # print("")
+        # print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable))
+        # print(bcolors.ENDC)
+        # print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
 
-        print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]")
-        print("")
-        print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable))
-        print(bcolors.ENDC)
-        print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
-
-        if timeout < 2:
+        if timeout < 3.21:
             timeout += .05
 
         sleep(timeout)
@@ -567,14 +572,17 @@ def printer_thread(configuration):
 def sniff_packets(packet):
     global Global_Mac_Filter
     global Global_Ignore_Broadcast
+    global Global_Hidden_SSIDs
 
-    if (Global_Mac_Filter == None or (packet.addr1 == Global_Mac_Filter or packet.addr2 == Global_Mac_Filter)):
+    if packet.addr1 == "f0:27:65:ef:79:9a" or packet.addr2 == "f0:27:65:ef:79:9a":
+        print(packet.type, packet.subtype)
+    # if (Global_Mac_Filter == None or (packet.addr1 == Global_Mac_Filter or packet.addr2 == Global_Mac_Filter)):
 
         if packet.type == 0:
             if packet.subtype == 4:
                 handler_probereq(packet)
 
-            elif packet.subtype == 5:
+            elif packet.subtype == 5 and packet.addr3 in Global_Hidden_SSIDs:
                 handler_proberes(packet)
 
             elif packet.subtype == 8:
