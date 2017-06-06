@@ -34,7 +34,7 @@ Global_Mac_Filter_Channel = ""
 
 Global_Hidden_SSIDs = []
 Global_Ignore_Broadcast = ["ff:ff:ff:ff:ff:ff", "00:00:00:00:00:00"]
-Global_Ignore_Multicast = ["01:00:", "01:80:c2", "33:33"]
+Global_Ignore_Multicast = ["01:00", "01:80:c2", "33:33"]
 
 Global_Print_Flag = True
 Global_Channel_Hopper_Flag = True
@@ -557,17 +557,8 @@ def printer_thread(configuration):
         else:
             printable_time = str(int(time_elapsed / 60))+" m"
 
-        # system("clear")
-        # #
-        # print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]")
-        # print("")
-        # print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable))
-        # print(bcolors.ENDC)
-        # print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
+        system('clear')
 
-<<<<<<< HEAD
-        if timeout < 3.21:
-=======
         print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]")
         print("")
         print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable))
@@ -575,7 +566,6 @@ def printer_thread(configuration):
         print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
 
         if timeout < 4:
->>>>>>> 96eedd5ce7922001d167c1c408a8665fcb30b8e3
             timeout += .05
 
         sleep(timeout)
@@ -586,9 +576,7 @@ def sniff_packets(packet):
     global Global_Ignore_Broadcast
     global Global_Hidden_SSIDs
 
-    if packet.addr1 == "f0:27:65:ef:79:9a" or packet.addr2 == "f0:27:65:ef:79:9a":
-        print(packet.type, packet.subtype)
-    # if (Global_Mac_Filter == None or (packet.addr1 == Global_Mac_Filter or packet.addr2 == Global_Mac_Filter)):
+    if (Global_Mac_Filter == None or (packet.addr1 == Global_Mac_Filter or packet.addr2 == Global_Mac_Filter)):
 
         if packet.type == 0:
             if packet.subtype == 4:
@@ -599,6 +587,11 @@ def sniff_packets(packet):
 
             elif packet.subtype == 8:
                 handler_beacon(packet)
+
+        elif packet.type == 1:
+            if packet.addr1 not in Global_Ignore_Broadcast and packet.addr2 and packet.addr2 not in Global_Ignore_Broadcast:
+                # print(packet.addr1, packet.addr2, packet.subtype)
+                handler_data(packet)
 
         elif packet.type == 2:
             if packet.addr1 not in Global_Ignore_Broadcast and packet.addr2 not in Global_Ignore_Broadcast:
@@ -672,7 +665,7 @@ def int_main(configuration):
             configuration.report.write(tabulate(clients, headers=["M", "AP M", "N", "S", "AP"], tablefmt="psql")+"\r\n")
             configuration.report.close()
 
-        print(bcolors.OKGREEN+"\r [+] Commit to Exit."+bcolors.ENDC)
+        print(bcolors.OKGREEN+"\r [+] "+bcolors.ENDC+"Commit to Exit.")
         exit(0)
         return 0
 
