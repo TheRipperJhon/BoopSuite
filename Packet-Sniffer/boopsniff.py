@@ -376,14 +376,14 @@ def handler_eap(packet):
         folder_path = ("/root/pcaps/")
         filename = (str(Global_Access_Points[packet.addr3].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
 
-    if len(Global_Handshakes[packet.addr3]) >= 6:
-        if not os.path.isfile(folder_path+filename):
-            os.system("touch "+folder_path+filename)
+        if len(Global_Handshakes[packet.addr3]) >= 6:
+            if not os.path.isfile(folder_path+filename):
+                os.system("touch "+folder_path+filename)
 
-        wrpcap(folder_path+filename, Global_Handshakes[packet.addr3], append=True)
-        Global_Handshakes[packet.addr3] = []
-        Global_Recent_Key_Cap = (" - [BOOPED: " + str(packet.addr3).upper() + "]")
-        Global_Handshake_Captures += 1
+            wrpcap(folder_path+filename, Global_Handshakes[packet.addr3], append=True)
+            Global_Handshakes[packet.addr3] = []
+            Global_Recent_Key_Cap = (" - [BOOPED: " + str(packet.addr3).upper() + "]")
+            Global_Handshake_Captures += 1
     return
 
 def handler_probereq(packet):
@@ -501,18 +501,6 @@ def get_access_points(AP):
 def get_clients(cl):
     global Global_Access_Points
 
-    return [
-        Global_Clients[cl].mmac,
-        Global_Access_Points[Global_Clients[cl].mbssid].mmac,
-        str(Global_Clients[cl].mnoise),
-        str(Global_Clients[cl].msig),
-        Global_Access_Points[Global_Clients[cl].mbssid].mssid
-    ]
-
-def get_un_clients():
-    global Global_Access_Points
-    global Global_Clients
-
     clients = []
     for cl in Global_Clients:
         try:
@@ -526,6 +514,30 @@ def get_un_clients():
                 ])
         except:
             pass
+    return clients
+
+def get_un_clients():
+    global Global_Access_Points
+    global Global_Clients
+
+    clients = []
+    for cl in Global_Clients:
+        try:
+            clients.append([
+                Global_Clients[cl].mmac,
+                Global_Access_Points[Global_Clients[cl].mbssid].mmac,
+                str(Global_Clients[cl].mnoise),
+                str(Global_Clients[cl].msig),
+                Global_Access_Points[Global_Clients[cl].mbssid].mssid
+            ])
+        except:
+            clients.append([
+                Global_Clients[cl].mmac,
+                "",
+                str(Global_Clients[cl].mnoise),
+                str(Global_Clients[cl].msig),
+                ""
+            ])
     return clients
 
 def printer_thread(configuration):
@@ -544,9 +556,9 @@ def printer_thread(configuration):
         wifis.sort(key=lambda x: (x[6]))
 
         if configuration.unassociated == True:		# print all clients no matter what
-            clients = list(map(get_clients, Global_Clients))
+            clients = get_un_clients()
         else:
-            clients = get_un_clients()	     		# only print associated clients
+            clients = get_clients()	     		# only print associated clients
 
         clients.sort(key=lambda x: (x[4]))
 
