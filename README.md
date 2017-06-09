@@ -5,7 +5,7 @@ BoopSuite
 
 BoopSuite is an up and coming suite of wireless tools designed to be easy to use
 and powerful in scope, written in python. For Kali linux specifically. Any other
-distro will require manual installation. 
+distro will require manual installation.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
 
@@ -107,7 +107,7 @@ Note: Will do error checking if you specify a channel the card doesnt support an
 
 NOTE: boop will always switch the mode from managed to monitor and vice versa.
 
-I'm not going to continue updating the GUI much as it's a pain and way less functional. Don't hate me.
+I'm working on updating the GUI so it will be much cleaner and way better looking, stay tuned.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/GUI.png "BoopSuite")
 

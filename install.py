@@ -39,7 +39,7 @@ def Install_Packages(Package_Manager):
     global WARNINGS
     Packages_To_Install = [
                             "libncap-dev", "iw", "tcpdump",
-                            "graphviz", "imagemagick", "python-gnuplot",
+                            "graphviz", "python-gnuplot",
                             "python-crypto"
                         ];
     Failed_Packages = [];
@@ -59,44 +59,35 @@ def Install_Packages(Package_Manager):
 
 def Create_Custom_Command():
 
-    if os.path.isdir("/usr/share/Packet-Sniffer/"):
-        os.system("rm -rf /usr/share/Packet-Sniffer/");
-        print(bcolors.OKGREEN+"[+] Removed Old Project Directory"+bcolors.ENDC);
+    links = ["/usr/local/bin/boopsniff", "/usr/local/bin/boopsniff_gui", "/usr/local/bin/boop"]
+    new_links = ["/usr/share/Packet-Sniffer/boopsniff.py", "/usr/share/Packet-Sniffer/boopsniff_gui.py", "/usr/share/Monitor/boop.py"]
 
-    if os.path.islink("/usr/local/bin/boopsniff_gui"):
-        os.system("rm -f /usr/local/bin/boopsniff_gui");
-        print(bcolors.OKGREEN+"[+] Removed Old Custom Command for GUI"+bcolors.ENDC);
-    if os.path.islink("/usr/local/bin/boopsniff"):
-        os.system("rm -f /usr/local/bin/boopsniff");
-        print(bcolors.OKGREEN+"[+] Removed Old Custom Command for CLI"+bcolors.ENDC);
+    dirs = ["/usr/share/Packet-Sniffer/", "/usr/share/Monitor/"]
+
+    for dire in dirs:
+        if os.path.isdir(dire):
+            os.system("sudo rm -rf "+dire);
+            print(bcolors.OKGREEN+"[+] Removed Old Project Directory"+bcolors.ENDC);
 
     try:
-        subprocess.check_output(["cp", "-r", "Packet-Sniffer/", "/usr/share/"], stderr=subprocess.STDOUT);
-        print(bcolors.OKGREEN+"[+] Installed Tools to: /usr/share/Packet-Sniffer"+bcolors.ENDC)
+        subprocess.check_output(["sudo", "cp", "-r", "Packet-Sniffer/", "/usr/share/"], stderr=subprocess.STDOUT)
+        subprocess.check_output(["sudo", "cp", "-r", "Monitor/", "/usr/share/"], stderr=subprocess.STDOUT);
+        print(bcolors.OKGREEN+"[+] Installed Tools to: /usr/share/"+bcolors.ENDC)
     except subprocess.CalledProcessError as e:
         print(e.output);
 
-    try:
-        subprocess.check_output(["ln", "-s", "/usr/share/Packet-Sniffer/boopsniff.py", "/usr/local/bin/boopsniff"], stderr=subprocess.STDOUT);
-        print(bcolors.OKGREEN+"[+] Created Custom Command for: boopsniff"+bcolors.ENDC)
-        subprocess.check_output(["chmod", "755", "/usr/local/bin/boopsniff"], stderr=subprocess.STDOUT);
-    except subprocess.CalledProcessError as e:
-        print(bcolors.FAIL+"[-] Failed During custom command creation.");
+    for link in links:
+        if os.path.islink(link):
+            os.system("sudo rm -f "+link);
+            print(bcolors.OKGREEN+"[+] Removed an old command"+bcolors.ENDC);
 
+    for index, value in enumerate(new_links):
+        try:
+            subprocess.check_output(["sudo", "ln", "-s", new_links[index], links[index]], stderr=subprocess.STDOUT);
+            subprocess.check_output(["sudo", "chmod", "755", links[index]], stderr=subprocess.STDOUT);
+        except subprocess.CalledProcessError as e:
+            print(bcolors.FAIL+"[-] Failed During custom command creation.");
 
-    try:
-        subprocess.check_output(["ln", "-s", "/usr/share/Packet-Sniffer/boopsniff_gui.py", "/usr/local/bin/boopsniff_gui"], stderr=subprocess.STDOUT);
-        print(bcolors.OKGREEN+"[+] Created Custom Command for: boopsniff_gui"+bcolors.ENDC)
-        subprocess.check_output(["chmod", "755", "/usr/local/bin/boopsniff_gui"], stderr=subprocess.STDOUT);
-    except subprocess.CalledProcessError as e:
-        print(e.output);
-
-    try:
-        subprocess.check_output(["ln", "-s", "/usr/share/Packet-Sniffer/boop.py", "/usr/local/bin/boop"], stderr=subprocess.STDOUT);
-        print(bcolors.OKGREEN+"[+] Created Custom Command for: boop"+bcolors.ENDC)
-        subprocess.check_output(["chmod", "755", "/usr/local/bin/boop"], stderr=subprocess.STDOUT);
-    except subprocess.CalledProcessError as e:
-        print(e.output);
 
     return 0;
 

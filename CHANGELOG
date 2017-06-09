@@ -1,3 +1,7 @@
+Changelog: 0.16.0
+  Working on deauth script begins
+  Lots of bug fixes. like a lot.
+
 Changelog: 0.15.7
     Added a pop up window for the GUI to display extra info on a client or an access point.
 

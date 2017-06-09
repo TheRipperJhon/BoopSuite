@@ -33,7 +33,7 @@ Global_Clients = {}         # MAC, CLIENT OBJECT
 Global_Mac_Filter_Channel = ""
 
 Global_Hidden_SSIDs = []
-Global_Ignore_Broadcast = ["ff:ff:ff:ff:ff:ff", "00:00:00:00:00:00"]
+Global_Ignore_Broadcast = ["ff:ff:ff:ff:ff:ff", "00:00:00:00:00:00", "01:80:c2:00:00:00"]
 Global_Ignore_Multicast = ["01:00", "01:80:c2", "33:33"]
 
 Global_Print_Flag = True
@@ -334,6 +334,7 @@ def handler_data(packet):
 
     address1 = packet.addr1
     address2 = packet.addr2
+    address3 = packet.addr3
 
     if Global_Access_Points.has_key(address1):
         if Global_Clients.has_key(address2):
@@ -348,6 +349,8 @@ def handler_data(packet):
             Global_Clients[address2] = Client(address2, address1, get_rssi(packet.notdecoded))
             Global_Clients[address2].mnoise += 1
 
+            print(address1, address2, address3, packet.subtype, 1)
+
     elif Global_Access_Points.has_key(address2):
         if Global_Clients.has_key(address1):
 
@@ -360,6 +363,9 @@ def handler_data(packet):
         elif check_valid(address1):
             Global_Clients[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
             Global_Clients[address1].mnoise += 1
+
+            print(address1, address2, address3, packet.subtype, 2)
+
 
     return
 
@@ -376,14 +382,14 @@ def handler_eap(packet):
         folder_path = ("/root/pcaps/")
         filename = (str(Global_Access_Points[packet.addr3].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
 
-    if len(Global_Handshakes[packet.addr3]) >= 6:
-        if not os.path.isfile(folder_path+filename):
-            os.system("touch "+folder_path+filename)
+        if len(Global_Handshakes[packet.addr3]) >= 6:
+            if not os.path.isfile(folder_path+filename):
+                os.system("touch "+folder_path+filename)
 
-        wrpcap(folder_path+filename, Global_Handshakes[packet.addr3], append=True)
-        Global_Handshakes[packet.addr3] = []
-        Global_Recent_Key_Cap = (" - [BOOPED: " + str(packet.addr3).upper() + "]")
-        Global_Handshake_Captures += 1
+            wrpcap(folder_path+filename, Global_Handshakes[packet.addr3], append=True)
+            Global_Handshakes[packet.addr3] = []
+            Global_Recent_Key_Cap = (" - [BOOPED: " + str(packet.addr3).upper() + "]")
+            Global_Handshake_Captures += 1
     return
 
 def handler_probereq(packet):
@@ -498,20 +504,8 @@ def get_access_points(AP):
         Global_Access_Points[AP].mssid
     ]
 
-def get_clients(cl):
+def get_clients():
     global Global_Access_Points
-
-    return [
-        Global_Clients[cl].mmac,
-        Global_Access_Points[Global_Clients[cl].mbssid].mmac,
-        str(Global_Clients[cl].mnoise),
-        str(Global_Clients[cl].msig),
-        Global_Access_Points[Global_Clients[cl].mbssid].mssid
-    ]
-
-def get_un_clients():
-    global Global_Access_Points
-    global Global_Clients
 
     clients = []
     for cl in Global_Clients:
@@ -526,6 +520,30 @@ def get_un_clients():
                 ])
         except:
             pass
+    return clients
+
+def get_un_clients():
+    global Global_Access_Points
+    global Global_Clients
+
+    clients = []
+    for cl in Global_Clients:
+        try:
+            clients.append([
+                Global_Clients[cl].mmac,
+                Global_Access_Points[Global_Clients[cl].mbssid].mmac,
+                str(Global_Clients[cl].mnoise),
+                str(Global_Clients[cl].msig),
+                Global_Access_Points[Global_Clients[cl].mbssid].mssid
+            ])
+        except:
+            clients.append([
+                Global_Clients[cl].mmac,
+                "",
+                str(Global_Clients[cl].mnoise),
+                str(Global_Clients[cl].msig),
+                ""
+            ])
     return clients
 
 def printer_thread(configuration):
@@ -544,9 +562,9 @@ def printer_thread(configuration):
         wifis.sort(key=lambda x: (x[6]))
 
         if configuration.unassociated == True:		# print all clients no matter what
-            clients = list(map(get_clients, Global_Clients))
+            clients = get_un_clients()
         else:
-            clients = get_un_clients()	     		# only print associated clients
+            clients = get_clients()	     		# only print associated clients
 
         clients.sort(key=lambda x: (x[4]))
 
@@ -557,13 +575,13 @@ def printer_thread(configuration):
         else:
             printable_time = str(int(time_elapsed / 60))+" m"
 
-        system('clear')
-
-        print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]")
-        print("")
-        print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable))
-        print(bcolors.ENDC)
-        print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
+        # system('clear')
+        #
+        # print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]")
+        # print("")
+        # print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable))
+        # print(bcolors.ENDC)
+        # print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
 
         if timeout < 4:
             timeout += .05
@@ -643,7 +661,7 @@ def start_sniffer(configuration):
 # MAIN CONTROLLER
 def int_main(configuration):
     global Global_Mac_Filter
-    global PRINTER_FLAG
+    global Global_Print_Flag
     global Global_Channel_Hopper_Flag
     global Global_Access_Points
     global Global_Clients
@@ -652,7 +670,7 @@ def int_main(configuration):
     Global_Mac_Filter = configuration.mac_filter
 
     def signal_handler(*args):
-        PRINTER_FLAG = False
+        Global_Print_Flag = False
         Global_Channel_Hopper_Flag  = False
 
         if configuration.report != None:

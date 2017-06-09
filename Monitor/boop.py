@@ -68,6 +68,13 @@ class Configuration:
     def parse_interface(self, interface):
         if interface in pyw.interfaces():
             print(c.OKGREEN+" [+] "+c.WHITE+"Valid Card Selected.")
+
+            info = pyw.ifinfo(pyw.getcard(interface))
+
+            print("   '->  Driver: "+info["driver"])
+            print("   '->  Hardware Address: "+info["hwaddr"])
+            print("   '->  manufacturer: "+info["manufacturer"])
+
             if pyw.modeget(pyw.getcard(interface)) == "monitor":
                 self.monitor = True
             else:
@@ -136,7 +143,7 @@ class Configuration:
         else:
             print(c.FAIL+" [-] "+c.WHITE+" Channel is invalid in either frequency")
             exit(0)
-
+        return
 
     def kill_interfering_tasks():
         commandlist = [
@@ -164,45 +171,40 @@ class Configuration:
 
     def turn_monitor_on(self):
         self.card = pyw.getcard(self.interface)
-        try:
-            if self.name:
-                self.newcard = pyw.devset(self.card, self.name)
-                pyw.modeset(self.newcard, "monitor")
-                pyw.up(self.newcard)
-            else:
-                self.newcard = pyw.devset(self.card, self.card.dev+"mon")
-                pyw.modeset(self.newcard, "monitor")
-                pyw.up(self.newcard)
+        if self.name:
+            self.newcard = pyw.devset(self.card, self.name)
+            pyw.modeset(self.newcard, "monitor")
+            pyw.up(self.newcard)
+        else:
+            self.newcard = pyw.devset(self.card, self.card.dev+"mon")
+            pyw.modeset(self.newcard, "monitor")
+            pyw.up(self.newcard)
 
-            print(c.OKGREEN+" [+] "+c.WHITE+"New Card Name: "+c.HEADER+self.newcard.dev)
+        print(c.OKGREEN+" [+] "+c.WHITE+"New Card Name: "+c.HEADER+self.newcard.dev)
 
-            if self.channel != None:
-                self.set_channel()
-        except:
-            print(c.FAIL+" [-] "+c.WHITE+" Error: "+str(exc_info()))
+        if self.channel != None:
+            self.set_channel()
+
         return
 
     def turn_monitor_off(self):
         self.card = pyw.getcard(self.interface)
-        try:
-            if self.name:
-                self.newcard = pyw.devset(self.card, self.name)
-                pyw.modeset(self.newcard, "managed")
-                pyw.up(self.newcard)
+        if self.name:
+            self.newcard = pyw.devset(self.card, self.name)
+            pyw.modeset(self.newcard, "managed")
+            pyw.up(self.newcard)
+        else:
+            if len(self.card.dev) < 4:
+                self.newcard = pyw.devset(self.card, "boopmon")
             else:
-                if len(self.card.dev) < 4:
-                    self.newcard = pyw.devset(self.card, "boopmon")
-                else:
-                    self.newcard = pyw.devset(self.card, self.card.dev[:-3])
-                pyw.modeset(self.newcard, "managed")
-                pyw.up(self.newcard)
+                self.newcard = pyw.devset(self.card, self.card.dev[:-3])
+            pyw.modeset(self.newcard, "managed")
+            pyw.up(self.newcard)
 
-            print(c.OKGREEN+" [+] "+c.WHITE+"New Card Name: "+c.HEADER+self.newcard.dev)
+        print(c.OKGREEN+" [+] "+c.WHITE+"New Card Name: "+c.HEADER+self.newcard.dev)
 
-            if self.channel != None:
-                self.set_channel()
-        except:
-            print(c.FAIL+" [-] "+c.WHITE+" Error: "+str(exc_info()))
+        if self.channel != None:
+            self.set_channel()
         return
 
     def set_channel(self):
@@ -253,7 +255,7 @@ class Configuration:
 
 def display_art():
     print(c.OKBLUE+"""
-    ____                  
+    ____
    / __ )____  ____  ____
   / __  / __ \/ __ \/ __ \\
  / /_/ / /_/ / /_/ / /_/ /

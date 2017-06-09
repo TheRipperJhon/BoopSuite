@@ -1,5 +1,4 @@
 pyric
-tkinter
 netaddr
 scapy
 tabulate
