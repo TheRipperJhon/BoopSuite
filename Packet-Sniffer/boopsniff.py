@@ -349,8 +349,6 @@ def handler_data(packet):
             Global_Clients[address2] = Client(address2, address1, get_rssi(packet.notdecoded))
             Global_Clients[address2].mnoise += 1
 
-            print(address1, address2, address3, packet.subtype, 1)
-
     elif Global_Access_Points.has_key(address2):
         if Global_Clients.has_key(address1):
 
@@ -363,9 +361,6 @@ def handler_data(packet):
         elif check_valid(address1):
             Global_Clients[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
             Global_Clients[address1].mnoise += 1
-
-            print(address1, address2, address3, packet.subtype, 2)
-
 
     return
 
