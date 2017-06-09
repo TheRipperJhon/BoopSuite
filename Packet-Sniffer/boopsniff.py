@@ -374,7 +374,7 @@ def handler_eap(packet):
         Global_Handshakes[packet.addr3].append(packet)
         Global_Access_Points[packet.addr3].meapols += 1
 
-        folder_path = ("/root/pcaps/")
+        folder_path = ("~/pcaps/")
         filename = (str(Global_Access_Points[packet.addr3].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
 
         if len(Global_Handshakes[packet.addr3]) >= 6:
@@ -645,8 +645,8 @@ def check_valid(mac):
     return True
 
 def create_pcap_filepath():
-    if not os.path.isdir("/root/pcaps"):
-        os.system("mkdir /root/pcaps")
+    if not os.path.isdir("~/pcaps"):
+        os.system("mkdir ~/pcaps")
     return
 
 def start_sniffer(configuration):
