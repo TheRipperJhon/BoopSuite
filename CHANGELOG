@@ -1,3 +1,10 @@
+Changelog: 0.16.0
+  Added a deauth attack to the sniffer script using the --attack command switch.
+    - Quickens the time needed to sniff handshakes.
+      - Quite evil. Persistent attack method.
+  Added a skip option for the --attack switch.
+  Some Bug Fixes
+
 Changelog: 0.15.8
   Working on deauth script begins
   Lots of bug fixes. like a lot.

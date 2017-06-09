@@ -73,6 +73,16 @@ Email me @: jacobsin1996@gmail.com
 
 `boopsniff -i wlan1mon -a xx:xx:xx:xx:xx:xx`
 
+#### If you want to deauth while sniffing to get handshakes faster:
+
+`boopsniff -i wlan1mon --attack`
+
+Warning This is very Abusive...
+
+#### If you are launching a deauth but dont want to target your network:
+
+`boopsniff -i wlan1mon --attack -s xx:xx:xx:xx:xx:xx`
+
 #### New Update includes a gui tool:
 
 `boopsniff_gui`
