@@ -1,3 +1,12 @@
+Changelog: 0.16.1
+  Figured out how to tell which order the handshake packets arrive in. AWESOME.
+  Some generic fixes and optimizations w/ more to come.
+  Added the deauth script to the install script.
+  Made the top bar read "Booped: " instead of "BOOPED: " - Just thought it looked better.
+  In boopstrike added a second sorting criteria.
+  Major mods to the readme file
+  Added additional longhand command switches.
+
 Changelog: 0.16.0
   Added a deauth attack to the sniffer script using the --attack command switch.
     - Quickens the time needed to sniff handshakes.
@@ -37,7 +46,7 @@ Changelog: 0.15.3.1
     Thanks to etem @ https://github.com/etem for reporting.
 
 Changelog: 0.15.3
-    Removed semicolons
+    Removed semicolons - Will add them back later.
     Took out some of the expensive thread calls
     Actually updated the version number this time.
     Added a catcher to the sniffer thread that has caused alot of speed improvements.

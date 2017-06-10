@@ -59,10 +59,21 @@ def Install_Packages(Package_Manager):
 
 def Create_Custom_Command():
 
-    links = ["/usr/local/bin/boopsniff", "/usr/local/bin/boopsniff_gui", "/usr/local/bin/boop"]
-    new_links = ["/usr/share/Packet-Sniffer/boopsniff.py", "/usr/share/Packet-Sniffer/boopsniff_gui.py", "/usr/share/Monitor/boop.py"]
+    links = [
+        "/usr/local/bin/boopsniff",
+        "/usr/local/bin/boopsniff_gui",
+        "/usr/local/bin/boop",
+        "/usr/local/bin/boopstrike"]
+    new_links = [
+        "/usr/share/Packet-Sniffer/boopsniff.py",
+        "/usr/share/Packet-Sniffer/boopsniff_gui.py",
+        "/usr/share/Monitor/boop.py",
+        "/usr/share/Deauth/boopstrike.py"]
 
-    dirs = ["/usr/share/Packet-Sniffer/", "/usr/share/Monitor/"]
+    dirs = [
+        "/usr/share/Packet-Sniffer/",
+        "/usr/share/Monitor/",
+        "/usr/share/Deauth"]
 
     for dire in dirs:
         if os.path.isdir(dire):
@@ -72,6 +83,7 @@ def Create_Custom_Command():
     try:
         subprocess.check_output(["sudo", "cp", "-r", "Packet-Sniffer/", "/usr/share/"], stderr=subprocess.STDOUT)
         subprocess.check_output(["sudo", "cp", "-r", "Monitor/", "/usr/share/"], stderr=subprocess.STDOUT);
+        subprocess.check_output(["sudo", "cp", "-r", "Deauth/", "/usr/share/"], stderr=subprocess.STDOUT);
         print(bcolors.OKGREEN+"[+] Installed Tools to: /usr/share/"+bcolors.ENDC)
     except subprocess.CalledProcessError as e:
         print(e.output);
@@ -85,9 +97,9 @@ def Create_Custom_Command():
         try:
             subprocess.check_output(["sudo", "ln", "-s", new_links[index], links[index]], stderr=subprocess.STDOUT);
             subprocess.check_output(["sudo", "chmod", "755", links[index]], stderr=subprocess.STDOUT);
+            print(bcolors.OKGREEN+"[+] Created New Command"+bcolors.ENDC)
         except subprocess.CalledProcessError as e:
             print(bcolors.FAIL+"[-] Failed During custom command creation.");
-
 
     return 0;
 

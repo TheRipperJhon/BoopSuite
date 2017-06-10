@@ -24,10 +24,14 @@ class c:
 
 class Configuration:
     def __init__(self):
+        self.check_root()
+        self.check_op()
+
         parser = argparse.ArgumentParser()
 
         parser.add_argument(
             "-i",
+            "--interface",
             action="store",
             dest="interface",
             help="select an interface",
@@ -35,6 +39,7 @@ class Configuration:
 
         parser.add_argument(
             "-n",
+            "--name",
             action="store",
             default=None,
             dest="name",
@@ -42,6 +47,7 @@ class Configuration:
 
         parser.add_argument(
             "-c",
+            "--channel",
             action="store",
             default=None,
             dest="channel",
@@ -49,6 +55,7 @@ class Configuration:
 
         parser.add_argument(
             "-k",
+            "--kill",
             action="store_true",
             dest="kill",
             default=False,
@@ -63,6 +70,18 @@ class Configuration:
 
         self.make_card_changes()
 
+        return
+
+    def check_root(self):
+        if getuid() != 0:
+            print(bcolors.FAIL+" [-] User is not Root.")
+            exit()
+        return
+
+    def check_op(self):
+        if uname()[0].startswith("Linux") and not "Darwin" not in uname()[0]:
+            print(bcolors.FAIL+" [-] Wrong OS.")
+            exit()
         return
 
     def parse_interface(self, interface):
@@ -262,7 +281,7 @@ def display_art():
 /_____/\____/\____/ .___/
                  /_/
     """)
-    print(c.HEADER+"     Codename: Horned Viper\r\n"+c.BOLD)
+    print(c.HEADER+"     Codename: Inland Taipan\r\n"+c.BOLD)
     return
 
 def main():
@@ -271,8 +290,7 @@ def main():
     try:
         configuration = Configuration()
     except Exception,e:
-        print("Please Email: jacobsin1996@gmail.com ")
-        print("Your Error is: "+str(e))
+        print("An error occured: "+str(e))
 
     print(c.OKBLUE+" [+] "+c.WHITE+"Time: "+c.OKGREEN+str(round(time.time() - start, 5)))
     return (0)

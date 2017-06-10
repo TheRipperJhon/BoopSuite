@@ -4,25 +4,45 @@ BoopSuite
 # Synopsis:
 
 BoopSuite is an up and coming suite of wireless tools designed to be easy to use
-and powerful in scope, written in python. For Kali linux specifically. Any other
-distro will require manual installation.
+and powerful in scope, written in python. A handshake sniffer (CLI and GUI), a
+monitor mode enabling script and a deauth script are all parts of this suite
+with more to come.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
 
 ## Why use this over aircrack-ng?
 
+### BoopSniff vs. airodump-ng
+
 This project is easier to use, identifies clients more quickly than airodump-ng,
 and displays less useless information. Additionally I can take requests and build
 them out as I continue to develop this project.
 
+### Boop vs. airmon-ng
+
+The script is just as easy to use and quite a bit faster in its method of
+putting cards into monitor mode. With as much usability as well.
+
+### BoopStrike vs aireplay-ng or wifijammer.py from Dan McInerney
+
+While boopstrike cant fully compare to aireplay-ng due to the amount of options
+present in it. BoopStrike can compare to Dan McInerney's wifijammer script as
+boopstrike accomplishes the same things, albeit with more grace. This script
+wont waste deauths on noiseless clients, but will surely jam those that are
+using their respective wifi's, also my tool supports the 5ghz frequency if you
+have a card that can do so.
+
 Don't mistake me, aircrack is an amazing suite of tools and I understand the thought of
 \"why use a different tool when airodump is still very usable\", and the answer
-is because change is good, and this project is going to continue to grow as I
+is because you have the freedom to do so and I hope my project can aid everyone
+in their pentesting needs, and this project is going to continue to grow as I
 add new handlers for additional packet types.
 
-The project now has a GUI!
+The project has a GUI.
 
-The project now has a monitor mode enabling script.
+The project has a monitor mode enabling script.
+
+The project now has a deauthentication script!
 
 Changelog located in CHANGELOG file.
 
@@ -35,7 +55,6 @@ would love to hear about it.
 ## What else is coming?
 
 I am going to add scripts to do the following:
-+ BoopStrike - Deauthentication attacks
 + BoopCoil   - Deauth attack detector
 
 More ideas are welcome.
@@ -82,6 +101,22 @@ Warning This is very Abusive...
 #### If you are launching a deauth but dont want to target your network:
 
 `boopsniff -i wlan1mon --attack -s xx:xx:xx:xx:xx:xx`
+
+#### To launch a deauth attack:
+
+`boopstrike -i wlan1mon`
+
+#### Deauth the 5ghz spectrum:
+
+`boopstrike -i wlan1mon -f 5`
+
+#### Deauth a single AP:
+
+`boopstrike -i wlan1mon -a xx:xx:xx:xx:xx:xx`
+
+#### Deauth everyone except one Access Point:
+
+`boopstrike -i wlan1mon -s xx:xx:xx:xx:xx:xx`
 
 #### New Update includes a gui tool:
 
@@ -162,7 +197,7 @@ chmod +x install.py
 
 # Reference:
 
-The top line is formatted as follows:
+The top line is formatted as follows for the sniffer:
 
 `[+] Time: TIME_ELAPSED Slithering: [CHANNEL] - [boopstrike: RECENT HANDHAKE CAPTURED] - [AMOUNT OF HANDSHAKES]`
 
