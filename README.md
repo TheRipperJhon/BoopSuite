@@ -32,6 +32,8 @@ wont waste deauths on noiseless clients, but will surely jam those that are
 using their respective wifi's, also my tool supports the 5ghz frequency if you
 have a card that can do so.
 
+### Note:
+
 Don't mistake me, aircrack is an amazing suite of tools and I understand the thought of
 \"why use a different tool when airodump is still very usable\", and the answer
 is because you have the freedom to do so and I hope my project can aid everyone
