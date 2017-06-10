@@ -160,7 +160,7 @@ class Configuration:
 
         parser.add_argument(
             "-s",
-            "--skip"
+            "--skip",
             action="store",
             default=None,
             dest="skip",
