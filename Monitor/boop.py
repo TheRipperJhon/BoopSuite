@@ -8,8 +8,8 @@ import pyric.lib.libnl as nl
 
 import argparse
 
-from os import system
-from sys import exit, exc_info
+from os import system, path, getuid, uname
+from sys import exit, stdout, exc_info
 
 class c:
     HEADER    = "\033[95m"
@@ -274,23 +274,29 @@ class Configuration:
 
 def display_art():
     print(c.OKBLUE+"""
-    ____
-   / __ )____  ____  ____
-  / __  / __ \/ __ \/ __ \\
- / /_/ / /_/ / /_/ / /_/ /
-/_____/\____/\____/ .___/
-                 /_/
+ /$$$$$$$
+| $$__  $$
+| $$  \ $$  /$$$$$$   /$$$$$$   /$$$$$$
+| $$$$$$$  /$$__  $$ /$$__  $$ /$$__  $$
+| $$__  $$| $$  \ $$| $$  \ $$| $$  \ $$
+| $$  \ $$| $$  | $$| $$  | $$| $$  | $$
+| $$$$$$$/|  $$$$$$/|  $$$$$$/| $$$$$$$/
+|_______/  \______/  \______/ | $$____/
+                              | $$
+                              | $$
+                              |__/
     """)
     print(c.HEADER+"     Codename: Inland Taipan\r\n"+c.BOLD)
     return
 
 def main():
+    stdout.write("\x1b[8;{rows};{cols}t".format(rows=35, cols=75))
     start = time.time()
     display_art()
     try:
         configuration = Configuration()
     except Exception,e:
-        print("An error occured: "+str(e))
+        print(" [-]An error occured: "+str(e))
 
     print(c.OKBLUE+" [+] "+c.WHITE+"Time: "+c.OKGREEN+str(round(time.time() - start, 5)))
     return (0)
