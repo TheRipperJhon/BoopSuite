@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __year__    = [2016, 2017]
 __status__  = "Testing"
@@ -27,6 +27,7 @@ from tabulate import tabulate
 from threading import Thread
 from time import sleep, time
 
+
 # GLOBALS
 Global_Access_Points = {} # MAC, AP OBJECT
 Global_Clients = {} # MAC, CLIENT OBJECT
@@ -45,6 +46,7 @@ Global_Handshake_Captures = 0
 
 Global_My_Gui = ""
 
+
 # CLASSES
 class Color:
     HEADER           = '#%02x%02x%02x' % (30, 144, 255)
@@ -52,6 +54,7 @@ class Color:
     BUTTON_COLOR     = '#%02x%02x%02x' % (242, 163, 189)
     TITLE_BACKGROUND = '#%02x%02x%02x' % (69,79,89)
     OPTION_MENU      = '#%02x%02x%02x' % (196, 173, 201)
+
 
 class Configuration:
     def __init__(self):
@@ -79,6 +82,7 @@ class Configuration:
             exit()
 
         return
+
 
 class Access_Point:
     def __init__(self, ssid, enc, ch, mac, ven, sig):
@@ -116,6 +120,7 @@ class Access_Point:
             pass
         return
 
+
 class Client:
     def __init__(self, mac, bssid, rssi):
         self.mmac   = mac
@@ -128,6 +133,7 @@ class Client:
     def update_network(self, bssid):
         self.mbssid = bssid
         return
+
 
 class MainWindow:
     def __init__(self, master, config):
@@ -444,6 +450,7 @@ class MainWindow:
 
         return
 
+
 # FUNCTIONS
 def handler_beacon(packet):
     global Global_Access_Points
@@ -514,6 +521,7 @@ def handler_beacon(packet):
             Global_My_Gui.add_wifi(Global_Access_Points[source])
     return
 
+
 def handler_data(packet):
     global Global_My_Gui
     global Global_Clients
@@ -554,6 +562,7 @@ def handler_data(packet):
 
     return
 
+
 def handler_eap(packet):
     global Global_My_Gui
     global Global_Clients
@@ -577,6 +586,7 @@ def handler_eap(packet):
             Global_Handshake_Captures += 1
     return
 
+
 def handler_probereq(packet):
     global Global_My_Gui
     global Global_Clients
@@ -596,6 +606,7 @@ def handler_probereq(packet):
 
     return
 
+
 def handler_proberes(packet):
     global Global_Hidden_SSIDs
     global Global_Access_Points
@@ -604,6 +615,7 @@ def handler_proberes(packet):
         Global_Access_Points[packet.addr3].mssid = packet.info
         Global_Hidden_SSIDs.remove(packet.addr3)
     return
+
 
 def get_rssi(DECODED):
     rssi = -(256 - ord(DECODED[-2:-1]))
@@ -615,6 +627,7 @@ def get_rssi(DECODED):
         return "-1"
 
     return rssi
+
 
 def channel_hopper(configuration):
     global Global_Flag
@@ -646,9 +659,11 @@ def channel_hopper(configuration):
         sleep(1.5)
     return
 
+
 def set_size(height, width):
     sys.stdout.write("\x1b[8{rows}{cols}t".format(rows=height, cols=width))
     return
+
 
 def check_valid(mac):
     global Global_Ignore_Broadcast
@@ -659,10 +674,12 @@ def check_valid(mac):
             return True
     return False
 
+
 def create_pcap_filepath():
     if not os.path.isdir("/root/pcaps"):
         os.system("mkdir /root/pcaps")
     return
+
 
 def sniff_packets( packet ):
     global Global_Mac_Filter
@@ -694,12 +711,14 @@ def sniff_packets( packet ):
 
     return
 
+
 def start_gui(configuration):
     global Global_My_Gui
     root = Tk()
     root.wm_attributes('-type', 'splash')
     Global_My_Gui = MainWindow(root, configuration)
     root.mainloop()
+
 
 if __name__ == '__main__':
     configuration = Configuration()
