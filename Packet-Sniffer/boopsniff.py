@@ -45,7 +45,6 @@ Global_Mac_Filter = None
 Global_Start_Time = ""
 Global_Recent_Key_Cap = ""
 Global_Handshake_Captures = 0
-Global_Handshake_List = []
 
 # CLASSES
 class bcolors:
@@ -292,6 +291,7 @@ def handler_beacon(packet):
     global Global_Clients
     global Global_Mac_Filter
     global Global_Mac_Filter_Channel
+    global Global_Handshakes
 
     source = packet.addr2
     mac = packet.addr3
@@ -307,21 +307,22 @@ def handler_beacon(packet):
 
         destination = packet.addr1
 
-        Global_Handshakes[mac] = {
-            'frame2': None,
-            'frame3': None,
-            'frame4': None,
-            'replay_counter': None,
-            'packets': [],
-            'beacon': []
-            }
+        if (not Global_Handshakes.has_key (mac)):
+            fields = {
+                'frame2': None,
+                'frame3': None,
+                'frame4': None,
+                'replay_counter': None,
+                'packets': []
+                }
+            Global_Handshakes[mac] = fields
 
         if packet.info and u"\x00" not in "".join([x if ord(x) < 128 else "" for x in packet.info]):
             name = packet.info.decode("utf-8")
-            Global_Handshakes[mac]['beacon'].append(packet)
+            Global_Handshakes[mac]['packets'].append(packet)
         else:
             Global_Hidden_SSIDs.append(mac)
-            name = "<len: "+str(len(packet.info))+">"
+            name = "< len: "+str(len(packet.info))+" >"
 
         p = packet[Dot11Elt]
         cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
@@ -347,6 +348,9 @@ def handler_beacon(packet):
 
             p = p.payload
 
+        if str(channel) != str(configuration.channel):
+            return
+
         if not sec:
             if "privacy" in cap:
                 sec.add("WEP")
@@ -359,7 +363,7 @@ def handler_beacon(packet):
         try:
             oui = ((EUI(mac)).oui).registration().org
         except:
-            oui = "<Unknown>"
+            oui = "< NA >"
 
         Global_Access_Points[source] = Access_Point(
             name,
@@ -420,7 +424,6 @@ def handler_data(packet):
     return
 
 def handler_eap(packet):
-    global Global_Handshake_List
     global Global_Access_Points
     global Global_Handshakes
     global Global_Recent_Key_Cap
@@ -429,7 +432,7 @@ def handler_eap(packet):
     layer = packet.getlayer(WPA_key)
 
     if (packet.FCfield & 1):
-        # Message come from STA 
+        # Message come from packet.addr3 
         # From DS = 0, To DS = 1
         STA = packet.addr2
     elif (packet.FCfield & 2):
@@ -439,20 +442,6 @@ def handler_eap(packet):
     else:
         return
 
-    if STA in Global_Handshake_List:
-        return
-
-    if (not Global_Handshakes.has_key (STA)):
-        fields = {
-            'frame2': None,
-            'frame3': None,
-            'frame4': None,
-            'replay_counter': None,
-            'packets': [],
-            'beacon': []
-            }
-        Global_Handshakes[STA] = fields
-
     key_info = layer.key_info
     wpa_key_length = layer.wpa_key_length
     replay_counter = layer.replay_counter
@@ -461,20 +450,20 @@ def handler_eap(packet):
     WPA_KEY_INFO_MIC = 256
     # check for frame 2
     if ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
-        Global_Handshakes[STA]['frame2'] = 1
-        Global_Handshakes[STA]['packets'].append (packet)
+        Global_Handshakes[packet.addr3]['frame2'] = 1
+        Global_Handshakes[packet.addr3]['packets'].append (packet)
     # check for frame 3
     elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
-        Global_Handshakes[STA]['frame3'] = 1
-        # store the replay counter for this STA
-        Global_Handshakes[STA]['replay_counter'] = replay_counter
-        Global_Handshakes[STA]['packets'].append(packet)
+        Global_Handshakes[packet.addr3]['frame3'] = 1
+        # store the replay counter for this packet.addr3
+        Global_Handshakes[packet.addr3]['replay_counter'] = replay_counter
+        Global_Handshakes[packet.addr3]['packets'].append(packet)
     # check for frame 4
-    elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and Global_Handshakes[STA]['replay_counter'] == replay_counter):
-        Global_Handshakes[STA]['frame4'] = 1
-        Global_Handshakes[STA]['packets'].append (packet)
+    elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and Global_Handshakes[packet.addr3]['replay_counter'] == replay_counter):
+        Global_Handshakes[packet.addr3]['frame4'] = 1
+        Global_Handshakes[packet.addr3]['packets'].append (packet)
 
-    if (Global_Handshakes[STA]['frame2'] and Global_Handshakes[STA]['frame3'] and Global_Handshakes[STA]['frame4']):
+    if (Global_Handshakes[packet.addr3]['frame2'] and Global_Handshakes[packet.addr3]['frame3'] and Global_Handshakes[packet.addr3]['frame4']):
         folder_path = ("pcaps/")
         filename = (str(Global_Access_Points[packet.addr3].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
 
@@ -482,10 +471,9 @@ def handler_eap(packet):
              os.system("touch "+folder_path+filename)
              os.system("chmod 1777 "+folder_path+filename)
 
-        wrpcap (folder_path+filename, Global_Handshakes[STA]['packets'])
+        wrpcap (folder_path+filename, Global_Handshakes[packet.addr3]['packets'])
         Global_Recent_Key_Cap = (" - [Booped: " + str(packet.addr3).upper() + "]")
         Global_Handshake_Captures += 1
-        Global_Handshake_List.append(STA)
     return
 
 def handler_probereq(packet):
@@ -508,16 +496,16 @@ def handler_proberes(packet):
 
     Global_Access_Points[packet.addr3].update_ssid(packet.info)
     Global_Hidden_SSIDs.remove(packet.addr3)
-    Global_Handshakes[packet.addr3]['beacon'].append(packet)
+    Global_Handshakes[packet.addr3]['packets'].append(packet)
     return
 
 def get_rssi(decoded):
     rssi = -(256 - ord(decoded[-2:-1]))
 
     if int(rssi) not in xrange(-100, 0):
-        return(-(256 - ord(decoded[-4:-3])))
+        rssi = (-(256 - ord(decoded[-4:-3])))
 
-    if rssi < -100:
+    if int(rssi) < -100:
         return -1
     return rssi
 
