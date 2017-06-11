@@ -130,4 +130,5 @@ def install():
     print(bcolors.HEADER+"[+] Exiting with: "+str(WARNINGS)+" warnings and 0 Failures.")
 
 
-install()
+if __name__ == "__main__":
+    install()
