@@ -40,7 +40,7 @@ def Install_Packages(Package_Manager):
     Packages_To_Install = [
                             "libncap-dev", "iw", "tcpdump",
                             "graphviz", "python-gnuplot",
-                            "python-crypto", "tshark"
+                            "python-crypto"
                         ];
     Failed_Packages = [];
 
