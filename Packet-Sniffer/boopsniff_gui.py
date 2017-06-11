@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __year__    = [2016, 2017]
 __status__  = "Testing"
