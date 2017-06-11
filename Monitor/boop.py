@@ -11,6 +11,7 @@ import argparse
 from os import system, path, getuid, uname
 from sys import exit, stdout, exc_info
 
+
 class c:
     HEADER    = "\033[95m"
     OKBLUE    = "\033[94m"
@@ -21,6 +22,7 @@ class c:
     ENDC      = "\033[0m"
     BOLD      = "\033[1m"
     UNDERLINE = "\033[4m"
+
 
 class Configuration:
     def __init__(self):
@@ -272,6 +274,7 @@ class Configuration:
         print(c.OKGREEN+" [+] "+c.WHITE+"Card Set to Channel: "+c.HEADER+str(self.channel))
         return
 
+
 def display_art():
     print(c.OKBLUE+"""
  /$$$$$$$
@@ -289,6 +292,7 @@ def display_art():
     print(c.HEADER+"     Codename: Inland Taipan\r\n"+c.BOLD)
     return
 
+
 def main():
     stdout.write("\x1b[8;{rows};{cols}t".format(rows=35, cols=75))
     start = time.time()
@@ -300,5 +304,6 @@ def main():
 
     print(c.OKBLUE+" [+] "+c.WHITE+"Time: "+c.OKGREEN+str(round(time.time() - start, 5)))
     return (0)
+
 
 main()

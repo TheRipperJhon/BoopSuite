@@ -22,6 +22,7 @@ from tabulate import tabulate
 from threading import Thread
 from time import sleep, time
 
+
 conf.verb = 0
 
 Channel_Hopper_Flag = True
@@ -38,6 +39,7 @@ Access_Points = []
 Clients = []
 Deauth_Dict = {"Client":[], "APS": []}
 
+
 # CLASSES
 class bcolors:
     HEADER    = "\033[95m"
@@ -48,6 +50,7 @@ class bcolors:
     ENDC      = "\033[0m"
     BOLD      = "\033[1m"
     UNDERLINE = "\033[4m"
+
 
 class Configuration:
     def __init__(self):
@@ -189,6 +192,7 @@ class Configuration:
             exit()
         return
 
+
 def handler_beacon(packet):
     global Mac_Filter_Channel
     global Mac_Filter
@@ -216,6 +220,7 @@ def handler_beacon(packet):
 
     return
 
+
 def handler_data(packet):
     global Access_Points
     global Clients
@@ -242,6 +247,7 @@ def handler_data(packet):
                 Deauth_Dict["Client"].append( [address1, address2, configuration.channel ] )
 
     return
+
 
 def channel_hopper(configuration):
     global Channel_Hopper_Flag
@@ -289,6 +295,7 @@ def channel_hopper(configuration):
         sleep(3)
     return
 
+
 def sniff_packets(packet):
     global Mac_Filter
     global Ignore_Broadcast
@@ -305,6 +312,7 @@ def sniff_packets(packet):
 
     return
 
+
 def check_valid(mac):
     global Ignore_Broadcast
     global Ignore_Multicast
@@ -320,9 +328,11 @@ def check_valid(mac):
             return False
     return True
 
+
 def start_sniffer(configuration):
     sniff(iface=configuration.interface, prn=sniff_packets, store=0)
     return
+
 
 def printer(configuration):
     global Deauth_Dict
@@ -374,9 +384,11 @@ def printer(configuration):
         sleep(timeout)
     return
 
+
 def set_size(height, width):
     stdout.write("\x1b[8;{rows};{cols}t".format(rows=height, cols=width))
     return
+
 
 def int_main(configuration):
     global Channel_Hopper_Flag
@@ -415,6 +427,7 @@ def int_main(configuration):
     printer(configuration)
 
     return 0
+
 
 def display_art():
     print(bcolors.OKBLUE+"""

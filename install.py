@@ -7,7 +7,9 @@ import random
 import string
 import subprocess
 
+
 WARNINGS = 0;
+
 
 class bcolors:
     HEADER = '\033[95m'
@@ -19,11 +21,13 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 def Check_Root():
     if os.getuid() != 0:
         print(bcolors.FAIL+"[-] Must be run as root."+bcolors.ENDC)
         sys.exit(0);
     return 0;
+
 
 def Find_Package_Manager():
     Package_Managers = ["apt-get", "pacman", "yum"];
@@ -35,6 +39,7 @@ def Find_Package_Manager():
 
     print(bcolors.FAIL+"[-] No Default Package Manager Found"+bcolors.ENDC);
     sys.exit(0);
+
 
 def Install_Packages(Package_Manager):
     global WARNINGS
@@ -57,6 +62,7 @@ def Install_Packages(Package_Manager):
         for item in Failed_Packages:
             print(bcolors.WARNING+"[-] Failed to install Package: "+item+bcolors.ENDC);
     return;
+
 
 def Create_Custom_Command():
 
@@ -104,6 +110,7 @@ def Create_Custom_Command():
 
     return 0;
 
+
 def install():
     global WARNINGS
 
@@ -121,5 +128,6 @@ def install():
     Create_Custom_Command();
 
     print(bcolors.HEADER+"[+] Exiting with: "+str(WARNINGS)+" warnings and 0 Failures.")
+
 
 install();

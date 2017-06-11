@@ -25,6 +25,7 @@ from tabulate import tabulate
 from threading import Thread
 from time import sleep, time
 
+
 conf.verb = 0
 
 # GLOBALS
@@ -47,6 +48,7 @@ Global_Recent_Key_Cap = ""
 Global_Handshake_Captures = 0
 Global_Handshake_List = []
 
+
 # CLASSES
 class bcolors:
     HEADER    = "\033[95m"
@@ -57,6 +59,7 @@ class bcolors:
     ENDC      = "\033[0m"
     BOLD      = "\033[1m"
     UNDERLINE = "\033[4m"
+
 
 class Configuration:
     def __init__(self):
@@ -262,6 +265,7 @@ class Configuration:
         print(bcolors.OKGREEN+" [+] Hostname: " + str(uname()[1])+bcolors.ENDC+bcolors.BOLD)
         return
 
+
 class Access_Point:
     def __init__(self, ssid, enc, ch, mac, ven, sig):
         self.mssid = ssid
@@ -278,6 +282,7 @@ class Access_Point:
         self.mssid = ssid
         return
 
+
 class Client:
     def __init__(self, mac, bssid, rssi):
         self.mmac   = mac
@@ -285,6 +290,7 @@ class Client:
         self.msig   = rssi
         self.mnoise = 0
         return
+
 
 # HANDLER
 def handler_beacon(packet):
@@ -377,6 +383,7 @@ def handler_beacon(packet):
 
     return
 
+
 def handler_data(packet):
     global Global_Access_Points
     global Global_Clients
@@ -418,6 +425,7 @@ def handler_data(packet):
             Global_Clients[address1].mnoise += 1
 
     return
+
 
 def handler_eap(packet):
     global Global_Handshake_List
@@ -488,6 +496,7 @@ def handler_eap(packet):
         Global_Handshake_List.append(STA)
     return
 
+
 def handler_probereq(packet):
     global Global_Clients
 
@@ -501,6 +510,7 @@ def handler_probereq(packet):
 
     return
 
+
 def handler_proberes(packet):
     global Global_Access_Points
     global Global_Hidden_SSIDs
@@ -511,6 +521,7 @@ def handler_proberes(packet):
     Global_Handshakes[packet.addr3]['beacon'].append(packet)
     return
 
+
 def get_rssi(decoded):
     rssi = -(256 - ord(decoded[-2:-1]))
 
@@ -520,6 +531,7 @@ def get_rssi(decoded):
     if rssi < -100:
         return -1
     return rssi
+
 
 def channel_hopper(configuration):
     global Global_Channel_Hopper_Flag
@@ -568,6 +580,7 @@ def channel_hopper(configuration):
         sleep(3)
     return
 
+
 def get_access_points(AP):
     global Global_Access_Points
 
@@ -580,6 +593,7 @@ def get_access_points(AP):
         Global_Access_Points[AP].mbeacons,
         Global_Access_Points[AP].mssid[:15]
     ]
+
 
 def get_clients():
     global Global_Access_Points
@@ -598,6 +612,7 @@ def get_clients():
         except:
             pass
     return clients
+
 
 def get_un_clients():
     global Global_Access_Points
@@ -623,6 +638,7 @@ def get_un_clients():
                 ""
             ])
     return clients
+
 
 def printer_thread(configuration):
     global Global_Clients
@@ -669,6 +685,7 @@ def printer_thread(configuration):
         sleep(timeout)
     return
 
+
 def sniff_packets(packet):
     global Global_Mac_Filter
     global Global_Ignore_Broadcast
@@ -699,10 +716,12 @@ def sniff_packets(packet):
 
     return
 
+
 # MISC
 def set_size(height, width):
     stdout.write("\x1b[8;{rows};{cols}t".format(rows=height, cols=width))
     return
+
 
 def display_art():
     print(bcolors.OKBLUE+"""
@@ -716,6 +735,7 @@ def display_art():
     print(bcolors.HEADER+"     Codename: Inland Taipan\r\n"+bcolors.BOLD)
     return
 
+
 def check_valid(mac):
     global Global_Ignore_Broadcast
     global Global_Ignore_Multicast
@@ -728,15 +748,18 @@ def check_valid(mac):
             return False
     return True
 
+
 def create_pcap_filepath():
     if not os.path.isdir("pcaps"):
         os.system("mkdir pcaps")
         os.system("chmod 1777 pcaps/")
     return
 
+
 def start_sniffer(configuration):
     sniff(iface=configuration.interface, prn=sniff_packets, store=0)
     return
+
 
 # MAIN CONTROLLER
 def int_main(configuration):
@@ -789,6 +812,7 @@ def int_main(configuration):
         printer_thread(configuration)
 
     return 0
+
 
 if __name__ == "__main__":
     display_art()
