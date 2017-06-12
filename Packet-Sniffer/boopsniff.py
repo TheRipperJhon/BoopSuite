@@ -587,57 +587,56 @@ def sniff_packets(packet):
                     configuration.cls[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
                     configuration.cls[address1].mnoise += 1
 
-                if packet.haslayer(WPA_key):
-                    if not configuration.aps.has_key(packet.addr3):
-                        return
+            if packet.haslayer(WPA_key):
+                if not configuration.aps.has_key(packet.addr3):
+                    return
 
-                    if configuration.aps[packet.addr3][1]['found'] == True:
-                        return
+                if configuration.aps[packet.addr3][1]['found'] == True:
+                    return
 
-                    else:
+                else:
+                    layer = packet.getlayer(WPA_key)
 
-                        layer = packet.getlayer(WPA_key)
-
-                        if (packet.FCfield & 1):
+                    if (packet.FCfield & 1):
                             # From DS = 0, To DS = 1
-                            STA = packet.addr2
-                        elif (packet.FCfield & 2):
+                        STA = packet.addr2
+                    elif (packet.FCfield & 2):
                             # From DS = 1, To DS = 0
-                            STA = packet.addr1
-                        else:
-                            return
+                        STA = packet.addr1
+                    else:
+                        return
 
-                        key_info = layer.key_info
-                        wpa_key_length = layer.wpa_key_length
-                        replay_counter = layer.replay_counter
-                        WPA_KEY_INFO_INSTALL = 64
-                        WPA_KEY_INFO_ACK = 128
-                        WPA_KEY_INFO_MIC = 256
+                    key_info = layer.key_info
+                    wpa_key_length = layer.wpa_key_length
+                    replay_counter = layer.replay_counter
+                    WPA_KEY_INFO_INSTALL = 64
+                    WPA_KEY_INFO_ACK = 128
+                    WPA_KEY_INFO_MIC = 256
                         # check for frame 2
-                        if ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
-                            configuration.aps[packet.addr3][1]['frame2'] = 1
-                            configuration.aps[packet.addr3][1]['packets'].append (packet)
+                    if ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
+                        configuration.aps[packet.addr3][1]['frame2'] = 1
+                        configuration.aps[packet.addr3][1]['packets'].append (packet)
                         # check for frame 3
-                        elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
-                            configuration.aps[packet.addr3][1]['frame3'] = 1
-                            configuration.aps[packet.addr3][1]['replay_counter'] = replay_counter
-                            configuration.aps[packet.addr3][1]['packets'].append(packet)
+                    elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
+                        configuration.aps[packet.addr3][1]['frame3'] = 1
+                        configuration.aps[packet.addr3][1]['replay_counter'] = replay_counter
+                        configuration.aps[packet.addr3][1]['packets'].append(packet)
                         # check for frame 4
-                        elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and configuration.aps[packet.addr3][1]['replay_counter'] == replay_counter):
-                            configuration.aps[packet.addr3][1]['frame4'] = 1
-                            configuration.aps[packet.addr3][1]['packets'].append (packet)
+                    elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and configuration.aps[packet.addr3][1]['replay_counter'] == replay_counter):
+                        configuration.aps[packet.addr3][1]['frame4'] = 1
+                        configuration.aps[packet.addr3][1]['packets'].append (packet)
 
-                        if (configuration.aps[packet.addr3][1]['frame2'] and configuration.aps[packet.addr3][1]['frame3'] and configuration.aps[packet.addr3][1]['frame4']):
-                            folder_path = ("pcaps/")
-                            filename = (str(configuration.aps[packet.addr3][0].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
+                    if (configuration.aps[packet.addr3][1]['frame2'] and configuration.aps[packet.addr3][1]['frame3'] and configuration.aps[packet.addr3][1]['frame4']):
+                        folder_path = ("pcaps/")
+                        filename = (str(configuration.aps[packet.addr3][0].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
 
-                            if not os.path.isfile(folder_path+filename):
-                                 system("touch "+folder_path+filename)
-                                 system("chmod 1777 "+folder_path+filename)
+                        if not os.path.isfile(folder_path+filename):
+                             system("touch "+folder_path+filename)
+                             system("chmod 1777 "+folder_path+filename)
 
-                            wrpcap (folder_path+filename, configuration.aps[packet.addr3][1]['packets'])
-                            configuration.aps[packet.addr3][1]['found'] = True
-                            configuration.cap_message = (" - [Booped: %s%s%s]" % (c.F, packet.addr3, c.E))
+                        wrpcap (folder_path+filename, configuration.aps[packet.addr3][1]['packets'])
+                        configuration.aps[packet.addr3][1]['found'] = True
+                        configuration.cap_message = (" - [Booped: %s%s%s]" % (c.F, packet.addr3, c.E))
 
     return
 
@@ -728,6 +727,6 @@ if __name__ == "__main__":
     create_pcap_filepath()
     set_size(50, 83)
     display_art()
-    
+
     main()
     # 830: Goal 800
