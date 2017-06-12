@@ -1,4 +1,4 @@
 *.pyc
 *.pcap
 test.py
-Packet-Sniffer/pcaps/
+pcaps/

@@ -1,3 +1,10 @@
+Changelog: 0.16.3
+  Made the print tables by hand which reduced the buffer time by 50-66%
+  Eliminated most of the var type casts. - saving a lot of time.
+  Eliminated the need for tabulate in the sniffer script and will do the same for the deauth script. - 0.16.4
+  Updated images to reflect current development state.
+    - Waiting for more Feedback!
+
 Changelog: 0.16.2
   Removed all global variables save 1 in the sniffer
   Edited all the scripts to include some better exceptions and overall look and feel

@@ -4,9 +4,9 @@ BoopSuite
 # Synopsis:
 
 BoopSuite is an up and coming suite of wireless tools designed to be easy to use
-and powerful in scope, written in python. A handshake sniffer (CLI and GUI), a
-monitor mode enabling script and a deauth script are all parts of this suite
-with more to come.
+and powerful in scope, that support both the 2 and 5 GHz spectrums. Written
+purely in python. A handshake sniffer (CLI and GUI), a monitor mode enabling
+script and a deauth script are all parts of this suite with more to come.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
 
@@ -14,7 +14,7 @@ with more to come.
 
 ### BoopSniff vs. airodump-ng
 
-This project is easier to use, identifies clients more quickly than airodump-ng,
+The sniffer is easier to use, identifies clients more quickly than airodump-ng,
 and displays less useless information. Additionally I can take requests and build
 them out as I continue to develop this project.
 
@@ -25,7 +25,7 @@ putting cards into monitor mode. With as much usability as well.
 
 ### BoopStrike vs aireplay-ng or wifijammer.py from Dan McInerney
 
-While boopstrike cant fully compare to aireplay-ng due to the amount of options
+While boopstrike can't fully compare to aireplay-ng due to the amount of options
 present in it. BoopStrike can compare to Dan McInerney's wifijammer script as
 boopstrike accomplishes the same things, albeit with more grace. This script
 wont waste deauths on noiseless clients, but will surely jam those that are
@@ -40,11 +40,8 @@ is because you have the freedom to do so and I hope my project can aid everyone
 in their pentesting needs, and this project is going to continue to grow as I
 add new handlers for additional packet types.
 
-The project has a GUI.
-
-The project has a monitor mode enabling script.
-
-The project now has a deauthentication script!
+The project has a CLI and GUI handshake sniffer, a monitor mode enabling script,
+ and a deauthentication script!
 
 Changelog located in CHANGELOG file.
 
@@ -154,15 +151,19 @@ Note: Will do error checking if you specify a channel the card doesnt support an
 
 NOTE: boop will always switch the mode from managed to monitor and vice versa.
 
-I'm working on updating the GUI so it will be much cleaner and way better looking, stay tuned.
+I'm working on updating the GUI so it will be much cleaner and way better looking,
+stay tuned.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/GUI.png "BoopSuite")
 
 Note: all pcap files will be saved in the directory ~/pcaps
 
-Note: since I haven't quite figured out how to determine which eapol
-message is which about 5% of the pcap files will be invalid.
-stay patient, I will figure it out.
+# Computer Usage
+
+The sniffer which is the heaviest CPU part uses really low CPU and memory,
+memory which is going to shrink in upcoming versions.
+
+![This Used To Be An Image But Now It Is Not. :(](Images/Top.png "BoopSuite")
 
 #### More options are coming in the future.
 
