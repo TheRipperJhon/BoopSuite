@@ -48,7 +48,7 @@ Global_My_Gui = ""
 
 
 # CLASSES
-class Color:
+class c:
     HEADER           = '#%02x%02x%02x' % (30, 144, 255)
     BACKGROUND       = '#%02x%02x%02x' % (255, 255, 255)
     BUTTON_COLOR     = '#%02x%02x%02x' % (242, 163, 189)
@@ -140,7 +140,7 @@ class MainWindow:
         global configuration
         configuration = config
         self.master = master
-        master.configure(background=Color.BACKGROUND)
+        master.configure(background=c.BACKGROUND)
         master.geometry('%dx%d+%d+%d' % (500, 900, 100, 100))
         self.create_title_bar(master)
         self.create_menu(master)
@@ -150,15 +150,15 @@ class MainWindow:
         master.after(5000, self.update_canvases)
 
     def create_title_bar(self, master):
-        self.title_bar = Frame( master, bg=Color.TITLE_BACKGROUND, bd=2 )
+        self.title_bar = Frame( master, bg=c.TITLE_BACKGROUND, bd=2 )
 
-        self.title = Label( self.title_bar, text="BoopSniff", fg=Color.HEADER, bg=Color.TITLE_BACKGROUND, font="Helvetica 16 bold" )
+        self.title = Label( self.title_bar, text="BoopSniff", fg=c.HEADER, bg=c.TITLE_BACKGROUND, font="Helvetica 16 bold" )
 
         self.title_bar.bind("<ButtonPress-1>", self.StartMove)
         self.title_bar.bind("<ButtonRelease-1>", self.StopMove)
         self.title_bar.bind("<B1-Motion>", self.OnMotion)
 
-        self.close_button = Button(self.title_bar, bg=Color.BUTTON_COLOR, text='X', highlightthickness = 0, bd = 0, relief=FLAT, command=master.destroy)
+        self.close_button = Button(self.title_bar, bg=c.BUTTON_COLOR, text='X', highlightthickness = 0, bd = 0, relief=FLAT, command=master.destroy)
 
         self.title_bar.pack(fill=X, anchor="n")
         self.close_button.pack(side=RIGHT, padx=(0, 3))
@@ -201,22 +201,22 @@ class MainWindow:
             print("No Valid Monitor Interfaces.")
             sys.exit(0)
 
-        self.header_frame = Frame(master, height=50, bg=Color.BACKGROUND)
+        self.header_frame = Frame(master, height=50, bg=c.BACKGROUND)
         self.header_frame.pack(fill=X)
 
-        self.interface_label = Label(self.header_frame, text="Face: ", bg=Color.BACKGROUND, fg="black", font="14")
+        self.interface_label = Label(self.header_frame, text="Face: ", bg=c.BACKGROUND, fg="black", font="14")
         self.interface_label.pack(padx=(15,0), pady=(10,0), anchor=NW, side=LEFT)
 
         self.interface_options = apply(OptionMenu, (self.header_frame, self.INTERFACE) + tuple(self.inter_options))
         self.interface_options.pack(padx=(5, 0), pady=(7, 0), anchor=NW, side=LEFT)
 
-        self.frequency_label = Label(self.header_frame, text="Freq: ", bg=Color.BACKGROUND, fg="black", font="14")
+        self.frequency_label = Label(self.header_frame, text="Freq: ", bg=c.BACKGROUND, fg="black", font="14")
         self.frequency_label.pack(padx=(5,0), pady=(10,0), anchor=NW, side=LEFT)
 
         self.frequency_options = apply(OptionMenu, (self.header_frame, self.FREQUENCY) + tuple(self.freq_options))
         self.frequency_options.pack(padx=(5, 0), pady=(7, 0), anchor=NW, side=LEFT)
 
-        self.channel_label = Label(self.header_frame, text="Ch: ", bg=Color.BACKGROUND, fg="black", font="14")
+        self.channel_label = Label(self.header_frame, text="Ch: ", bg=c.BACKGROUND, fg="black", font="14")
         self.channel_label.pack(padx=(5,0), pady=(10,0), anchor=NW, side=LEFT)
 
         self.ch_options = apply(OptionMenu, (self.header_frame, self.CHANNEL) + tuple(self.channel_options))
@@ -231,16 +231,16 @@ class MainWindow:
         self.UNASSOCIATED = StringVar()
         self.Global_Mac_Filter = StringVar()
 
-        self.subhead_frame = Frame(master, height=8, bg=Color.BACKGROUND)
+        self.subhead_frame = Frame(master, height=8, bg=c.BACKGROUND)
         self.subhead_frame.pack(fill=X)
 
-        self.kill = Checkbutton(self.subhead_frame, text="Kill blocking tasks", fg="black", selectcolor=Color.BACKGROUND, activeforeground="black", activebackground=Color.BACKGROUND, variable=self.KILL, highlightthickness = 0, bd = 0, relief=FLAT, font="10", bg=Color.BACKGROUND)
+        self.kill = Checkbutton(self.subhead_frame, text="Kill blocking tasks", fg="black", selectcolor=c.BACKGROUND, activeforeground="black", activebackground=c.BACKGROUND, variable=self.KILL, highlightthickness = 0, bd = 0, relief=FLAT, font="10", bg=c.BACKGROUND)
         self.kill.pack(padx=(30, 0), pady=(10, 0), anchor=NW, side=LEFT)
 
-        self.subhead2_frame = Frame(master, height=8, bg=Color.BACKGROUND)
+        self.subhead2_frame = Frame(master, height=8, bg=c.BACKGROUND)
         self.subhead2_frame.pack(fill=X)
 
-        self.filter_label = Label(self.subhead2_frame, text="AP Filter: ", bg=Color.BACKGROUND, fg="black", font="14")
+        self.filter_label = Label(self.subhead2_frame, text="AP Filter: ", bg=c.BACKGROUND, fg="black", font="14")
         self.filter_label.pack(padx=(20, 0), pady=(5, 0), anchor=NW, side=LEFT)
 
         self.filter_entry = Entry(self.subhead2_frame, exportselection=0, state=DISABLED, takefocus=True, textvariable=self.Global_Mac_Filter)
@@ -250,18 +250,18 @@ class MainWindow:
         return
 
     def create_canvas(self, master):
-        self.frame=Frame(master, bg=Color.HEADER)
+        self.frame=Frame(master, bg=c.HEADER)
         self.frame.pack(pady=(10, 0))
 
-        self.wifi_title = Label(self.frame, fg="black", text="APS: ", bg=Color.HEADER)
+        self.wifi_title = Label(self.frame, fg="black", text="APS: ", bg=c.HEADER)
         self.wifi_title.pack(padx=5)
 
         self.wifi_vbar=Scrollbar(self.frame,orient=VERTICAL)
         self.wifi_vbar.pack(side=RIGHT,fill=Y, expand=True)
 
-        self.wifi_canvas=Canvas(self.frame,bg=Color.BACKGROUND,width=400,height=300, scrollregion=(0,0,0,400), yscrollcommand=self.wifi_vbar.set)
+        self.wifi_canvas=Canvas(self.frame,bg=c.BACKGROUND,width=400,height=300, scrollregion=(0,0,0,400), yscrollcommand=self.wifi_vbar.set)
 
-        self.wifi_inner_card = Frame(self.wifi_canvas, bg=Color.BACKGROUND)
+        self.wifi_inner_card = Frame(self.wifi_canvas, bg=c.BACKGROUND)
         self.wifi_inner_card.pack(fill="both", expand="true")
 
         self.wifi_vbar.config(command=self.wifi_canvas.yview)
@@ -274,18 +274,18 @@ class MainWindow:
 
         ##########################################################################
 
-        self.frame2=Frame(master, bg=Color.HEADER)
+        self.frame2=Frame(master, bg=c.HEADER)
         self.frame2.pack(pady=(10, 0))
 
-        self.client_title = Label(self.frame2, fg="black", text="Clients: ", bg=Color.HEADER)
+        self.client_title = Label(self.frame2, fg="black", text="Clients: ", bg=c.HEADER)
         self.client_title.pack(padx=5)
 
         self.client_vbar=Scrollbar(self.frame2,orient=VERTICAL)
         self.client_vbar.pack(side=RIGHT,fill=Y, expand=True)
 
-        self.client_canvas=Canvas(self.frame2,bg=Color.BACKGROUND,width=400,height=300, scrollregion=(0,0,0,400), yscrollcommand=self.client_vbar.set)
+        self.client_canvas=Canvas(self.frame2,bg=c.BACKGROUND,width=400,height=300, scrollregion=(0,0,0,400), yscrollcommand=self.client_vbar.set)
 
-        self.client_inner_card = Frame(self.client_canvas, bg=Color.BACKGROUND)
+        self.client_inner_card = Frame(self.client_canvas, bg=c.BACKGROUND)
         self.client_inner_card.pack(fill="both", expand="true")
 
         self.client_vbar.config(command=self.client_canvas.yview)

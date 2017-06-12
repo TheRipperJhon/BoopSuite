@@ -1,3 +1,14 @@
+Changelog: 0.16.2
+  Removed all global variables save 1 in the sniffer
+  Edited all the scripts to include some better exceptions and overall look and feel
+  Added color to the top bar of the Sniffer
+  Used a better console clearing command in the sniffer.
+  Added Tshark to the install.py requirements.
+  Added a packet command switch to the deauther so you can specify how many deauths to send.
+    - Allows for bursts of deauthentication.
+  Changed the < Unknown > vendor to < NA >
+  Fixed the WPA2:WPA issue that happened occasionally.
+
 Changelog: 0.16.1
   Figured out how to tell which order the handshake packets arrive in. AWESOME.
   Some generic fixes and optimizations w/ more to come.

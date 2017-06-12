@@ -76,13 +76,13 @@ class Configuration:
 
     def check_root(self):
         if getuid() != 0:
-            print(bcolors.FAIL+" [-] User is not Root.")
+            print(c.FAIL+" [-] User is not Root.")
             exit()
         return
 
     def check_op(self):
         if uname()[0].startswith("Linux") and not "Darwin" not in uname()[0]:
-            print(bcolors.FAIL+" [-] Wrong OS.")
+            print(c.FAIL+" [-] Wrong OS.")
             exit()
         return
 

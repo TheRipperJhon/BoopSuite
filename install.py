@@ -7,7 +7,6 @@ import random
 import string
 import subprocess
 
-
 WARNINGS = 0
 
 
@@ -44,10 +43,10 @@ def Find_Package_Manager():
 def Install_Packages(Package_Manager):
     global WARNINGS
     Packages_To_Install = [
-                            "libncap-dev", "iw", "tcpdump",
-                            "graphviz", "python-gnuplot",
-                            "python-crypto", "tshark"
-                        ]
+        "libncap-dev", "iw", "tcpdump",
+        "graphviz", "python-gnuplot",
+        "python-crypto", "tshark"
+        ]
     Failed_Packages = []
 
     for package in Packages_To_Install:
