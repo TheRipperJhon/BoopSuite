@@ -1,4 +1,3 @@
 pyric
 netaddr
 scapy
-tabulate

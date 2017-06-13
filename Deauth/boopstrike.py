@@ -18,7 +18,6 @@ from os import system, path, getuid, uname
 from random import choice
 from scapy.all import *
 from sys import exit, stdout, stderr
-from tabulate import tabulate
 from threading import Thread
 from time import sleep, time
 
