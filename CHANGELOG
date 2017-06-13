@@ -1,7 +1,16 @@
+Changelog: 0.16.4
+  Sped up the channel change process by .01 seconds per iteration.
+  Removed the --attack and -s switch from the sniffer script and will instead bolster the deauth script.
+  Added a printout at the bottom for refresh rate to determine how good a terminal handles python.
+  Removed Splash print in sniffer - Didn't feel like the user needed reminding what tool they were using.
+  Removed the -u switch from the deauth script. Not sure why it was ever there...
+  Removed the need for the tabulate library entirely.
+  Will be fixing the deauth printing in a future update.
+
 Changelog: 0.16.3
   Made the print tables by hand which reduced the buffer time by 50-66%
   Eliminated most of the var type casts. - saving a lot of time.
-  Eliminated the need for tabulate in the sniffer script and will do the same for the deauth script. - 0.16.4
+  Eliminated the need for tabulate in the sniffer script and will do the same for the deauth script. - 0.16.5
   Updated images to reflect current development state.
     - Waiting for more Feedback!
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# TODO: Use pyric to change channel. reduces channel change time by 50 - 70%
-
 __year__    = [2016, 2017]
 __status__  = "Stable"
 __contact__ = "jacobsin1996@gmail.com"
@@ -45,6 +43,7 @@ class Configuration:
 
         self.aps = {}
         self.cls = {}
+        self.un_cls = {}
 
         self.hidden = []
 
@@ -143,14 +142,6 @@ class Configuration:
         self.mac_filter = mac_filter
         return
 
-    def parse_attack(self, attack):
-        self.attack = attack
-        return
-
-    def parse_skip(self, skip):
-        self.skip = skip
-        return
-
     def parse_args(self):
         parser = argparse.ArgumentParser()
 
@@ -216,21 +207,6 @@ class Configuration:
             dest="access_mac",
             help="Command for a specific mac addr.")
 
-        parser.add_argument(
-            "--attack",
-            action="store_true",
-            default=False,
-            dest="attack",
-            help="Launch Deauth attack while sniffing.")
-
-        parser.add_argument(
-            "-s",
-            "--skip",
-            action="store",
-            default=None,
-            dest="skip",
-            help="Mac to not deauth (Usually your own...)")
-
         results = parser.parse_args()
 
         self.parse_interface(results.interface)
@@ -240,8 +216,6 @@ class Configuration:
         self.parse_kill(results.kill)
         self.parse_unassociated(results.unassociated)
         self.parse_mac_filter(results.access_mac)
-        self.parse_attack(results.attack)
-        self.parse_skip(results.skip)
 
         self.user_force_variables_static()
         return
@@ -254,7 +228,7 @@ class Configuration:
         return
 
     def check_op(self):
-        if uname()[0].startswith("Linux") and not "Darwin" not in uname()[0]:
+        if uname()[0].startswith("Linux") and not "Darwin" not in uname():
             print(c.F+" [-] Wrong OS.")
             exit()
 
@@ -262,7 +236,7 @@ class Configuration:
 
 
 class Access_Point:
-    def __init__(self, ssid, enc, ch, mac, ven, sig):
+    def __init__(self, ssid, enc, ch, mac, ven, sig, packet):
         self.mssid = ssid
         self.menc = enc
         self.mch = ch
@@ -270,19 +244,23 @@ class Access_Point:
         self.mven = ven[:8]
         self.msig = sig
         self.mbeacons = 1
-        return
 
-    def update_ssid(self, ssid):
-        self.mssid = ssid
+        self.frame2 = None,
+        self.frame3 = None,
+        self.frame4 = None,
+        self.replay_counter = None,
+        self.packets = [packet],
+        self.found   = False
         return
 
 
 class Client:
-    def __init__(self, mac, bssid, rssi):
+    def __init__(self, mac, bssid, rssi, essid):
         self.mmac   = mac
         self.mbssid = bssid
         self.msig   = rssi
-        self.mnoise = 0
+        self.mnoise = 1
+        self.essid  = essid
         return
 
 
@@ -298,111 +276,92 @@ def get_rssi(decoded):
     return rssi
 
 
-def channel_hopper(configuration):
-    interface = configuration.interface
+def channel_hopper():
+    interface = pyw.getcard(configuration.interface)
     frequency = configuration.frequency
 
     if frequency == 2:
-        __FREQS__ = {
-            "2.412": 1, "2.417": 2, "2.422": 3,
-            "2.427": 4, "2.432": 5, "2.437": 6,
-            "2.442": 7, "2.447": 8, "2.452": 9,
-            "2.457": 10, "2.462": 11
-            }
+        __FREQS__ = [
+            1, 2, 3,
+            4, 5, 6,
+            7, 8, 9,
+            10, 11
+            ]
 
     elif frequency == 5:
-        __FREQS__ = {
-            "5.180": 36, "5.200": 40, "5.220": 44,
-            "5.240": 48, "5.260": 52, "5.280": 56,
-            "5.300": 60, "5.320": 64, "5.500": 100,
-            "5.520": 104, "5.540": 108, "5.560": 112,
-            "5.580": 116, "5.660": 132, "5.680": 136,
-            "5.700": 140, "5.745": 149, "5.765": 153,
-            "5.785": 157, "5.805": 161, "5.825": 165
-        }
+        __FREQS__ = [
+            36, 40, 44,
+            48, 52, 56,
+            60, 64, 100,
+            104, 108, 112,
+            116, 132, 136,
+            140, 149, 153,
+            157, 161, 165
+        ]
 
     while configuration.channel_flag == True:
-        if configuration.mac_filter_channel != "":
-            channel = __FREQS__.keys()[__FREQS__.values().index(configuration.mac_filter_channel)]
-            system("sudo iwconfig "+interface+" freq "+channel+"G")
+        start = time()
+        if not configuration.mac_filter_channel:
+            channel = choice(__FREQS__)
+            pyw.chset(interface, channel, None)
+            configuration.channel = channel
+        else:
+            channel = configuration.mac_filter_channel
+            pyw.chset(interface, channel, None)
             configuration.channel = configuration.mac_filter_channel
             break
 
-        channel = str(choice(__FREQS__.keys()))
-        system("sudo iwconfig "+interface+" freq "+channel+"G")
-
-        configuration.channel = __FREQS__[channel]
-        sleep(2.5)
+        # print( ("\r\n {0}[Channel: {1}{2}{3}]").format(c.F, c.E, time()-start, c.F))
+        sleep(2.75)
     return
 
 
 def get_access_points(AP):
     return [
-        configuration.aps[AP][0].mmac,
-        configuration.aps[AP][0].menc,
-        configuration.aps[AP][0].mch,
-        configuration.aps[AP][0].mven,
-        configuration.aps[AP][0].msig,
-        configuration.aps[AP][0].mbeacons,
-        configuration.aps[AP][0].mssid[:15]
+        configuration.aps[AP].mmac,
+        configuration.aps[AP].menc,
+        configuration.aps[AP].mch,
+        configuration.aps[AP].mven,
+        configuration.aps[AP].msig,
+        configuration.aps[AP].mbeacons,
+        configuration.aps[AP].mssid[:22]
     ]
 
 
-def get_clients():
-    clients = []
-    for cl in configuration.cls:
-        try:
-            if len(configuration.aps[configuration.cls[cl].mbssid][0].mssid) > 0:
-                clients.append([
-                    configuration.cls[cl].mmac,
-                    configuration.aps[configuration.cls[cl].mbssid][0].mmac,
-                    configuration.cls[cl].mnoise,
-                    configuration.cls[cl].msig,
-                    configuration.aps[configuration.cls[cl].mbssid][0].mssid
-                ])
-        except:
-            pass
-    return clients
+def get_clients(cl):
+    return [
+        configuration.cls[cl].mmac,
+        configuration.cls[cl].mbssid,
+        configuration.cls[cl].mnoise,
+        configuration.cls[cl].msig,
+        configuration.cls[cl].essid
+        ]
 
 
-def get_un_clients():
-    clients = []
-    for cl in configuration.cls:
-        try:
-            clients.append([
-                configuration.cls[cl].mmac,
-                configuration.aps[configuration.cls[cl].mbssid][0].mmac,
-                configuration.cls[cl].mnoise,
-                configuration.cls[cl].msig,
-                configuration.aps[configuration.cls[cl].mbssid][0].mssid
-            ])
-
-        except:
-            clients.append([
-                configuration.cls[cl].mmac,
-                "",
-                configuration.cls[cl].mnoise,
-                configuration.cls[cl].msig,
-                ""
-            ])
-    return clients
+def get_un_clients(cl):
+    return [
+        configuration.un_cls[cl].mmac,
+        "",
+        configuration.un_cls[cl].mnoise,
+        configuration.un_cls[cl].msig,
+        ""
+        ]
 
 
 def printer_thread():
     typetable = "simple"
-    timeout = 2.1
-
-    sleep(timeout)
+    timeout = 1.1
+    buffer_message = ""
 
     while configuration.print_flag == True:
         start = time()
         wifis = list(map(get_access_points, configuration.aps))
         wifis.sort(key=lambda x: (x[6]))
 
+        clients = list(map(get_clients, configuration.cls))
+
         if configuration.unassociated == True:		# print all clients no matter what
-            clients = get_un_clients()
-        else:
-            clients = get_clients()	     		    # only print associated clients
+            clients += list(map(get_un_clients, configuration.un_cls))
 
         clients.sort(key=lambda x: (x[4]))
 
@@ -411,6 +370,7 @@ def printer_thread():
         hours = time_elapsed / 3600
         mins = (time_elapsed % 3600) / 60
         secs = time_elapsed % 60
+
         if hours > 0:
             printable_time = "%d h %d m %d s" % (hours, mins, secs)
 
@@ -422,7 +382,7 @@ def printer_thread():
 
         stderr.write("\x1b[2J\x1b[H")
 
-        print("%s[+] %sTime: %s[%s%s%s] %sSlithering: %s[%s%s%s] %s%s" % (c.G, c.E, c.B, c.W, printable_time, c.B, c.E, c.B, c.W, configuration.channel, c.B, c.E, configuration.cap_message))
+        print("{0}[+] {1}Time: {2}[{3}{4}{5}] {6}Slithering: {7}[{8}{9}{10}] {11}{12} {13}".format(c.G, c.E, c.B, c.W, printable_time, c.B, c.E, c.B, c.W, configuration.channel, c.B, c.E, configuration.cap_message, buffer_message))
 
         print( "\r\n{0}{1}{2}{3}{4}{5}{6}".format(c.F+"Mac Addr".ljust(19, " "), "Enc".ljust(10, " "), "Ch".ljust(4, " "), "Vendor".ljust(9, " "), "Sig".ljust(5, " "), "Beacons".ljust(8, " "), "SSID"+c.E) )
         for item in wifis:
@@ -434,8 +394,9 @@ def printer_thread():
             print( " {0}{1}{2:<7}{3:<5}{4}".format(item[0].ljust(19, " "), item[1].ljust(19, " "), item[2], item[3], item[4]) )
 
         if timeout < 4.5:
-            timeout += .035
-        print("\r\n"+c.F+"[Buffer time: "+c.E+str(time()-start)+c.F+"]")
+            timeout += .05
+
+        # buffer_message = (" {0}[Buffer Time: {1}{2}{3}]").format(c.F, c.E, time()-start, c.F)
 
         sleep(timeout)
     return
@@ -447,32 +408,28 @@ def sniff_packets(packet):
         if packet.type == 0:
             if packet.subtype == 4 and configuration.unassociated:
 
-                if configuration.cls.has_key(packet.addr2):
-                    configuration.cls[packet.addr2].msig = (get_rssi(packet.notdecoded))
-                elif check_valid(packet.addr2):
-                    configuration.cls[packet.addr2] = Client(packet.addr2, "", get_rssi(packet.notdecoded))
-                configuration.cls[packet.addr2].mnoise += 1
+                if configuration.un_cls.has_key(packet.addr2):
+                    configuration.un_cls[packet.addr2].msig = (get_rssi(packet.notdecoded))
+                    configuration.un_cls[packet.addr2].mnoise += 1
+
+                elif check_valid(packet.addr2) and not configuration.cls.has_key(packet.addr2):
+                    configuration.un_cls[packet.addr2] = Client(packet.addr2, "", get_rssi(packet.notdecoded), "")
 
 
             elif packet.subtype == 5 and packet.addr3 in configuration.hidden:
-                configuration.aps[packet.addr3][0].update_ssid(packet.info)
+
+                configuration.aps[packet.addr3].mssid = packet.info
                 configuration.hidden.remove(packet.addr3)
-                configuration.aps[packet.addr3][1]['packets'].append(packet)
+                configuration.aps[packet.addr3].packets.append(packet)
 
 
-            elif packet.subtype == 8:
+            elif packet.subtype == 8 and check_valid(packet.addr3):
+                # start = time()
                 source = packet.addr2
                 mac = packet.addr3
 
-                if not check_valid(mac):
-                    return
-
                 if configuration.aps.has_key(source):
-                    configuration.aps[source][0].msig = (get_rssi(packet.notdecoded))
-                    configuration.aps[source][0].mbeacons += 1
-
-                    if configuration.attack and configuration.aps[source][0].mbeacons % 50 == 0:
-                        send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(1))
+                    configuration.aps[source].msig = (get_rssi(packet.notdecoded))
 
                 else:
                     destination = packet.addr1
@@ -481,7 +438,7 @@ def sniff_packets(packet):
                         name = packet.info.decode("utf-8")
                     else:
                         configuration.hidden.append(mac)
-                        name = "< len: "+str(len(packet.info))+" >"
+                        name = (("< len: {0} >").format(len(packet.info)))
 
                     p = packet[Dot11Elt]
                     cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
@@ -526,29 +483,19 @@ def sniff_packets(packet):
                     except:
                         oui = "< NA >"
 
-                    configuration.aps[source] = [Access_Point(
+                    configuration.aps[source] = Access_Point(
                         name,
                         ":".join(sec),
                         channel,
                         mac,
                         unicode(oui),
-                        get_rssi(packet[0].notdecoded)
-                        ),
-                            {
-                                'frame2': None,
-                                'frame3': None,
-                                'frame4': None,
-                                'replay_counter': None,
-                                'packets': [packet],
-                                'found': False
-                            }
-                        ]
+                        get_rssi(packet.notdecoded),
+                        packet
+                        )
 
                     if mac == configuration.mac_filter:
                         configuration.mac_filter_channel = channel
-
-                    if configuration.attack and configuration.aps[mac][0].mbeacons % 100 == 0 and mac != configuration.skip:
-                        send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(1))
+                configuration.aps[source].mbeacons += 1
 
         elif packet.type in [1, 2]:
             address1 = packet.addr1
@@ -564,11 +511,12 @@ def sniff_packets(packet):
                     configuration.cls[address2].mnoise += 1
                     configuration.cls[address2].msig = (get_rssi(packet.notdecoded))
 
-                    if configuration.attack and configuration.cls[address2].mnoise % 25 == 0 and address2 != configuration.skip and address1 != configuration.skip:
-                        send(Dot11(addr1=address2, addr2=address1, addr3=address1)/Dot11Deauth(), inter=(0.0), count=(1))
+                elif configuration.un_cls.has_key(address2):
+                    configuration.cls[address2] = Client(address2, address1, get_rssi(packet.notdecoded), configuration.aps[address1].mssid)
+                    del configuration.un_cls[address2]
 
                 elif check_valid(address2):
-                    configuration.cls[address2] = Client(address2, address1, get_rssi(packet.notdecoded))
+                    configuration.cls[address2] = Client(address2, address1, get_rssi(packet.notdecoded), configuration.aps[address1].mssid)
                     configuration.cls[address2].mnoise += 1
 
             elif configuration.aps.has_key(address2):
@@ -580,18 +528,19 @@ def sniff_packets(packet):
                     configuration.cls[address1].mnoise += 1
                     configuration.cls[address1].msig = (get_rssi(packet.notdecoded))
 
-                    if configuration.attack and configuration.cls[address1].mnoise % 25 == 0 and address1 != configuration.skip and address2 != configuration.skip:
-                        send(Dot11(addr1=address1, addr2=address2, addr3=address2)/Dot11Deauth(), inter=(0.0), count=(1))
+                elif configuration.un_cls.has_key(address1):
+                    configuration.cls[address1] = Client(address1, address2, get_rssi(packet.notdecoded), configuration.aps[address2].mssid)
+                    del configuration.un_cls[address1]
 
                 elif check_valid(address1):
-                    configuration.cls[address1] = Client(address1, address2, get_rssi(packet.notdecoded))
+                    configuration.cls[address1] = Client(address1, address2, get_rssi(packet.notdecoded), configuration.aps[address2].mssid)
                     configuration.cls[address1].mnoise += 1
 
             if packet.haslayer(WPA_key):
                 if not configuration.aps.has_key(packet.addr3):
                     return
 
-                if configuration.aps[packet.addr3][1]['found'] == True:
+                if configuration.aps[packet.addr3].found == True:
                     return
 
                 else:
@@ -614,28 +563,26 @@ def sniff_packets(packet):
                     WPA_KEY_INFO_MIC = 256
                         # check for frame 2
                     if ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
-                        configuration.aps[packet.addr3][1]['frame2'] = 1
-                        configuration.aps[packet.addr3][1]['packets'].append (packet)
+                        configuration.aps[packet.addr3].frame2 = 1
+                        configuration.aps[packet.addr3].packets.append(packet[0])
                         # check for frame 3
                     elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
-                        configuration.aps[packet.addr3][1]['frame3'] = 1
-                        configuration.aps[packet.addr3][1]['replay_counter'] = replay_counter
-                        configuration.aps[packet.addr3][1]['packets'].append(packet)
+                        configuration.aps[packet.addr3].frame3 = 1
+                        configuration.aps[packet.addr3].replay_counter = replay_counter
+                        configuration.aps[packet.addr3].packets.append(packet[0])
                         # check for frame 4
-                    elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and configuration.aps[packet.addr3][1]['replay_counter'] == replay_counter):
-                        configuration.aps[packet.addr3][1]['frame4'] = 1
-                        configuration.aps[packet.addr3][1]['packets'].append (packet)
+                    elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and configuration.aps[packet.addr3].replay_counter == replay_counter):
+                        configuration.aps[packet.addr3].frame4 = 1
+                        configuration.aps[packet.addr3].packets.append(packet[0])
 
-                    if (configuration.aps[packet.addr3][1]['frame2'] and configuration.aps[packet.addr3][1]['frame3'] and configuration.aps[packet.addr3][1]['frame4']):
+                    if (configuration.aps[packet.addr3].frame2 and configuration.aps[packet.addr3].frame3 and configuration.aps[packet.addr3].frame4):
                         folder_path = ("pcaps/")
-                        filename = (str(configuration.aps[packet.addr3][0].mssid)+"_"+str(packet.addr3)[-5:].replace(":", "")+".pcap")
+                        filename = ("{0}_{1}.pcap").format(configuration.aps[packet.addr3].mssid, packet.addr3[-5:].replace(":", ""))
 
-                        if not os.path.isfile(folder_path+filename):
-                             system("touch "+folder_path+filename)
-                             system("chmod 1777 "+folder_path+filename)
+                        writer=PcapWriter(filename, configuration.aps[packet.addr3].packets)
+                        writer.flush()
 
-                        wrpcap (folder_path+filename, configuration.aps[packet.addr3][1]['packets'])
-                        configuration.aps[packet.addr3][1]['found'] = True
+                        configuration.aps[packet.addr3].found = True
                         configuration.cap_message = (" - [Booped: %s%s%s]" % (c.F, packet.addr3, c.E))
 
     return
@@ -643,19 +590,6 @@ def sniff_packets(packet):
 
 def set_size(height, width):
     stdout.write("\x1b[8;{rows};{cols}t".format(rows=height, cols=width))
-    return
-
-
-def display_art():
-    print(c.B+"""
-    ____                   _____       _ ________
-   / __ )____  ____  ____ / ___/____  (_) __/ __/
-  / __  / __ \/ __ \/ __ \\\__ \/ __ \/ / /_/ /_
- / /_/ / /_/ / /_/ / /_/ /__/ / / / / / __/ __/
-/_____/\____/\____/ .___/____/_/ /_/_/_/ /_/
-                 /_/
-    """)
-    print(c.H+"     Codename: Inland Taipan\r\n"+c.Bo)
     return
 
 
@@ -677,7 +611,7 @@ def create_pcap_filepath():
     return
 
 
-def start_sniffer(configuration):
+def start_sniffer():
     sniff(iface=configuration.interface, prn=sniff_packets, store=0)
     return
 
@@ -704,17 +638,18 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     if configuration.hop == True:
-        Hopper_Thread = Thread(target=channel_hopper, args=[configuration])
+        Hopper_Thread = Thread(target=channel_hopper)
         Hopper_Thread.daemon = True
         Hopper_Thread.start()
     else:
         system("iwconfig " + configuration.interface + " channel " + str(configuration.channel))
 
-    Sniffer_Thread = Thread(target=start_sniffer, args=[configuration])
-    Sniffer_Thread.daemon = True
-    Sniffer_Thread.start()
+    if configuration.print_flag == True:
+        Printer_Thread = Thread(target=printer_thread)
+        Printer_Thread.daemon = True
+        Printer_Thread.start()
 
-    printer_thread()
+    Sniffer_Thread = start_sniffer()
 
     return 0
 
@@ -726,7 +661,6 @@ if __name__ == "__main__":
 
     create_pcap_filepath()
     set_size(50, 83)
-    display_art()
 
     main()
     # 830: Goal 800

