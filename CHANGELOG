@@ -1,3 +1,11 @@
+Changelog: 1.0.0
+    Removed almost all globals
+    Made the sniffer a class to better handle system calls.
+    Profiled alot of code and optimized several pieces.
+    Removed reporting - will readd in a later Update
+    Began work on an updater script.
+    Readded semicolons because it is my project and I prefer them. 
+
 Changelog: 0.16.4
   Sped up the channel change process by .01 seconds per iteration.
   Removed the --attack and -s switch from the sniffer script and will instead bolster the deauth script.
