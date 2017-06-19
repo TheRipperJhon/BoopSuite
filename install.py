@@ -43,9 +43,8 @@ def Find_Package_Manager():
 def Install_Packages(Package_Manager):
     global WARNINGS
     Packages_To_Install = [
-        "libncap-dev", "iw", "tcpdump",
-        "graphviz", "python-gnuplot",
-        "python-crypto", "tshark"
+        "libncap-dev", "tcpdump",
+        "python-gnuplot", "python-crypto"
         ]
     Failed_Packages = []
 
