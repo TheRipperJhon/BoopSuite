@@ -78,7 +78,6 @@ class Sniffer_Configuration:
         self.unassociated = unassociated;
         self.cap_message  = "";
 
-
         self.ignore = [
             "ff:ff:ff:ff:ff:ff", "00:00:00:00:00:00",
             "01:80:c2:00:00:00", "01:00:5e", "01:80:c2",
@@ -566,8 +565,9 @@ def parse_args():
 
 
 def main():
-    os.system("mkdir pcaps/")
-    os.system("chmod 1777 pcaps/")
+    os.system("mkdir pcaps/");
+    os.system("chmod 1777 pcaps/");
+
     def signal_handler(*args):
         print(c.G+"\r [+] "+c.E+"Commit to Exit.");
         exit(0);

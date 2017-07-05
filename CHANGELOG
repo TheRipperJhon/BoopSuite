@@ -1,10 +1,17 @@
+Changelog: 1.0.1
+    Sniffer has a new gui that looks alot better
+    Images for gui have been updated.
+    Lots of little nit picky code fixes.
+
+    Added boopdate but it is empty, dont worry about it for now.
+
 Changelog: 1.0.0
     Removed almost all globals
     Made the sniffer a class to better handle system calls.
     Profiled alot of code and optimized several pieces.
     Removed reporting - will readd in a later Update
     Began work on an updater script.
-    Readded semicolons because it is my project and I prefer them. 
+    Readded semicolons because it is my project and I prefer them.
 
 Changelog: 0.16.4
   Sped up the channel change process by .01 seconds per iteration.

@@ -10,37 +10,17 @@ script and a deauth script are all parts of this suite with more to come.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
 
-## Why use this over aircrack-ng?
+## Another Wireless pentesting suite.
 
-### BoopSniff vs. airodump-ng
-
-The sniffer is easier to use, and has a more targeted approach. Capture
-Handshakes, no frills.
-
-### Boop vs. airmon-ng
-
-The script is just as easy to use and quite a bit faster in its method of
-putting cards into monitor mode. With as much usability as well.
-
-### BoopStrike vs aireplay-ng or wifijammer.py from Dan McInerney
-
-While boopstrike can't compare to aireplay-ng due to the amount of options
-present in it. BoopStrike can compare to Dan McInerney's wifijammer script as
-boopstrike accomplishes the same things, albeit with more grace. This script
-wont waste deauths on noiseless clients, but will surely jam those that are
-using their respective wifi's, also my tool supports the 5ghz frequency if you
-have a card that can do so.
++ A wireless sniffer
++ Two gui's for the wireless sniffer (old/new)
++ A wireless deauther
++ A monitor mode enabler and disabler
 
 ### Note:
 
-Don't mistake me, aircrack is an amazing suite of tools and I understand the thought of
-\"why use a different tool when you know airodump\", and the answer
-is because you have the freedom to do so and I hope my project can aid everyone
-in their pentesting needs, and this project is going to continue to grow as I
-add new handlers for additional packet types.
-
-The project has a CLI and GUI handshake sniffer, a monitor mode enabling script,
- and a deauthentication script!
+I hope my project can aid everyone in their pentesting needs, and this project
+is going to continue to grow as I add new handlers for additional packet types.
 
 Changelog located in CHANGELOG file.
 
@@ -219,3 +199,4 @@ to myself that I can do things that were previously impossible to me.
 # License:
 
 MIT License
+(c) Jarad Dingman, 2017
