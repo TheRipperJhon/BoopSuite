@@ -299,7 +299,7 @@ def main():
     display_art()
     try:
         configuration = Configuration()
-    except Exception,e:
+    except Exception as e:
         print(" [-]An error occured: "+str(e))
 
     print(c.OKBLUE+" [+] "+c.WHITE+"Time: "+c.OKGREEN+str(round(time.time() - start, 5)))
