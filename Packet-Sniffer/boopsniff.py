@@ -2,26 +2,26 @@
 # -*- coding: utf-8 -*-
 
 __year__    = [2016, 2017];
-__status__  = "Stable";
+__status__  = "Development";
 __contact__ = "jacobsin1996@gmail.com";
 
 # Imports
-import argparse
-import logging
-import signal
+from signal import signal, SIGINT;
+from argparse import ArgumentParser;
+from logging import getLogger, ERROR;
 
-import pyric.pyw as pyw
+import pyric.pyw as pyw;
 
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR);
+getLogger("scapy.runtime").setLevel(ERROR);
 
 from netaddr import *
-from os import system, path, getuid, uname
-from random import choice
-from scapy.contrib.wpa_eapol import WPA_key
 from scapy.all import *
-from sys import exit, stdout, stderr, setcheckinterval
+from random import choice
 from threading import Thread
 from time import sleep, time
+from scapy.contrib.wpa_eapol import WPA_key
+from os import system, path, getuid, uname, makedirs
+from sys import exit, stdout, stderr, setcheckinterval
 
 conf.verb = 0;
 setcheckinterval = 1000;
@@ -37,6 +37,7 @@ class c:
 
 
 class Access_Point:
+
     def __init__(self, ssid, enc, ch, mac, ven, sig, packet):
         self.mssid = ssid;
         self.menc  = enc;
@@ -55,8 +56,13 @@ class Access_Point:
         self.found   = False;
         return;
 
+    def add_noise(self):
+        self.mbeacons += 1;
+        return;
+
 
 class Client:
+
     def __init__(self, mac, bssid, rssi, essid):
         self.mmac   = mac;
         self.mbssid = bssid;
@@ -65,17 +71,21 @@ class Client:
         self.essid  = essid;
         return;
 
+    def add_noise(self):
+        self.mnoise += 1;
+        return;
+
 
 class Sniffer_Configuration:
-    def __init__(self, interface, channel, hop, freq, kill, mfilter, unassociated):
-        self.mface    = interface;
-        self.mchannel = channel;
-        self.mfreq    = freq;
-        self.mkill    = kill;
-        self.mfilter  = mfilter;
-        self.hop      = hop;
+
+    def __init__(self, args):
+        self.mface    = args[0];
+        self.mchannel = args[1];
+        self.hop      = args[2];
+        self.mfreq    = args[3];
+        self.mfilter  = args[4];
+        self.unassociated = args[5];
         self.mfilter_channel = None;
-        self.unassociated = unassociated;
         self.cap_message  = "";
 
         self.ignore = [
@@ -84,7 +94,6 @@ class Sniffer_Configuration:
             "33:33"];
 
         self.hidden = [];
-        self.valid_channels = [];
 
         self.aps = {};
         self.cls = {};
@@ -94,7 +103,20 @@ class Sniffer_Configuration:
 
 
     def run(self):
-        sniff(iface=self.mface, prn=self.sniff_packets, store=0);
+        if self.mfilter != None:
+            sniff(
+                iface=self.mface,
+                filter="ether host "+self.mfilter.lower(),
+                prn=self.sniff_packets,
+                store=0
+            );
+
+        else:
+            sniff(
+                iface=self.mface,
+                prn=self.sniff_packets,
+                store=0
+            );
         return;
 
 
@@ -106,6 +128,7 @@ class Sniffer_Configuration:
             for item in self.ignore:
                 if mac.startswith(item):
                     return False;
+
         return True;
 
 
@@ -117,7 +140,7 @@ class Sniffer_Configuration:
             __FREQS__ = [
                 1, 2, 3, 4, 5, 6,
                 7, 8, 9, 10, 11
-                ];
+            ];
 
         elif self.mfreq == 5:
             __FREQS__ = [
@@ -140,7 +163,7 @@ class Sniffer_Configuration:
                 self.mchannel = self.mfilter_channel;
                 break;
 
-            while timeout < 3:
+            if timeout < 3:
                 timeout += .05;
             sleep(timeout);
         return;
@@ -189,7 +212,7 @@ class Sniffer_Configuration:
 
             clients = list(map(self.get_clients, self.cls));
 
-            if self.unassociated == True:		# print all clients no matter what
+            if self.unassociated:
                 clients += list(map(self.get_un_clients, self.un_cls));
 
             clients.sort(key=lambda x: (x[4]));
@@ -209,18 +232,18 @@ class Sniffer_Configuration:
             else:
                 printable_time = "%d s" % secs;
 
-            stderr.write("\x1b[2J\x1b[H");
+            err("\x1b[2J\x1b[H");
 
-            sys.stdout.write("{0}[+] {1}Time: {2}[{3}{4}{5}] {6}Slithering: {7}[{8}{9}{10}] {11}{12} {13}\n".format(c.G, c.E, c.B, c.W, printable_time, c.B, c.E, c.B, c.W, self.mchannel, c.B, c.E, self.cap_message, buffer_message));
+            stdout.write("{0}[+] {1}Time: {2}[{3}{4}{5}] {6}Slithering: {7}[{8}{9}{10}] {11}{12} {13}\n".format(c.G, c.E, c.B, c.W, printable_time, c.B, c.E, c.B, c.W, self.mchannel, c.B, c.E, self.cap_message, buffer_message));
 
-            sys.stdout.write( "\r\n{0}{1}{2}{3}{4}{5}{6}\n".format(c.F+"Mac Addr".ljust(19, " "), "Enc".ljust(10, " "), "Ch".ljust(4, " "), "Vendor".ljust(9, " "), "Sig".ljust(5, " "), "Beacons".ljust(8, " "), "SSID"+c.E) );
+            stdout.write( "\r\n{0}{1}{2}{3}{4}{5}{6}\n".format(c.F+"Mac Addr".ljust(19, " "), "Enc".ljust(10, " "), "Ch".ljust(4, " "), "Vendor".ljust(9, " "), "Sig".ljust(5, " "), "Beacons".ljust(8, " "), "SSID"+c.E) );
             for item in wifis:
                 sys.stdout.write( " {0}{1}{2:<4}{3}{4:<5}{5:<8}{6}\n".format(item[0].ljust(19, " "), item[1].ljust(10, " "), item[2], item[3].ljust(9, " "), item[4], item[5], item[6].encode('utf-8') ));
 
-            sys.stdout.write("\n{0}{1}{2}{3}{4}\n".format(c.F+"Mac".ljust(19, " "), "AP Mac".ljust(19, " "), "Noise".ljust(7, " "), "Sig".ljust(5, " "), "AP SSID"+c.E) );
+            stdout.write("\n{0}{1}{2}{3}{4}\n".format(c.F+"Mac".ljust(19, " "), "AP Mac".ljust(19, " "), "Noise".ljust(7, " "), "Sig".ljust(5, " "), "AP SSID"+c.E) );
 
             for item in clients:
-                sys.stdout.write( " {0}{1}{2:<7}{3:<5}{4}\n".format(item[0].ljust(19, " "), item[1].ljust(19, " "), item[2], item[3], item[4].encode('utf-8')) );
+                stdout.write( " {0}{1}{2:<7}{3:<5}{4}\n".format(item[0].ljust(19, " "), item[1].ljust(19, " "), item[2], item[3], item[4].encode('utf-8')) );
 
             if timeout < 4.5:
                 timeout += .05;
@@ -229,24 +252,13 @@ class Sniffer_Configuration:
         return;
 
 
-    def get_rssi(self, decoded):
-        rssi = int(-(256 - ord(decoded[-2:-1])));
-
-        if rssi not in xrange(-100, 0):
-            rssi = (-(256 - ord(decoded[-4:-3])));
-
-        if rssi < -100:
-            return -1;
-        return rssi;
-
-
     def handler_proberequest(self, packet):
         if packet.addr2 in self.un_cls:
-            self.un_cls[packet.addr2].msig = (self.get_rssi(packet.notdecoded));
-            self.un_cls[packet.addr2].mnoise += 1;
+            self.un_cls[packet.addr2].msig = (get_rssi(packet.notdecoded));
+            self.un_cls[packet.addr2].add_noise();
 
         elif self.check_valid(packet.addr2):
-            self.un_cls[packet.addr2] = Client(packet.addr2, "", self.get_rssi(packet.notdecoded), "");
+            self.un_cls[packet.addr2] = Client(packet.addr2, "", get_rssi(packet.notdecoded), "");
 
         return;
 
@@ -261,8 +273,8 @@ class Sniffer_Configuration:
 
     def handler_beacon(self, packet):
         if packet.addr2 in self.aps:
-            self.aps[packet.addr2].msig = (self.get_rssi(packet.notdecoded));
-            self.aps[packet.addr2].mbeacons += 1;
+            self.aps[packet.addr2].msig = (get_rssi(packet.notdecoded));
+            self.aps[packet.addr2].add_noise();
 
         else:
             if packet.info and u"\x00" not in "".join([x if ord(x) < 128 else "" for x in packet.info]):
@@ -307,7 +319,7 @@ class Sniffer_Configuration:
                     sec.add("OPEN");
 
             if "0050f204104a000110104400010210" in str(packet).encode("hex"):
-                sec.add("WPS"); #204104a000110104400010210 < May not be necessary...
+                sec.add("WPS"); # 204104a000110104400010210 < May not be necessary...
 
             try:
                 oui = ((EUI(packet.addr3)).oui).registration().org;
@@ -320,7 +332,7 @@ class Sniffer_Configuration:
                 channel,
                 packet.addr3,
                 unicode(oui),
-                self.get_rssi(packet.notdecoded),
+                get_rssi(packet.notdecoded),
                 packet
                 );
 
@@ -332,7 +344,7 @@ class Sniffer_Configuration:
 
     def handler_ctrl(self, packet):
         if packet.addr1 in self.aps:
-            self.aps[packet.addr1].msig = (self.get_rssi(packet.notdecoded));
+            self.aps[packet.addr1].msig = (get_rssi(packet.notdecoded));
         return;
 
 
@@ -343,16 +355,16 @@ class Sniffer_Configuration:
                 if self.cls[packet.addr2].mbssid != packet.addr1:
                     self.cls[packet.addr2].mssid = (packet.addr1);
 
-                self.cls[packet.addr2].mnoise += 1;
-                self.cls[packet.addr2].msig = (self.get_rssi(packet.notdecoded));
+                self.cls[packet.addr2].add_noise();
+                self.cls[packet.addr2].msig = (get_rssi(packet.notdecoded));
 
             elif packet.addr2 in self.un_cls:
-                self.cls[packet.addr2] = Client(packet.addr2, packet.addr1, self.get_rssi(packet.notdecoded), self.aps[packet.addr1].mssid);
+                self.cls[packet.addr2] = Client(packet.addr2, packet.addr1, get_rssi(packet.notdecoded), self.aps[packet.addr1].mssid);
                 del self.un_cls[packet.addr2]
 
             elif self.check_valid(packet.addr2):
-                self.cls[packet.addr2] = Client(packet.addr2, packet.addr1, self.get_rssi(packet.notdecoded), self.aps[packet.addr1].mssid);
-                self.cls[packet.addr2].mnoise += 1;
+                self.cls[packet.addr2] = Client(packet.addr2, packet.addr1, get_rssi(packet.notdecoded), self.aps[packet.addr1].mssid);
+                self.cls[packet.addr2].add_noise();
 
         elif packet.addr2 in self.aps:
             if packet.addr1 in self.cls:
@@ -360,16 +372,16 @@ class Sniffer_Configuration:
                 if self.cls[packet.addr1].mbssid != packet.addr2:
                     self.cls[packet.addr1].mssid = (packet.addr2);
 
-                self.cls[packet.addr1].mnoise += 1;
-                self.cls[packet.addr1].msig = (self.get_rssi(packet.notdecoded));
+                self.cls[packet.addr1].add_noise();
+                self.cls[packet.addr1].msig = (get_rssi(packet.notdecoded));
 
             elif packet.addr1 in self.un_cls:
-                self.cls[packet.addr1] = Client(packet.addr1, packet.addr2, self.get_rssi(packet.notdecoded), self.aps[packet.addr2].mssid);
+                self.cls[packet.addr1] = Client(packet.addr1, packet.addr2, get_rssi(packet.notdecoded), self.aps[packet.addr2].mssid);
                 del self.un_cls[packet.addr1];
 
             elif self.check_valid(packet.addr1):
-                self.cls[packet.addr1] = Client(packet.addr1, packet.addr2, self.get_rssi(packet.notdecoded), self.aps[packet.addr2].mssid);
-                self.cls[packet.addr1].mnoise += 1;
+                self.cls[packet.addr1] = Client(packet.addr1, packet.addr2, get_rssi(packet.notdecoded), self.aps[packet.addr2].mssid);
+                self.cls[packet.addr1].add_noise();
 
         if packet.haslayer(WPA_key):
             if packet.addr3 not in self.aps:
@@ -421,39 +433,59 @@ class Sniffer_Configuration:
 
 
     def sniff_packets(self, packet):
-        if (self.mfilter == None or (packet.addr1 == self.mfilter or packet.addr2 == self.mfilter)):
+        if packet.type == 0:
+            if packet.subtype == 4:
+                self.handler_proberequest(packet);
 
-            if packet.type == 0:
-                if packet.subtype == 4:
-                    self.handler_proberequest(packet);
+            elif packet.subtype == 5 and packet.addr3 in self.hidden:
+                self.handler_proberesponse(packet);
 
-                elif packet.subtype == 5 and packet.addr3 in self.hidden:
-                    self.handler_proberesponse(packet);
+            elif packet.subtype == 8 and self.check_valid(packet.addr3):
+                self.handler_beacon(packet);
 
-                elif packet.subtype == 8 and self.check_valid(packet.addr3):
-                    self.handler_beacon(packet);
+        elif packet.type == 1:
+            self.handler_ctrl(packet);
 
-            elif packet.type == 1:
-                self.handler_ctrl(packet);
-
-            elif packet.type == 2:
-                self.handler_data(packet);
+        elif packet.type == 2:
+            self.handler_data(packet);
         return;
+
+################################################################################
+def err(error=None):
+    stderr.write("{0} {1} {2}\n".format(c.F, error, c.E));
+    return;
+
+
+def get_rssi(decoded):
+    rssi = int(-(256 - ord(decoded[-2:-1])));
+
+    if rssi not in xrange(-100, 0):
+        rssi = (-(256 - ord(decoded[-4:-3])));
+
+    if rssi < -100:
+        return -1;
+    return rssi;
 
 
 def startup_checks():
     if getuid() != 0:
-        sys.stderr(c.F+" [-] User is not Root.");
+        err(" [-] User is not Root.");
         exit();
 
     if uname()[0].startswith("Linux") and not "Darwin" not in uname():
-        sys.stderr(c.F+" [-] Wrong OS.");
+        err(" [-] Wrong OS.");
         exit();
     return;
 
 
 def parse_args():
-    parser = argparse.ArgumentParser();
+    channels = [
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            [36, 40, 44, 48, 52, 56, 60, 64, 100,
+            104, 108, 112, 116, 132, 136, 140,
+            149, 153, 157, 161, 165]];
+
+    parser = ArgumentParser();
 
     parser.add_argument(
         '--version',
@@ -519,33 +551,29 @@ def parse_args():
     unassociated = results.unassociated;
 
     if interface not in pyw.interfaces() or  pyw.modeget(interface) != "monitor":
-        print(c.F + " [-] Non Monitor card selected.");
+        err("[-] Non Monitor card selected.");
         exit(0);
 
 
     if channel == None:
 
-        if frequency == 2:
-            hop = True;
-
-        elif frequency == 5:
-            hop = True;
-
-        else:
-            print(c.F+" [-] Channel Setting incorrect.");
+        if frequency not in [2, 5]:
+            err(" [-] Channel Setting incorrect.");
             exit(0);
 
+        else:
+            hop = True;
 
     elif channel != None:
 
-        if frequency == 2 and channel in xrange(1, 12):
+        if frequency == 2 and channel in channels[0]:
             hop = False;
 
-        elif frequency == "5" and channel in [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 132, 136, 140, 149, 153, 157, 161, 165]:
+        elif frequency == "5" and channels[1]:
             hop = False;
 
         else:
-            print(c.F+" [-] Channel Setting incorrect."+c.E);
+            err(" [-] Channel Setting incorrect");
             exit(0);
 
     if kill != False:
@@ -561,24 +589,26 @@ def parse_args():
             except:
                 pass
 
-    return [interface, channel, hop, frequency, kill, mfilter, unassociated];
+    return [interface, channel, hop, frequency, mfilter, unassociated];
+
+
+def signal_handler(*args):
+    stdout.write(c.G+"\r [+] "+c.E+"Commit to Exit.\n");
+    # sleep(3);
+    exit(0);
+    return;
 
 
 def main():
-    os.system("mkdir pcaps/");
-    os.system("chmod 1777 pcaps/");
+    if not path.exists("pcaps"):
+        makedirs("pcaps");
 
-    def signal_handler(*args):
-        print(c.G+"\r [+] "+c.E+"Commit to Exit.");
-        exit(0);
-        return;
-
-    signal.signal(signal.SIGINT, signal_handler);
+    signal(SIGINT, signal_handler);
 
     startup_checks();
     args = parse_args();
 
-    Sniffer = Sniffer_Configuration(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+    Sniffer = Sniffer_Configuration(args);
 
     if args[2] == True:
         hop_thread = Thread(target=Sniffer.hopper);
