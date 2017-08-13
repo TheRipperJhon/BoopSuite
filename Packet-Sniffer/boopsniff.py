@@ -15,7 +15,7 @@ import pyric.pyw as pyw
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR);
 
 from netaddr import *
-from os import system, path, getuid, uname
+from os import system, path, getuid, uname, makedirs
 from random import choice
 from scapy.contrib.wpa_eapol import WPA_key
 from scapy.all import *
@@ -565,8 +565,8 @@ def parse_args():
 
 
 def main():
-    os.system("mkdir pcaps/");
-    os.system("chmod 1777 pcaps/");
+    if not path.exists("pcaps"):
+        makedirs("pcaps");
 
     def signal_handler(*args):
         print(c.G+"\r [+] "+c.E+"Commit to Exit.");
