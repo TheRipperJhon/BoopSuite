@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__year__    = [2016, 2017];
+__year__    = [2017];
 __status__  = "Development";
 __contact__ = "jacobsin1996@gmail.com";
 
 # Imports
-from signal import signal, SIGINT;
-from argparse import ArgumentParser;
-from logging import getLogger, ERROR;
+import signal
+import argparse
+import logging
 
 import pyric.pyw as pyw;
 
-getLogger("scapy.runtime").setLevel(ERROR);
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR);
 
 from netaddr import *
 from scapy.all import *
@@ -24,7 +24,18 @@ from os import system, path, getuid, uname, makedirs
 from sys import exit, stdout, stderr, setcheckinterval
 
 conf.verb = 0;
+# Tell scapy to do less "talking"
 setcheckinterval = 1000;
+# Thread checks every second.
+
+# Global Thread Check
+gAlive = True;
+
+################################################################################
+#
+#           Classes
+#
+################################################################################
 
 class c:
     H  = "\033[95m"; # Magenta
@@ -35,194 +46,203 @@ class c:
     E  = "\033[0m";  # Clear
     Bo = "\033[1m";  # Bold
 
+# Class for Sniffer Objects
+class Sniffer:
 
-class Access_Point:
-
-    def __init__(self, ssid, enc, ch, mac, ven, sig, packet):
-        self.mssid = ssid;
-        self.menc  = enc;
-        self.mch   = ch;
-        self.mmac  = mac;
-        self.mven  = ven[:8];
-        self.msig  = sig;
-
-        self.mbeacons = 1;
-
-        self.frame2 = None;
-        self.frame3 = None;
-        self.frame4 = None;
-        self.replay_counter = None;
-        self.packets = [packet];
-        self.found   = False;
-        return;
-
-    def add_noise(self):
-        self.mbeacons += 1;
-        return;
-
-
-class Client:
-
-    def __init__(self, mac, bssid, rssi, essid):
-        self.mmac   = mac;
-        self.mbssid = bssid;
-        self.msig   = rssi;
-        self.mnoise = 1;
-        self.essid  = essid;
-        return;
-
-    def add_noise(self):
-        self.mnoise += 1;
-        return;
-
-
-class Sniffer_Configuration:
-
+    # Init method for Sniffer Objects
     def __init__(self, args):
-        self.mface    = args[0];
-        self.mchannel = args[1];
-        self.hop      = args[2];
-        self.mfreq    = args[3];
-        self.mfilter  = args[4];
-        self.unassociated = args[5];
-        self.mfilter_channel = None;
-        self.cap_message  = "";
+        self.mInterface    = args['interface'];     # String
+        self.mFrequency    = args['freq'];          # Int
+        self.mChannel      = args['channel'];       # Int
+        self.mKill         = args['kill'];          # Bool
+        self.mTarget       = args['target'];        # String
+        self.mMAC          = args['mac'];           # String
+        self.mUnassociated = args['unassociated'];  # Bool
 
-        self.ignore = [
-            "ff:ff:ff:ff:ff:ff", "00:00:00:00:00:00",
-            "01:80:c2:00:00:00", "01:00:5e", "01:80:c2",
-            "33:33"];
+        self.mCapMessage    = "";                   # String
 
-        self.hidden = [];
+        self.mFilterChannel = None;                 # Int
+        self.mPackets       = 0;                    # Int
 
-        self.aps = {};
-        self.cls = {};
-        self.un_cls = {};
+        self.mIgnore = [
+            "ff:ff:ff:ff:ff:ff",                    # Broadcast
+            "00:00:00:00:00:00",                    # Multicast
+            "01:80:c2:00:00:00",                    # Multicast
+            "01:00:5e",                             # Multicast
+            "01:80:c2",                             # Multicast
+            "33:33"                                 # Multicast
+        ];
+
+        self.mHidden = [];                          # List
+
+        self.mAPs  = {};                            # Dict
+        self.mCls  = {};                            # Dict
+        self.mUCls = {};                            # Dict
+
+        if self.mChannel:
+            self.mHop = True;                       # Bool
+
+        else:
+            self.mHop = False;                      # Bool
 
         return;
 
-
-    def run(self):
-        if self.mfilter != None:
-            sniff(
-                iface=self.mface,
-                filter="ether host "+self.mfilter.lower(),
-                prn=self.sniff_packets,
-                store=0
-            );
-
-        else:
-            sniff(
-                iface=self.mface,
-                prn=self.sniff_packets,
-                store=0
-            );
-        return;
-
-
-    def check_valid(self, mac=None):
-        if not mac:
-            return False;
-
-        else:
-            for item in self.ignore:
-                if mac.startswith(item):
-                    return False;
-
-        return True;
-
-
+    # Method for handling the cards channel hopping.
     def hopper(self):
-        interface = pyw.getcard(self.mface);
+        global gAlive
+
+        # Create pyric card object.
+        interface = pyw.getcard(self.mInterface);
+
+        # Set channel hopping timeout.
         timeout = 1.0;
 
-        if self.mfreq == 2:
-            __FREQS__ = [
-                1, 2, 3, 4, 5, 6,
-                7, 8, 9, 10, 11
+        # Get channels if frequency is 2.4 ghz
+        if self.mFrequency == 2:
+            freqs = [
+                1, 2, 3,
+                4, 5, 6,
+                7, 8, 9,
+                10, 11
             ];
 
-        elif self.mfreq == 5:
-            __FREQS__ = [
-                36, 40, 44, 48, 52, 56,
-                60, 64, 100, 104, 108, 112,
-                116, 132, 136, 140, 149, 153,
+        # Get channels if frequency is 5.8 ghz
+        elif self.mFrequency == 5:
+            freqs = [
+                36, 40, 44,
+                48, 52, 56,
+                60, 64, 100,
+                104, 108, 112,
+                116, 132, 136,
+                140, 149, 153,
                 157, 161, 165
             ];
 
-        while True:
+        # Repeat until program exits.
+        while gAlive:
 
-            if not self.mfilter_channel:
-                channel = choice(__FREQS__);
-                pyw.chset(interface, channel, None);
-                self.mchannel = channel;
+            try:
 
-            else:
-                channel = self.mfilter_channel;
-                pyw.chset(interface, channel, None);
-                self.mchannel = self.mfilter_channel;
-                break;
+                # If target not found yet.
+                if not self.mFilterChannel:
 
-            if timeout < 3:
-                timeout += .05;
-            sleep(timeout);
+                    # Choose channel at random.
+                    channel = choice(freqs);
+
+                    # Set channel
+                    pyw.chset(interface, channel, None);
+
+                    # Set channel variable
+                    self.mChannel = channel;
+
+                # If target found.
+                else:
+
+                    # Set Channel
+                    pyw.chset(interface, self.mFilterChannel, None);
+
+                    # Set channel variable
+                    self.mChannel = self.mFilterChannel;
+
+                    # Set cap messages
+                    self.mCapMessage = "[:Hopper Thread Exited:]"
+
+                    # Break out of loop and return.
+                    break;
+
+                # Increase timeout every iteration.
+                if timeout < 3:
+
+                    # Increment timeout.
+                    timeout += .05;
+
+                # Sleep program for timeout.
+                sleep(timeout);
+
+            except AttributeError:
+                printf("Thread-1 Error: Most likely interpreter shutdown. Disregard.")
+
+        # Exit hopper.
         return;
 
-
-    def get_access_points(self, AP):
+    # C-extension map method for retrieving access points
+    def getAccessPoints(self, AP):
         return [
-            self.aps[AP].mmac,
-            self.aps[AP].menc,
-            self.aps[AP].mch,
-            self.aps[AP].mven,
-            self.aps[AP].msig,
-            self.aps[AP].mbeacons,
-            self.aps[AP].mssid[:22]
+            self.mAPs[AP].mMAC,                  # Mac
+            self.mAPs[AP].mEnc,                  # Encryption
+            self.mAPs[AP].mCh,                   # Channel
+            self.mAPs[AP].mVen,                  # Vendor
+            self.mAPs[AP].mSig,                  # Signal
+            self.mAPs[AP].mBeacons,              # Beacons
+            self.mAPs[AP].mSSID[:22]             # SSID
         ];
 
 
-    def get_clients(self, cl):
+    # C-extension map method for retrieving Clients
+    def getClients(self, cl):
         return [
-            self.cls[cl].mmac,
-            self.cls[cl].mbssid,
-            self.cls[cl].mnoise,
-            self.cls[cl].msig,
-            self.cls[cl].essid
+            self.mCls[cl].mMAC,                  # Mac
+            self.mCls[cl].mBSSID,                # BSSID
+            self.mCls[cl].mNoise,                # Noise
+            self.mCls[cl].mSig,                  # Signal
+            self.mCls[cl].mESSID                  # ESSID
         ];
 
 
-    def get_un_clients(self, cl):
+    # C-extension map method for retrieving unassociated clients
+    def getUClients(self, cl):
         return [
-            self.un_cls[cl].mmac,
-            "",
-            self.un_cls[cl].mnoise,
-            self.un_cls[cl].msig,
-            ""
+            self.mUCls[cl].mMAC,               # Mac
+            "",                                 # NULL
+            self.mUCls[cl].mNoise,             # Noise
+            self.mUCls[cl].mSig,               # Signal
+            ""                                  # NULL
         ];
 
 
+    # Printer method for discovered clients and APS
     def printer(self):
+        global gAlive
+
+        # Create a time object to measure elapsed time.
         start_time = time();
+
+        # Timeout for printer
         timeout = 1.1;
+
+        # Message to display at top. < Captured handshake.
         buffer_message = "";
 
-        while True:
-            wifis = list(map(self.get_access_points, self.aps));
+        # Loop until program exit.
+        while gAlive:
+
+            # Get all access points in a list of lists.
+            wifis = list(map(self.getAccessPoints, self.mAPs));
+
+            # Sort access points on 6th key index.
             wifis.sort(key=lambda x: (x[6]));
 
-            clients = list(map(self.get_clients, self.cls));
+            # Get clients
+            clients = list(map(self.getClients, self.mCls));
 
-            if self.unassociated:
-                clients += list(map(self.get_un_clients, self.un_cls));
+            # Check if user wants unassociated clients displayed.
+            if self.mUnassociated:
 
+                # Get unassociated clients
+                clients += list(map(self.getUClients, self.mUCls));
+
+            # Sort clients on key index 4
             clients.sort(key=lambda x: (x[4]));
 
+            # Create new time object based on time subtract start time
             time_elapsed = int(time() - start_time);
 
-            hours = time_elapsed / 3600;
-            mins = (time_elapsed % 3600) / 60;
-            secs = time_elapsed % 60;
+            # Perform math to get elapsed time.
+            hours = (time_elapsed / 3600);
+            mins  = (time_elapsed % 3600) / 60;
+            secs  = (time_elapsed % 60);
 
+            # Create time messages.
             if hours > 0:
                 printable_time = "%d h %d m %d s" % (hours, mins, secs);
 
@@ -232,266 +252,610 @@ class Sniffer_Configuration:
             else:
                 printable_time = "%d s" % secs;
 
-            err("\x1b[2J\x1b[H");
 
-            stdout.write("{0}[+] {1}Time: {2}[{3}{4}{5}] {6}Slithering: {7}[{8}{9}{10}] {11}{12} {13}\n".format(c.G, c.E, c.B, c.W, printable_time, c.B, c.E, c.B, c.W, self.mchannel, c.B, c.E, self.cap_message, buffer_message));
+            # Clear the console.
+            clearConsole();
 
-            stdout.write( "\r\n{0}{1}{2}{3}{4}{5}{6}\n".format(c.F+"Mac Addr".ljust(19, " "), "Enc".ljust(10, " "), "Ch".ljust(4, " "), "Vendor".ljust(9, " "), "Sig".ljust(5, " "), "Beacons".ljust(8, " "), "SSID"+c.E) );
+            # Write top line to terminal.
+            stdout.write(
+                "{3}[{6}]{0}{2} T: {3}[{4}] {0}C: {3}[{5}] {7}\n\n".format(
+                    c.G,
+                    c.E,
+                    c.Bo,
+                    c.W,
+                    printable_time,
+                    self.mChannel,
+                    self.mPackets,
+                    self.mCapMessage
+                )
+            );
+
+            # Print first header line in red.
+            stdout.write(
+                "{0}{1}{2}{3}{4}{5}{6}\n".format(
+                    c.F+"Mac Addr".ljust(19, " "),
+                    "Enc".ljust(10, " "),
+                    "Ch".ljust(4, " "),
+                    "Vendor".ljust(9, " "),
+                    "Sig".ljust(5, " "),
+                    "Beacons".ljust(8, " "),
+                    "SSID"+c.E
+                )
+            );
+
             for item in wifis:
-                sys.stdout.write( " {0}{1}{2:<4}{3}{4:<5}{5:<8}{6}\n".format(item[0].ljust(19, " "), item[1].ljust(10, " "), item[2], item[3].ljust(9, " "), item[4], item[5], item[6].encode('utf-8') ));
+                # Print access points
+                sys.stdout.write(
+                    " {0}{1}{2:<4}{3}{4:<5}{5:<8}{6}\n".format(
+                        item[0].ljust(19, " "),
+                        item[1].ljust(10, " "),
+                        item[2],
+                        item[3].ljust(9, " "),
+                        item[4],
+                        item[5],
+                        item[6].encode('utf-8')
+                    )
+                );
 
-            stdout.write("\n{0}{1}{2}{3}{4}\n".format(c.F+"Mac".ljust(19, " "), "AP Mac".ljust(19, " "), "Noise".ljust(7, " "), "Sig".ljust(5, " "), "AP SSID"+c.E) );
+            # Print second header in red.
+            stdout.write(
+                "\n{0}{1}{2}{3}{4}\n".format(
+                    c.F+"Mac".ljust(19, " "),
+                    "AP Mac".ljust(19, " "),
+                    "Noise".ljust(7, " "),
+                    "Sig".ljust(5, " "),
+                    "AP SSID"+c.E
+                )
+            );
 
             for item in clients:
-                stdout.write( " {0}{1}{2:<7}{3:<5}{4}\n".format(item[0].ljust(19, " "), item[1].ljust(19, " "), item[2], item[3], item[4].encode('utf-8')) );
+                # Print clients.
+                stdout.write(
+                    " {0}{1}{2:<7}{3:<5}{4}\n".format(
+                        item[0].ljust(19, " "),
+                        item[1].ljust(19, " "),
+                        item[2],
+                        item[3],
+                        item[4].encode('utf-8')
+                    )
+                );
 
+            # If timeout is less than max then increment timeout.
             if timeout < 4.5:
+
+                # increment timeout.
                 timeout += .05;
 
+            # Timeout for other thread execution.
             sleep(timeout);
+
+        # If exits.
         return;
 
 
-    def handler_proberequest(self, packet):
-        if packet.addr2 in self.un_cls:
-            self.un_cls[packet.addr2].msig = (get_rssi(packet.notdecoded));
-            self.un_cls[packet.addr2].add_noise();
+    # Method for checking if a mac address is valid.
+    def checkValidMac(self, mac=None):
 
-        elif self.check_valid(packet.addr2):
-            self.un_cls[packet.addr2] = Client(packet.addr2, "", get_rssi(packet.notdecoded), "");
-
-        return;
-
-
-    def handler_proberesponse(self, packet):
-        self.aps[packet.addr3].mssid = packet.info;
-        self.hidden.remove(packet.addr3);
-        self.aps[packet.addr3].packets.append(packet);
-
-        return;
-
-
-    def handler_beacon(self, packet):
-        if packet.addr2 in self.aps:
-            self.aps[packet.addr2].msig = (get_rssi(packet.notdecoded));
-            self.aps[packet.addr2].add_noise();
+        # if mac == None
+        if not mac:
+            # Not a valid mac.
+            return False;
 
         else:
+            # if mac is in list of ignore addresses.
+            for item in self.mIgnore:
+
+                # Check is mac is == to any in ignore list.
+                if mac.startswith(item):
+
+                    # Mac is invalid.
+                    return False;
+
+        # Mac is valid.
+        return True;
+
+
+    # Method for parsing packets.
+    def sniff_packets(self, packet):
+
+        # Increment total sniffed packets.
+        self.mPackets += 1;
+
+        # check if packet is mgmt
+        if packet.type == 0:
+
+            # Check if packet is probe request
+            if packet.subtype == 4:
+                self.handlerProbeRequest(packet);
+
+            # Check if packet is probe response
+            elif packet.subtype == 5 and packet.addr3 in self.mHidden:
+                self.handlerProbeResponse(packet);
+
+            # check if packet is beacon.
+            elif packet.subtype == 8 and self.checkValidMac(packet.addr3):
+                self.handlerBeacon(packet);
+
+        # Check if packet is ctrl
+        elif packet.type == 1:
+            self.handlerCtrl(packet);
+
+        # check if packet is data
+        elif packet.type == 2:
+            self.handlerData(packet);
+        return;
+
+
+    # Method for starting the actual sniffing of the program.
+    def run(self):
+
+        # Check if a target is set.
+        if self.mTarget:
+
+            self.mCapMessage = "[:Filter Set:]"
+
+            sniff(
+                iface=self.mInterface,
+                filter="ether host "+self.mTarget.lower(),
+                prn=self.sniff_packets,
+                store=0
+            );
+
+
+        # If no target is set.
+        else:
+
+            sniff(
+                iface=self.mInterface,
+                prn=self.sniff_packets,
+                store=0
+            );
+
+
+        return;
+
+
+    # Handler for probe requests
+    def handlerProbeRequest(self, packet):
+
+        # if client in unassociated.
+        if packet.addr2 in self.mUCls:
+
+            # Update signal and noise
+            self.mUCls[packet.addr2].mSig = (getRssi(packet.notdecoded));
+            self.mUCls[packet.addr2] + 1;
+
+        # If client not seen.
+        elif self.checkValidMac(packet.addr2):
+
+            # Create unassociated client object.
+            self.mUCls[packet.addr2] = Client(packet.addr2, "", getRssi(packet.notdecoded), "");
+
+        return;
+
+
+    # Handler probe responses
+    def handlerProbeResponse(self, packet):
+        '''
+            This method only runs on previouly identified hidden networks.
+        '''
+
+        # update ssid info
+        self.mAPs[packet.addr3].mSSID = packet.info;
+
+        # Remove from hidden list
+        self.mHidden.remove(packet.addr3);
+
+        # Append this packet as beacon packet for later cracking.
+        self.mAPs[packet.addr3].packets.append(packet);
+
+        return;
+
+
+    # Handler for beacons
+    def handlerBeacon(self, packet):
+
+        # If AP already seen.
+        if packet.addr2 in self.mAPs:
+
+            # Update signal strength
+            self.mAPs[packet.addr2].mSig = (getRssi(packet.notdecoded));
+            # Add a packet.
+            self.mAPs[packet.addr2] + 1;
+
+        # If beacon is a new AP.
+        else:
+
+            # Get name of Access Point.
             if packet.info and u"\x00" not in "".join([x if ord(x) < 128 else "" for x in packet.info]):
-                name = packet.info.decode("utf-8");
+
+                # Encode it in case the asshole admin puts a damn emoji in the SSID.
+                name = packet.info.decode("utf-8"); # Cause dickheads exist.
+
+            # If name is hidden.
             else:
-                self.hidden.append(packet.addr3);
+
+                # Add packet to
+                self.mHidden.append(packet.addr3);
+                # Default name for hidden network
                 name = (("< len: {0} >").format(len(packet.info)));
 
+            # Grab first Dot11Elt layer
             p = packet[Dot11Elt];
+
+            # Need to figure out what this line does because honestly i have no clue.
             cap = packet.sprintf("{Dot11Beacon:%Dot11Beacon.cap%}"
             "{Dot11ProbeResp:%Dot11ProbeResp.cap%}").split("+");
 
+            # create a set to store all security properties. <- So no values get repeated.
             sec = set();
-            channel = "";
 
+            # set channel to 0 in case its not found. <- not likely but possible.
+            channel = 0;
+
+            # Loop over layers in packet.
             while isinstance(p, Dot11Elt):
+
                 if p.ID == 3:
+
                     try:
                         channel = ord(p.info);
-                    except:
+                    except TypeError:
                         pass;
+
                 elif p.ID == 48:
+
                     if "WPA" in sec:
                         sec.remove("WPA");
                     sec.add("WPA2");
+
                 elif p.ID == 61:
+
                     if channel == "":
                         channel = ord(p.info[-int(p.len):-int(p.len)+1]);
+
                 elif p.ID == 221 and p.info.startswith("\x00P\xf2\x01\x01\x00"):
+
                     if "WPA2" not in sec:
                         sec.add("WPA");
 
+                # Increment payload
                 p = p.payload;
 
-            if self.hop == False and channel != self.mchannel:
+            # Check if channel matches sniffing channel.
+            if self.mHop and channel != self.mChannel:
+                # If not discard. < Might need to change this.
                 return;
 
+            # If encryption != WPA/WPA2
             if not sec:
+
+                # Check for wep
                 if "privacy" in cap:
                     sec.add("WEP");
+
+                # Must be an open network.
                 else:
                     sec.add("OPEN");
 
-            if "0050f204104a000110104400010210" in str(packet).encode("hex"):
+            # Check for WPS
+            if "0050f" in str(packet).encode("hex"):
+                # Used to check: 0050f204104a000110104400010210
                 sec.add("WPS"); # 204104a000110104400010210 < May not be necessary...
 
+            # Test if oui in mac address
             try:
                 oui = ((EUI(packet.addr3)).oui).registration().org;
-            except:
+
+            # if not in mac database.
+            except NotRegisteredError:
                 oui = "< NA >";
 
-            self.aps[packet.addr2] = Access_Point(
+            # Create AP object.
+            self.mAPs[packet.addr2] = Access_Point(
                 name,
                 ":".join(sec),
                 channel,
                 packet.addr3,
                 unicode(oui),
-                get_rssi(packet.notdecoded),
+                getRssi(packet.notdecoded),
                 packet
                 );
 
-            if packet.addr3 == self.mfilter:
-                self.mfilter_channel = channel;
+            # If target found set filter and cancel hopper thread.
+            if packet.addr3 == self.mTarget:
 
-            return;
+                # Set Filter Channel to active.
+                self.mFilterChannel = channel;
 
-
-    def handler_ctrl(self, packet):
-        if packet.addr1 in self.aps:
-            self.aps[packet.addr1].msig = (get_rssi(packet.notdecoded));
         return;
 
 
-    def handler_data(self, packet):
-        if packet.addr1 in self.aps:
-            if packet.addr2 in self.cls:
+    # Handler for ctrl packets
+    def handlerCtrl(self, packet):
 
-                if self.cls[packet.addr2].mbssid != packet.addr1:
-                    self.cls[packet.addr2].mssid = (packet.addr1);
+        # If AP has been seen
+        if packet.addr1 in self.mAPs:
 
-                self.cls[packet.addr2].add_noise();
-                self.cls[packet.addr2].msig = (get_rssi(packet.notdecoded));
+            # Update signal and return.
+            self.mAPs[packet.addr1].mSig = (getRssi(packet.notdecoded));
 
-            elif packet.addr2 in self.un_cls:
-                self.cls[packet.addr2] = Client(packet.addr2, packet.addr1, get_rssi(packet.notdecoded), self.aps[packet.addr1].mssid);
-                del self.un_cls[packet.addr2]
+        return;
 
-            elif self.check_valid(packet.addr2):
-                self.cls[packet.addr2] = Client(packet.addr2, packet.addr1, get_rssi(packet.notdecoded), self.aps[packet.addr1].mssid);
-                self.cls[packet.addr2].add_noise();
 
-        elif packet.addr2 in self.aps:
-            if packet.addr1 in self.cls:
+    # Handler for data packets.
+    def handlerData(self, packet):
 
-                if self.cls[packet.addr1].mbssid != packet.addr2:
-                    self.cls[packet.addr1].mssid = (packet.addr2);
+        # if ap has been seen
+        if packet.addr1 in self.mAPs:
 
-                self.cls[packet.addr1].add_noise();
-                self.cls[packet.addr1].msig = (get_rssi(packet.notdecoded));
+            # if client has been seen
+            if packet.addr2 in self.mCls:
 
-            elif packet.addr1 in self.un_cls:
-                self.cls[packet.addr1] = Client(packet.addr1, packet.addr2, get_rssi(packet.notdecoded), self.aps[packet.addr2].mssid);
-                del self.un_cls[packet.addr1];
+                # if client changed access points
+                if self.mCls[packet.addr2].mBSSID != packet.addr1:
 
-            elif self.check_valid(packet.addr1):
-                self.cls[packet.addr1] = Client(packet.addr1, packet.addr2, get_rssi(packet.notdecoded), self.aps[packet.addr2].mssid);
-                self.cls[packet.addr1].add_noise();
+                    # Update access point
+                    self.mCls[packet.addr2].mSSID = (packet.addr1);
 
+                # Update signal and noise
+                self.mCls[packet.addr2] + 1;
+                self.mCls[packet.addr2].mSig = (getRssi(packet.notdecoded));
+
+            # If client was previously unassociated
+            elif packet.addr2 in self.mUCls:
+
+                # Create a new client object
+                self.mCls[packet.addr2] = Client(packet.addr2, packet.addr1, getRssi(packet.notdecoded), self.mAPs[packet.addr1].mSSID);
+
+                # Destroy previous client object
+                del self.mUCls[packet.addr2]
+
+            # if client previously unseen
+            elif self.checkValidMac(packet.addr2):
+
+                # Create new client object
+                self.mCls[packet.addr2] = Client(packet.addr2, packet.addr1, getRssi(packet.notdecoded), self.mAPs[packet.addr1].mSSID);
+
+        # If access point seen
+        elif packet.addr2 in self.mAPs:
+
+            # If client seen.
+            if packet.addr1 in self.mCls:
+
+                # if client changed access points
+                if self.mCls[packet.addr1].mBSSID != packet.addr2:
+                    self.mCls[packet.addr1].mSSID = (packet.addr2);
+
+                # Update noise and signal
+                self.mCls[packet.addr1] + 1;
+                self.mCls[packet.addr1].mSig = (getRssi(packet.notdecoded));
+
+            # if client was previously unassociated
+            elif packet.addr1 in self.mUCls:
+
+                # Create new client and delete old object
+                self.mCls[packet.addr1] = Client(packet.addr1, packet.addr2, getRssi(packet.notdecoded), self.mAPs[packet.addr2].mSSID);
+                del self.mUCls[packet.addr1];
+
+            # Check if mac is valid before creating new object.
+            elif self.checkValidMac(packet.addr1):
+
+                # Create new client object
+                self.mCls[packet.addr1] = Client(packet.addr1, packet.addr2, getRssi(packet.notdecoded), self.mAPs[packet.addr2].mSSID);
+
+        # Check if packet is part of a wpa handshake
         if packet.haslayer(WPA_key):
-            if packet.addr3 not in self.aps:
+
+            # If mac has not been seen.
+            if packet.addr3 not in self.mAPs:
                 return;
 
-            if self.aps[packet.addr3].found == True:
-                return;
-
+            # If mac has been seen
             else:
+
+                # Get wpa layer
                 layer = packet.getlayer(WPA_key);
 
+
                 if (packet.FCfield & 1):
-                        # From DS = 0, To DS = 1
+                    # From DS = 0, To DS = 1
                     STA = packet.addr2;
+
                 elif (packet.FCfield & 2):
-                        # From DS = 1, To DS = 0
+                    # From DS = 1, To DS = 0
                     STA = packet.addr1;
+
+                # Invalid wpa_key
                 else:
                     return;
 
+                # This info may be unnecessary.
                 key_info = layer.key_info;
                 wpa_key_length = layer.wpa_key_length;
                 replay_counter = layer.replay_counter;
+
                 WPA_KEY_INFO_INSTALL = 64;
                 WPA_KEY_INFO_ACK = 128;
                 WPA_KEY_INFO_MIC = 256;
+
+                # Check for key info and message integrity check.
+                if (key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_INSTALL):
+
                     # check for frame 2
-                if ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
-                    self.aps[packet.addr3].frame2 = 1;
-                    self.aps[packet.addr3].packets.append(packet[0]);
+                    if ((key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
+
+                        self.mAPs[packet.addr3].frame2 = True;
+                        self.mAPs[packet.addr3].packets.append(packet[0]);
+
                     # check for frame 3
-                elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
-                    self.aps[packet.addr3].frame3 = 1;
-                    self.aps[packet.addr3].replay_counter = replay_counter;
-                    self.aps[packet.addr3].packets.append(packet[0]);
+                    elif ((key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
+
+                        self.mAPs[packet.addr3].frame3 = True;
+                        self.mAPs[packet.addr3].replay_counter = replay_counter;
+                        self.mAPs[packet.addr3].packets.append(packet[0]);
+
                     # check for frame 4
-                elif ((key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and self.aps[packet.addr3].replay_counter == replay_counter):
-                    self.aps[packet.addr3].frame4 = 1;
-                    self.aps[packet.addr3].packets.append(packet[0]);
+                    elif ((key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and self.mAPs[packet.addr3].replay_counter == replay_counter):
 
-                if (self.aps[packet.addr3].frame2 and self.aps[packet.addr3].frame3 and self.aps[packet.addr3].frame4):
+                        self.mAPs[packet.addr3].frame4 = True;
+                        self.mAPs[packet.addr3].packets.append(packet[0]);
+
+                if (self.mAPs[packet.addr3].frame2 and self.mAPs[packet.addr3].frame3 and self.mAPs[packet.addr3].frame4):
+
                     folder_path = ("pcaps/");
-                    filename = ("{0}_{1}.pcap").format(self.aps[packet.addr3].mssid.encode('utf-8'), packet.addr3[-5:].replace(":", ""));
+                    filename = ("{0}_{1}.pcap").format(self.mAPs[packet.addr3].mSSID.encode('utf-8'), packet.addr3[-5:].replace(":", ""));
 
-                    wrpcap(folder_path+filename, self.aps[packet.addr3].packets);
+                    wrpcap(folder_path+filename, self.mAPs[packet.addr3].packets);
 
-                    self.aps[packet.addr3].found = True;
-                    self.cap_message = (" - [Booped: %s%s%s]" % (c.F, packet.addr3, c.E));
-
-
-    def sniff_packets(self, packet):
-        if packet.type == 0:
-            if packet.subtype == 4:
-                self.handler_proberequest(packet);
-
-            elif packet.subtype == 5 and packet.addr3 in self.hidden:
-                self.handler_proberesponse(packet);
-
-            elif packet.subtype == 8 and self.check_valid(packet.addr3):
-                self.handler_beacon(packet);
-
-        elif packet.type == 1:
-            self.handler_ctrl(packet);
-
-        elif packet.type == 2:
-            self.handler_data(packet);
+                    self.mCapMessage = ("Capped: "+packet.addr3);
         return;
 
+
+# Class for Access Point objects
+class Access_Point:
+
+    def __init__(self, ssid, enc, ch, mac, ven, sig, packet):
+        self.mSSID = ssid;
+        self.mEnc  = enc;
+        self.mCh   = ch;
+        self.mMAC  = mac;
+        self.mVen  = ven[:8];
+        self.mSig  = sig;
+
+        self.mBeacons = 1;
+
+        self.frame2 = False;
+        self.frame3 = False;
+        self.frame4 = False;
+        self.replay_counter = None;
+        self.packets = [packet];
+        return;
+
+    def __add__(self, value=1):
+        self.mBeacons += value;
+        return;
+
+class Client:
+
+    def __init__(self, mac, bssid, rssi, essid):
+        self.mMAC   = mac;
+        self.mBSSID = bssid;
+        self.mSig   = rssi;
+        self.mNoise = 1;
+        self.mESSID  = essid;
+        return;
+
+    def __add__(self, value=1):
+        self.mNoise += value;
+        return;
+
+
 ################################################################################
-def err(error=None):
-    stderr.write("{0} {1} {2}\n".format(c.F, error, c.E));
-    return;
+#
+#           Functions
+#
+################################################################################
 
+# get signal strength from non-decoded slice of data in packet.
+def getRssi(decoded):
 
-def get_rssi(decoded):
+    # for 2.4 ghz packets most rssi appears here
     rssi = int(-(256 - ord(decoded[-2:-1])));
 
+    # Else it can also appear here
     if rssi not in xrange(-100, 0):
         rssi = (-(256 - ord(decoded[-4:-3])));
 
+    # If rssi value is invalid.
     if rssi < -100:
         return -1;
+
+    # If rssi is valid.
     return rssi;
 
+# Use ascii code to clear terminal.
+def clearConsole():
+    stdout.write("\x1b[2J\x1b[H");
+    return;
 
-def startup_checks():
-    if getuid() != 0:
-        err(" [-] User is not Root.");
-        exit();
+# Print success
+def prints(*args, **kwargs):
 
-    if uname()[0].startswith("Linux") and not "Darwin" not in uname():
-        err(" [-] Wrong OS.");
-        exit();
+    stdout.write("{4} -> {0}[{1}+{2}]{3}: ".format(c.G, c.E, c.G, c.E, time()));
+    stdout.write(*args);
+    stdout.write("\n");
+
     return;
 
 
-def parse_args():
-    channels = [
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-            [36, 40, 44, 48, 52, 56, 60, 64, 100,
-            104, 108, 112, 116, 132, 136, 140,
-            149, 153, 157, 161, 165]];
+# Print failure
+def printf(*args, **kwargs):
 
-    parser = ArgumentParser();
+    stderr.write("{4} -> {0}[{1}!{2}]{3}: ".format(c.F, c.E, c.F, c.E, time()));
+    stderr.write(*args);
+    stderr.write("\n");
 
+    return;
+
+
+# Create directory for pcaps
+def createPcapDirectory():
+    # Check if pcap directory already exists
+    if not path.exists("pcaps"):
+
+        # If not create directory.
+        makedirs("pcaps");
+        prints("Created Pcap Directory.")
+
+    return 0;
+
+
+# Handler for ctrl+c Event.
+def signal_handler(*args):
+    global gAlive
+
+    # Set global flag to false to kill daemon threads.
+    gAlive = False;
+
+    print("\r[+] Commit to exit.")
+
+    # Sleep to allow one final execution of threads.
+    sleep(3.5);
+
+    # Kill Program.
+    exit(0);
+
+
+# Checks for proper OS and UID
+def startupChecks():
+
+    # Check for root.
+    if getuid() != 0:
+        printf("User is not Root.");
+        exit();
+
+    # Check for proper OS.
+    if uname()[0].startswith("Linux") and not "Darwin" not in uname():
+        printf("Wrong OS.");
+        exit();
+
+    return;
+
+# Function to gather all arguments passed by CLI
+def parseArgs():
+
+    # Instantiate parser object
+    parser = argparse.ArgumentParser();
+
+    # Arg for version number.
     parser.add_argument(
+        '-v',
         '--version',
         action='version',
-        version="{0}{1}".format(c.G, "Version: 1.0.0"));
+        version="{0}".format("Version: 1.0.0"));
 
+    # Arg for interface.
     parser.add_argument(
         "-i",
         "--interface",
@@ -500,6 +864,7 @@ def parse_args():
         help="select an interface",
         required=True);
 
+    # Arg for frequency.
     parser.add_argument(
         "-f",
         "--frequency",
@@ -510,6 +875,7 @@ def parse_args():
         help="select a frequency (2/5)",
         choices=[2, 5]);
 
+    # Arg for channel.
     parser.add_argument(
         "-c",
         "--channel",
@@ -519,6 +885,16 @@ def parse_args():
         type=int,
         help="select a channel");
 
+    # Arg for custom mac address.
+    parser.add_argument(
+        "-m",
+        "--mac",
+        action="store",
+        default=None,
+        dest="mac",
+        help="Custom Mac Address");
+
+    # Flag for kill commands.
     parser.add_argument(
         "-k",
         "--kill",
@@ -526,6 +902,7 @@ def parse_args():
         dest="kill",
         help="sudo kill interfering processes.");
 
+    # Flag for unassociated clients.
     parser.add_argument(
         "-u",
         "--unassociated",
@@ -533,95 +910,109 @@ def parse_args():
         dest="unassociated",
         help="Whether to show unassociated clients.");
 
+    # Arg for target to sniff.
     parser.add_argument(
-        "-a",
-        "--accesspoint",
+        "-t",
+        "--target",
         action="store",
         default=None,
-        dest="access_mac",
-        help="Command for a specific mac addr.");
+        dest="target",
+        help="Command for targeting a specific network.");
 
-    results = parser.parse_args();
-
-    interface = results.interface;
-    channel   = results.channel;
-    frequency = results.freq;
-    kill      = results.kill;
-    mfilter   = results.access_mac;
-    unassociated = results.unassociated;
-
-    if interface not in pyw.interfaces() or  pyw.modeget(interface) != "monitor":
-        err("[-] Non Monitor card selected.");
-        exit(0);
-
-
-    if channel == None:
-
-        if frequency not in [2, 5]:
-            err(" [-] Channel Setting incorrect.");
-            exit(0);
-
-        else:
-            hop = True;
-
-    elif channel != None:
-
-        if frequency == 2 and channel in channels[0]:
-            hop = False;
-
-        elif frequency == "5" and channels[1]:
-            hop = False;
-
-        else:
-            err(" [-] Channel Setting incorrect");
-            exit(0);
-
-    if kill != False:
-        commandlist = [
-            "service avahi-daemon stop",
-            "service network-manager stop",
-            "pkill wpa_supplicant", "pkill dhclient"
-            ];
-
-        for item in commandlist:
-            try:
-                system("sudo %s" % (item));
-            except:
-                pass
-
-    return [interface, channel, hop, frequency, mfilter, unassociated];
-
-
-def signal_handler(*args):
-    stdout.write(c.G+"\r [+] "+c.E+"Commit to Exit.\n");
-    # sleep(3);
-    exit(0);
-    return;
-
+    # return dict of args.
+    return vars(parser.parse_args());
 
 def main():
-    if not path.exists("pcaps"):
-        makedirs("pcaps");
+    # list of all channels in 5ghz spectrum
+    fspectrum = [
+        36, 40, 44, 48, 52, 56, 60, 64,
+        100, 104, 108, 112, 116, 132, 136,
+        140, 149, 153, 157, 161, 165
+    ];
 
-    signal(SIGINT, signal_handler);
+    # Get all arguments from terminal
+    results = parseArgs();
 
-    startup_checks();
-    args = parse_args();
+    # Check if interface exists.
+    if results['interface'] not in pyw.interfaces():
+        printf("Interface is not valid.");
+        exit(1);
 
-    Sniffer = Sniffer_Configuration(args);
+    # Check if interface in monitor mode.
+    if pyw.modeget(results['interface']) != "monitor":
+        printf("Non monitor interface selected.");
+        exit(1);
 
-    if args[2] == True:
-        hop_thread = Thread(target=Sniffer.hopper);
+    # Check if channel specified
+    if results['channel']:
+
+    # Check if channel is valid.
+        if results['freq'] == 2 and results['channel'] not in range(1, 12):
+            printf("Channel selected is invalid");
+            exit(1);
+
+    # Check if channel is valid.
+        elif results['freq'] == 5 and results['channel'] not in fspectrum:
+            printf("Channel selected is invalid");
+            exit(1);
+
+    # Check if mac is of valid length.
+    if results['mac'] and len(results['mac']) != 17:
+        printf("Invalid mac option selected.");
+        exit(1);
+
+    # Check if task kill flag is set.
+    if results['kill']:
+        killBlockingTasks();
+
+    # Check if target mac is of valid length.
+    if results['target'] and len(results['target']) != 17:
+        printf("Invalid Target Selected.");
+        exit(1);
+
+    '''
+    Note to self:
+        Find regex pattern for mac addresses. <- Better error detection.
+
+    '''
+
+    # Set ctrl+c interceptor.
+    signal.signal(signal.SIGINT, signal_handler);
+
+    # Check values at start up: OS and UID.
+    startupChecks();
+
+    # Create directory for captured handshakes.
+    createPcapDirectory();
+
+    # Create Sniffer object
+    sniffer = Sniffer(results);
+
+    # If channel isnt set then create channel hopping thread.
+    if results['channel'] == None:
+
+        # Create hopper thread.
+        hop_thread = Thread(target=sniffer.hopper);
+
+        # Set thread object as a daemon.
         hop_thread.daemon = True;
+
+        # Start thread.
         hop_thread.start()
 
-    printer_thread = Thread(target=Sniffer.printer);
+    # If channel is set.
+    else:
+
+        # set channel and continue.
+        pyw.chset(pyw.getcard(results['interface']), results['channel'], None);
+
+    printer_thread = Thread(target=sniffer.printer);
     printer_thread.daemon = True;
-    printer_thread.start()
+    printer_thread.start();
 
-    Sniffer.run();
-    return;
+    # try:
+    sniffer.run();
+    # except AttributeError:
+        # printf("AttributeError: Disregard This Error.");
 
-
-if __name__ == "__main__":
-    main();
+main();
