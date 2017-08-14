@@ -541,7 +541,7 @@ def parse_args():
         if frequency == 2 and channel in xrange(1, 12):
             hop = False;
 
-        elif frequency == "5" and channel in [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 132, 136, 140, 149, 153, 157, 161, 165]:
+        elif frequency == 5 and channel in [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 132, 136, 140, 149, 153, 157, 161, 165]:
             hop = False;
 
         else:
