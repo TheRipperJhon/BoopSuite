@@ -133,7 +133,7 @@ class Configuration:
             self.channel = None
             return
 
-        elif int(channel) in xrange(1, 12):
+        elif 0 < int(channel) < 12:
 
             print(c.OKGREEN+" [+] "+c.WHITE+"Channel in range: 2GHz")
             self.frequency = "2GHz"
