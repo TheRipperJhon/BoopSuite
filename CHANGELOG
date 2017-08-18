@@ -1,3 +1,9 @@
+Changelog: 1.1.0:
+    Sniffer updated from beta branch: new_master
+    updater script... updated.
+    readme updated.
+    installer script made to only use apt-get. Cause Kali linux.
+
 Changelog: 1.0.1
     Sniffer has a new gui that looks alot better
     Images for gui have been updated.

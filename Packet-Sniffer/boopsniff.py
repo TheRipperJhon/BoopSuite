@@ -15,21 +15,17 @@ import pyric.pyw as pyw;
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR);
 
 from netaddr import *
-from os import system, path, getuid, uname, makedirs
-from random import choice
-from scapy.contrib.wpa_eapol import WPA_key
+
 from scapy.all import *
+from scapy.contrib.wpa_eapol import WPA_key
 from random import choice
 from threading import Thread
 from time import sleep, time
-from scapy.contrib.wpa_eapol import WPA_key
-from os import system, path, getuid, uname, makedirs
-from sys import exit, stdout, stderr, setcheckinterval
+from os import path, getuid, uname, makedirs
+from sys import exit, stdout, stderr
 
 conf.verb = 0;
 # Tell scapy to do less "talking"
-setcheckinterval = 1000;
-# Thread checks every second.
 
 # Global Thread Check
 gAlive = True;
@@ -950,12 +946,12 @@ def main():
     # Check if channel specified
     if results['channel']:
 
-    # Check if channel is valid.
+        # Check if channel is valid.
         if results['freq'] == 2 and results['channel'] not in range(1, 12):
             printf("Channel selected is invalid");
             exit(1);
 
-    # Check if channel is valid.
+        # Check if channel is valid.
         elif results['freq'] == 5 and results['channel'] not in fspectrum:
             printf("Channel selected is invalid");
             exit(1);
@@ -987,7 +983,7 @@ def main():
     sniffer = Sniffer(results);
 
     # If channel isnt set then create channel hopping thread.
-    if results['channel'] == None:
+    if not results['channel']:
 
         # Create hopper thread.
         hop_thread = Thread(target=sniffer.hopper);
@@ -1008,9 +1004,9 @@ def main():
     printer_thread.daemon = True;
     printer_thread.start();
 
-    # try:
-    sniffer.run();
-    # except AttributeError:
-        # printf("AttributeError: Disregard This Error.");
+    try:
+        sniffer.run();
+    except AttributeError:
+        printf("AttributeError: Disregard This Error.");
 
 main();

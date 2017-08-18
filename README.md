@@ -3,19 +3,16 @@ BoopSuite
 
 # Synopsis:
 
-BoopSuite is an up and coming suite of wireless tools designed to be easy to use
-and powerful in scope, that support both the 2 and 5 GHz spectrums. Written
-purely in Python 2.7. A handshake sniffer (CLI and GUI), a monitor mode enabling
-script and a deauth script are all parts of this suite with more to come.
+BoopSuite a wireless pentesting suite designed to emulate aircrack-ng functionality for personal growth.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
 
-## Another Wireless pentesting suite.
+## This suite includes:
 
 + A wireless sniffer
 + Two gui's for the wireless sniffer (old/new)
-+ A wireless deauther
-+ A monitor mode enabler and disabler
++ A wireless deauthentication script
++ A monitor mode enabler
 
 ### Note:
 
@@ -25,7 +22,7 @@ is going to continue to grow as I add new handlers for additional packet types.
 Changelog located in CHANGELOG file.
 
 Hopefully others find it useful. If you do please email me and let me know I
-would love to hear about it.
+would love to hear about it @ jayrad.security@protonmail.com
 
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=43LHEBX448Y48&lc=US&item_name=M1ND%2dB3ND3R&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
 
@@ -37,7 +34,7 @@ I am going to add scripts to do the following:
 + BoopDate   - A script to update boopsuite
 
 More ideas are welcome.
-Email me @: jacobsin1996@gmail.com
+Email me @: jayrad.security@protonmail.com
 
 # Examples:
 
@@ -117,17 +114,9 @@ Note: Will do error checking if you specify a channel the card doesnt support an
 
 NOTE: boop will always switch the mode from managed to monitor and vice versa.
 
-I'm working on updating the GUI so it will be much cleaner and way better looking,
-stay tuned.
-
 ![This Used To Be An Image But Now It Is Not. :(](Images/GUI.png "BoopSuite")
 
 Note: all pcap files will be saved in the directory ~/pcaps
-
-# Computer Usage
-
-The sniffer which is the heaviest CPU part uses really low CPU and memory,
-memory which is going to shrink in upcoming versions.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Top.png "BoopSuite")
 
@@ -140,7 +129,7 @@ memory which is going to shrink in upcoming versions.
 ```
 git clone https://github.com/M1ND-B3ND3R/BoopSuite.git
 cd BoopSuite
-pip install -r requirements.txt
+sudo pip install -r requirements.txt
 chmod +x install.py
 ./install.py
 ```
@@ -164,27 +153,6 @@ chmod +x install.py
 ./install.py
 ```
 
-# Reference:
-
-The top line is formatted as follows for the sniffer:
-
-`[+] Time: TIME_ELAPSED Slithering: [CHANNEL] - [boopstrike: RECENT HANDHAKE CAPTURED] - [AMOUNT OF HANDSHAKES]`
-
-Next line is the start of the Access Point table and is formatted as follows:
-
-`[Mac address] [Encryption] [Channel] [Vendor] [Signal] [Beacons] [SSID]`
-
-The Line that starts the client table is formatted as follows:
-
-`[Mac address] [AP Mac address] [Noise] [Signal] [AP SSID]`
-
-
-# Contributors:
-
-+ M1ND-B3ND3R
-+ Sean Bangerter - Proofing my readme
-+ Boop - My pet ball python
-
 # Motivation:
 
 I am motivated by the want to be better. To prove others wrong and to prove
@@ -199,4 +167,4 @@ to myself that I can do things that were previously impossible to me.
 # License:
 
 MIT License
-(c) Jarad Dingman, 2017
+(c) MisterBianco, 2017

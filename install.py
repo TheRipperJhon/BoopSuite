@@ -7,7 +7,6 @@ import random
 import string
 import subprocess
 
-WARNINGS = 0
 
 
 class bcolors:
@@ -21,112 +20,163 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-def Check_Root():
+def checkRoot():
     if os.getuid() != 0:
-        print(bcolors.FAIL+"[-] Must be run as root."+bcolors.ENDC)
+        print(bcolors.FAIL+"[-] Must be run as root.\n"+bcolors.ENDC)
         sys.exit(0)
     return 0
 
 
-def Find_Package_Manager():
-    Package_Managers = ["apt-get", "pacman", "yum"]
+def installPackages(apt):
 
-    for manager in Package_Managers:
-        Default_Package_Manager = os.popen("which "+manager).read()
-        if Default_Package_Manager not in range(0, 300):
-            return Default_Package_Manager.split("/")[-1].strip()
+    # List of dependencies.
+    packages = [
+        "libncap-dev",          # Required
+        "tcpdump",              # Not required but recommended.
+        "python-gnuplot",       # Recommended
+        "python-crypto"         # Recommended
+    ];
 
-    print(bcolors.FAIL+"[-] No Default Package Manager Found"+bcolors.ENDC)
-    sys.exit(0)
-
-
-def Install_Packages(Package_Manager):
-    global WARNINGS
-    Packages_To_Install = [
-        "libncap-dev", "tcpdump",
-        "python-gnuplot", "python-crypto"
-        ]
-    Failed_Packages = []
-
-    for package in Packages_To_Install:
+    for package in packages:
         try:
-            subprocess.check_output([Package_Manager, "install", package, "-y"], stderr=subprocess.STDOUT)
-            print(bcolors.OKGREEN+"[+] Installed: "+package+bcolors.ENDC)
+
+            subprocess.check_output(
+                [
+                    apt, "install", package, "-y"
+                ],
+                    stderr=subprocess.STDOUT
+            );
+
+            sys.stdout.write(bcolors.OKGREEN+"[+] Installed: "+package+bcolors.ENDC+"\n");
+
         except subprocess.CalledProcessError as e:
-            Failed_Packages.append( package )
-            WARNINGS += 1
 
-    if len(Failed_Packages) > 0:
-        for item in Failed_Packages:
-            print(bcolors.WARNING+"[-] Failed to install Package: "+item+bcolors.ENDC)
-    return
+            sys.stderr.write(bcolors.WARNING+"[-] Failed to install Package: \n" + item + bcolors.ENDC);
+            sys.stderr.write("\t - Reason: \n"+str(e.output));
+
+    return 0;
 
 
-def Create_Custom_Command():
+def createCustomCommand():
 
     links = [
         "/usr/local/bin/boopsniff",
         "/usr/local/bin/boopsniff_gui",
         "/usr/local/bin/boop",
-        "/usr/local/bin/boopstrike"]
+        "/usr/local/bin/boopstrike"
+    ];
+
     new_links = [
         "/usr/share/Packet-Sniffer/boopsniff.py",
         "/usr/share/Packet-Sniffer/boopsniff_gui.py",
         "/usr/share/Monitor/boop.py",
-        "/usr/share/Deauth/boopstrike.py"]
+        "/usr/share/Deauth/boopstrike.py"
+    ];
 
     dirs = [
         "/usr/share/Packet-Sniffer/",
         "/usr/share/Monitor/",
-        "/usr/share/Deauth"]
+        "/usr/share/Deauth"
+    ];
 
     for dire in dirs:
         if os.path.isdir(dire):
-            os.system("sudo rm -rf "+dire)
-            print(bcolors.OKGREEN+"[+] Removed Old Project Directory"+bcolors.ENDC)
+            os.system("rm -rf " + dire)
+            sys.stdout.write(bcolors.OKGREEN+"[+] Removed Old Project Directory\n"+bcolors.ENDC)
 
     try:
-        subprocess.check_output(["sudo", "cp", "-r", "Packet-Sniffer/", "/usr/share/"], stderr=subprocess.STDOUT)
-        subprocess.check_output(["sudo", "cp", "-r", "Monitor/", "/usr/share/"], stderr=subprocess.STDOUT)
-        subprocess.check_output(["sudo", "cp", "-r", "Deauth/", "/usr/share/"], stderr=subprocess.STDOUT)
-        print(bcolors.OKGREEN+"[+] Installed Tools to: /usr/share/"+bcolors.ENDC)
+
+        subprocess.check_output(
+            [
+                "cp", "-r", "Packet-Sniffer/", "/usr/share/"
+            ],
+                stderr=subprocess.STDOUT
+        );
+
+        subprocess.check_output(
+            [
+                "cp", "-r", "Monitor/", "/usr/share/"
+            ],
+                stderr=subprocess.STDOUT
+        );
+
+        subprocess.check_output(
+            [
+                "cp", "-r", "Deauth/", "/usr/share/"
+            ],
+                stderr=subprocess.STDOUT
+        );
+
+        sys.stdout.write(bcolors.OKGREEN+"[+] Installed Tools to: /usr/share/\n"+bcolors.ENDC)
+
     except subprocess.CalledProcessError as e:
-        print(e.output)
+
+        sys.stderr.write(e.output);
 
     for link in links:
+
         if os.path.islink(link):
-            os.system("sudo rm -f "+link)
-            print(bcolors.OKGREEN+"[+] Removed an old command"+bcolors.ENDC)
+
+            os.system("rm -f " + link)
+            sys.stdout.write(bcolors.OKGREEN+"[+] Removed an old command\n"+bcolors.ENDC)
 
     for index, value in enumerate(new_links):
+
         try:
-            subprocess.check_output(["sudo", "ln", "-s", new_links[index], links[index]], stderr=subprocess.STDOUT)
-            subprocess.check_output(["sudo", "chmod", "755", links[index]], stderr=subprocess.STDOUT)
-            print(bcolors.OKGREEN+"[+] Created New Command"+bcolors.ENDC)
+
+            subprocess.check_output(
+                [
+                    "ln", "-s", new_links[index], links[index]
+                ],
+                    stderr=subprocess.STDOUT
+            );
+
+            subprocess.check_output(
+                [
+                    "chmod", "755", links[index]
+                ],
+                    stderr=subprocess.STDOUT
+            );
+
+            sys.stdout.write(bcolors.OKGREEN+"[+] Created New Command\n"+bcolors.ENDC);
+
         except subprocess.CalledProcessError as e:
-            print(bcolors.FAIL+"[-] Failed During custom command creation.")
+
+            sys.stderr.write(bcolors.FAIL+"[-] Failed During custom command creation.\n");
+            sys.stderr.write("\t - Reason: " + str(e.output)+"\n");
+
 
     return 0
 
 
-def install():
-    global WARNINGS
+# Display a welcome message to installer.
+def welcomeText():
 
-    Check_Root()
+    print(
+    """
+    {0}Thanks for installing.
+    
+    For suggestions or more info on the tool(s),
+    contact me @ jayrad.security@protonmail.com.
+    {1}""".format(bcolors.OKBLUE, bcolors.ENDC)
+    );
 
-    print(bcolors.OKBLUE+"""
-,_,_,_,_,_,_,_,_,_,_|____________________BOOP-INSTALLER____________________
-|#|#|#|#|#|#|#|#|#|#|_____________________________________________________/
-'-'-'-'-'-'-'-'-'-'-|----------------------------------------------------'
-                                          M1ND-B3ND3R
-    """+bcolors.ENDC)
+    return 0;
 
-    Package_Manager = Find_Package_Manager()
-    Install_Packages(Package_Manager)
-    Create_Custom_Command()
 
-    print(bcolors.HEADER+"[+] Exiting with: "+str(WARNINGS)+" warnings and 0 Failures.")
+def main():
+
+    # Check for proper permissions.
+    checkRoot();
+
+    # Install proper packages.
+    installPackages("apt-get");
+
+    # Create custom commands for the tools.
+    createCustomCommand()
+
+    return 0;
 
 
 if __name__ == "__main__":
-    install()
+    main()
