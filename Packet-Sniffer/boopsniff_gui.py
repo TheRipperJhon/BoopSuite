@@ -220,7 +220,6 @@ class MainWindow:
 
         self.wifi_vbar.config(command=self.wifi_canvas.yview);
 
-        self.wifi_vbar.config(command=self.wifi_canvas.yview);
         self.wifi_canvas.config(scrollregion=self.wifi_canvas.bbox("all"));
 
         self.wifi_canvas.pack(expand=True,fill=BOTH, pady=(5));

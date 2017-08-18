@@ -402,7 +402,8 @@ def int_main(configuration):
         Print_Flag = False
         Channel_Hopper_Flag  = False
 
-        print(c.G+"\r [+] "+c.E+"Commit to Exit.")
+        print(c.G+"\r [+] "+c.E+"Commit to Exit.\n");
+        sleep(5)
         exit(0)
         return 0
 
