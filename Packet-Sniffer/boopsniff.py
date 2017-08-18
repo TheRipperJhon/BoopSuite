@@ -15,6 +15,9 @@ import pyric.pyw as pyw;
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR);
 
 from netaddr import *
+from os import system, path, getuid, uname, makedirs
+from random import choice
+from scapy.contrib.wpa_eapol import WPA_key
 from scapy.all import *
 from random import choice
 from threading import Thread
@@ -922,6 +925,7 @@ def parseArgs():
     # return dict of args.
     return vars(parser.parse_args());
 
+  
 def main():
     # list of all channels in 5ghz spectrum
     fspectrum = [
@@ -969,12 +973,6 @@ def main():
     if results['target'] and len(results['target']) != 17:
         printf("Invalid Target Selected.");
         exit(1);
-
-    '''
-    Note to self:
-        Find regex pattern for mac addresses. <- Better error detection.
-
-    '''
 
     # Set ctrl+c interceptor.
     signal.signal(signal.SIGINT, signal_handler);

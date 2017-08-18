@@ -5,7 +5,7 @@ BoopSuite
 
 BoopSuite is an up and coming suite of wireless tools designed to be easy to use
 and powerful in scope, that support both the 2 and 5 GHz spectrums. Written
-purely in python. A handshake sniffer (CLI and GUI), a monitor mode enabling
+purely in Python 2.7. A handshake sniffer (CLI and GUI), a monitor mode enabling
 script and a deauth script are all parts of this suite with more to come.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")

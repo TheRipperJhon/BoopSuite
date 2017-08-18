@@ -133,7 +133,7 @@ class Configuration:
             self.channel = None
             return
 
-        elif int(channel) in xrange(1, 12):
+        elif 0 < int(channel) < 12:
 
             print(c.OKGREEN+" [+] "+c.WHITE+"Channel in range: 2GHz")
             self.frequency = "2GHz"
@@ -299,7 +299,7 @@ def main():
     display_art()
     try:
         configuration = Configuration()
-    except Exception,e:
+    except Exception as e:
         print(" [-]An error occured: "+str(e))
 
     print(c.OKBLUE+" [+] "+c.WHITE+"Time: "+c.OKGREEN+str(round(time.time() - start, 5)))
