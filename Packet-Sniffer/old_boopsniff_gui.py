@@ -10,7 +10,6 @@ import string
 
 import pyric
 import pyric.pyw as pyw
-import pyric.lib.libnl as nl
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
