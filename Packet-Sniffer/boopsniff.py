@@ -30,6 +30,8 @@ conf.verb = 0;
 # Global Thread Check
 gAlive = True;
 
+gStartTime = time();
+
 ################################################################################
 #
 #           Classes
@@ -184,7 +186,7 @@ class Sniffer:
             self.mCls[cl].mBSSID,                # BSSID
             self.mCls[cl].mNoise,                # Noise
             self.mCls[cl].mSig,                  # Signal
-            self.mCls[cl].mESSID                  # ESSID
+            self.mCls[cl].mESSID                 # ESSID
         ];
 
 
@@ -192,10 +194,10 @@ class Sniffer:
     def getUClients(self, cl):
         return [
             self.mUCls[cl].mMAC,               # Mac
-            "",                                 # NULL
+            "",                                # NULL
             self.mUCls[cl].mNoise,             # Noise
             self.mUCls[cl].mSig,               # Signal
-            ""                                  # NULL
+            ""                                 # NULL
         ];
 
 
@@ -204,7 +206,7 @@ class Sniffer:
         global gAlive
 
         # Create a time object to measure elapsed time.
-        start_time = time();
+        start_time = gStartTime;
 
         # Timeout for printer
         timeout = 1.1;
@@ -538,9 +540,9 @@ class Sniffer:
                     sec.add("OPEN");
 
             # Check for WPS
-            if "0050f" in str(packet).encode("hex"):
+            if "0050f204104a000110104400010210" in str(packet).encode("hex"):
                 # Used to check: 0050f204104a000110104400010210
-                sec.add("WPS"); # 204104a000110104400010210 < May not be necessary...
+                sec.add("WPS"); # 204104a000110104400010210 < is absolutely necessary
 
             # Test if oui in mac address
             try:
@@ -715,20 +717,20 @@ class Sniffer:
 class Access_Point:
 
     def __init__(self, ssid, enc, ch, mac, ven, sig, packet):
-        self.mSSID = ssid;
-        self.mEnc  = enc;
-        self.mCh   = ch;
-        self.mMAC  = mac;
-        self.mVen  = ven[:8];
-        self.mSig  = sig;
+        self.mSSID = ssid;              # String
+        self.mEnc  = enc;               # String
+        self.mCh   = ch;                # int
+        self.mMAC  = mac;               # String
+        self.mVen  = ven[:8];           # String
+        self.mSig  = sig;               # Int
 
-        self.mBeacons = 1;
+        self.mBeacons = 1;              # Int
 
-        self.frame2 = False;
-        self.frame3 = False;
-        self.frame4 = False;
-        self.replay_counter = None;
-        self.packets = [packet];
+        self.frame2 = False;            # Bool
+        self.frame3 = False;            # Bool
+        self.frame4 = False;            # Bool
+        self.replay_counter = None;     # Int
+        self.packets = [packet];           # List
         return;
 
     def __add__(self, value=1):
@@ -781,7 +783,7 @@ def clearConsole():
 # Print success
 def prints(*args, **kwargs):
 
-    stdout.write("{4} -> {0}[{1}+{2}]{3}: ".format(c.G, c.E, c.G, c.E, time()));
+    stdout.write("[{4}] -> {0}[{1}+{2}]{3}: ".format(c.G, c.E, c.G, c.E, round(time() - gStartTime, 5)));
     stdout.write(*args);
     stdout.write("\n");
 
@@ -791,7 +793,7 @@ def prints(*args, **kwargs):
 # Print failure
 def printf(*args, **kwargs):
 
-    stderr.write("{4} -> {0}[{1}!{2}]{3}: ".format(c.F, c.E, c.F, c.E, time()));
+    stderr.write("[{4}] -> {0}[{1}!{2}]{3}: ".format(c.F, c.E, c.F, c.E, round(time() - gStartTime, 5)));
     stderr.write(*args);
     stderr.write("\n");
 
@@ -837,6 +839,7 @@ def startupChecks():
     # Check for proper OS.
     if uname()[0].startswith("Linux") and not "Darwin" not in uname():
         printf("Wrong OS.");
+        printf("Remember Macs are for Assholes")
         exit();
 
     return;
@@ -921,8 +924,14 @@ def parseArgs():
     # return dict of args.
     return vars(parser.parse_args());
 
-  
+
 def main():
+    '''
+        The main controller for the program.
+
+        Instantiates all threads and processes.
+    '''
+
     # list of all channels in 5ghz spectrum
     fspectrum = [
         36, 40, 44, 48, 52, 56, 60, 64,
