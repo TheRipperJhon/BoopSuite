@@ -3,38 +3,26 @@ BoopSuite
 
 # Synopsis:
 
-BoopSuite a wireless pentesting suite designed to emulate aircrack-ng functionality for personal growth.
+BoopSuite a wireless pentesting suite designed to aid myself in my wireless engagements. Supports both the 2.4 and 5.8 GHz spectrum.
+
+Meant for kali linux and **only** supported on Kali linux.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Run.png "BoopSuite")
 
 ## This suite includes:
 
-+ A wireless sniffer
-+ Two gui's for the wireless sniffer (old/new)
++ Packet Sniffer (GUI/CLI)
 + A wireless deauthentication script
 + A monitor mode enabler
 
-### Note:
-
-I hope my project can aid everyone in their pentesting needs, and this project
-is going to continue to grow as I add new handlers for additional packet types.
-
 Changelog located in CHANGELOG file.
-
-Hopefully others find it useful. If you do please email me and let me know I
-would love to hear about it @ jayrad.security@protonmail.com
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=43LHEBX448Y48&lc=US&item_name=M1ND%2dB3ND3R&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
-
 
 ## What else is coming?
 
 I am going to add scripts to do the following:
+
 + BoopCoil   - Deauth attack detector
 + BoopDate   - A script to update boopsuite
-
-More ideas are welcome.
-Email me @: jayrad.security@protonmail.com
 
 # Examples:
 
@@ -48,7 +36,7 @@ Email me @: jayrad.security@protonmail.com
 
 `boopsniff -i wlan1mon -c 6`
 
-#### Boop also works on the 5ghz spectrum if you have a supporting card:
+#### Boop also works on the 5ghz spectrum *if* you have a supporting card:
 
 `boopsniff -i wlan1mon -f 5`
 
@@ -102,7 +90,7 @@ note: will enable or disable monitor mode accordingly.
 
 `boop -i wlan1 -c 11`
 
-Note: Will do error checking if you specify a channel the card doesnt support and is ready for cards supporting the 5GHz network.
+Note: Will do error checking if you specify a channel the card doesn't support and is ready for cards supporting the 5GHz network.
 
 #### Kill any interfering tasks:
 
@@ -168,3 +156,5 @@ to myself that I can do things that were previously impossible to me.
 
 MIT License
 (c) MisterBianco, 2017
+
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=43LHEBX448Y48&lc=US&item_name=M1ND%2dB3ND3R&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
