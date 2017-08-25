@@ -59,6 +59,7 @@ class Sniffer:
         self.mTarget       = args['target'];        # String
         self.mMAC          = args['mac'];           # String
         self.mUnassociated = args['unassociated'];  # Bool
+        self.mDiagnose     = args['diagnose'];      # Bool
 
         self.mCapMessage    = "";                   # String
 
@@ -150,6 +151,9 @@ class Sniffer:
 
                     # Break out of loop and return.
                     break;
+
+                if self.mDiagnose:
+                    prints("Channel Set to: {0}".format(self.mChannel));
 
                 # Increase timeout every iteration.
                 if timeout < 3:
@@ -432,6 +436,9 @@ class Sniffer:
             # Create unassociated client object.
             self.mUCls[packet.addr2] = Client(packet.addr2, "", getRssi(packet.notdecoded), "");
 
+            if self.mDiagnose:
+                prints("New Un Client: {0}".format(packet.addr2));
+
         return;
 
 
@@ -449,6 +456,9 @@ class Sniffer:
 
         # Append this packet as beacon packet for later cracking.
         self.mAPs[packet.addr3].packets.append(packet);
+
+        if self.mDiagnose:
+            prints("Hidden Network Uncovered: {0}".format(packet.info));
 
         return;
 
@@ -569,6 +579,9 @@ class Sniffer:
                 # Set Filter Channel to active.
                 self.mFilterChannel = channel;
 
+            if self.mDiagnose:
+                prints("New Network: {0}".format(name));
+
         return;
 
 
@@ -599,6 +612,9 @@ class Sniffer:
                     # Update access point
                     self.mCls[packet.addr2].mSSID = (packet.addr1);
 
+                    if self.mDiagnose:
+                        prints("Client changed networks: {0}".format(packet.addr2));
+
                 # Update signal and noise
                 self.mCls[packet.addr2] + 1;
                 self.mCls[packet.addr2].mSig = (getRssi(packet.notdecoded));
@@ -610,13 +626,19 @@ class Sniffer:
                 self.mCls[packet.addr2] = Client(packet.addr2, packet.addr1, getRssi(packet.notdecoded), self.mAPs[packet.addr1].mSSID);
 
                 # Destroy previous client object
-                del self.mUCls[packet.addr2]
+                del self.mUCls[packet.addr2];
+
+                if self.mDiagnose:
+                    prints("New Client: {0}".format(packet.addr2));
 
             # if client previously unseen
             elif self.checkValidMac(packet.addr2):
 
                 # Create new client object
                 self.mCls[packet.addr2] = Client(packet.addr2, packet.addr1, getRssi(packet.notdecoded), self.mAPs[packet.addr1].mSSID);
+
+                if self.mDiagnose:
+                    prints("New Client: {0}".format(packet.addr1));
 
         # If access point seen
         elif packet.addr2 in self.mAPs:
@@ -626,7 +648,11 @@ class Sniffer:
 
                 # if client changed access points
                 if self.mCls[packet.addr1].mBSSID != packet.addr2:
+
                     self.mCls[packet.addr1].mSSID = (packet.addr2);
+
+                    if self.mDiagnose:
+                        prints("New Un Client: {0}".format(packet.addr1));
 
                 # Update noise and signal
                 self.mCls[packet.addr1] + 1;
@@ -637,13 +663,20 @@ class Sniffer:
 
                 # Create new client and delete old object
                 self.mCls[packet.addr1] = Client(packet.addr1, packet.addr2, getRssi(packet.notdecoded), self.mAPs[packet.addr2].mSSID);
+
                 del self.mUCls[packet.addr1];
+
+                if self.mDiagnose:
+                    prints("New Client: {0}".format(packet.addr1));
 
             # Check if mac is valid before creating new object.
             elif self.checkValidMac(packet.addr1):
 
                 # Create new client object
                 self.mCls[packet.addr1] = Client(packet.addr1, packet.addr2, getRssi(packet.notdecoded), self.mAPs[packet.addr2].mSSID);
+
+                if self.mDiagnose:
+                    prints("New Un Client: {0}".format(packet.addr1));
 
         # Check if packet is part of a wpa handshake
         if packet.haslayer(WPA_key):
@@ -658,7 +691,6 @@ class Sniffer:
                 # Get wpa layer
                 layer = packet.getlayer(WPA_key);
 
-
                 if (packet.FCfield & 1):
                     # From DS = 0, To DS = 1
                     STA = packet.addr2;
@@ -666,10 +698,6 @@ class Sniffer:
                 elif (packet.FCfield & 2):
                     # From DS = 1, To DS = 0
                     STA = packet.addr1;
-
-                # Invalid wpa_key
-                else:
-                    return;
 
                 # This info may be unnecessary.
                 key_info = layer.key_info;
@@ -680,29 +708,38 @@ class Sniffer:
                 WPA_KEY_INFO_ACK = 128;
                 WPA_KEY_INFO_MIC = 256;
 
-                # Check for key info and message integrity check.
-                if (key_info & WPA_KEY_INFO_MIC) and (key_info & WPA_KEY_INFO_INSTALL):
+                # check for frame 2
+                if (key_info & WPA_KEY_INFO_MIC) and ((key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
 
-                    # check for frame 2
-                    if ((key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and (wpa_key_length > 0)):
+                    if self.mDiagnose:
+                        prints("Key part 1 found: {0}".format(packet.addr3));
 
-                        self.mAPs[packet.addr3].frame2 = True;
-                        self.mAPs[packet.addr3].packets.append(packet[0]);
+                    self.mAPs[packet.addr3].frame2 = 1;
+                    self.mAPs[packet.addr3].packets.append(packet[0]);
 
-                    # check for frame 3
-                    elif ((key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
+                # check for frame 3
+                elif (key_info & WPA_KEY_INFO_MIC) and ((key_info & WPA_KEY_INFO_ACK) and (key_info & WPA_KEY_INFO_INSTALL)):
 
-                        self.mAPs[packet.addr3].frame3 = True;
-                        self.mAPs[packet.addr3].replay_counter = replay_counter;
-                        self.mAPs[packet.addr3].packets.append(packet[0]);
+                    if self.mDiagnose:
+                        prints("Key part 2 found: {0}".format(packet.addr3));
+
+                    self.mAPs[packet.addr3].frame3 = 1;
+                    self.mAPs[packet.addr3].replay_counter = replay_counter;
+                    self.mAPs[packet.addr3].packets.append(packet[0]);
 
                     # check for frame 4
-                    elif ((key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and self.mAPs[packet.addr3].replay_counter == replay_counter):
+                elif (key_info & WPA_KEY_INFO_MIC) and ((key_info & WPA_KEY_INFO_ACK == 0) and (key_info & WPA_KEY_INFO_INSTALL == 0) and self.mAPs[packet.addr3].replay_counter == replay_counter):
 
-                        self.mAPs[packet.addr3].frame4 = True;
-                        self.mAPs[packet.addr3].packets.append(packet[0]);
+                    if self.mDiagnose:
+                        prints("Key part 3 found: {0}".format(packet.addr3));
+
+                    self.mAPs[packet.addr3].frame4 = 1;
+                    self.mAPs[packet.addr3].packets.append(packet[0]);
 
                 if (self.mAPs[packet.addr3].frame2 and self.mAPs[packet.addr3].frame3 and self.mAPs[packet.addr3].frame4):
+
+                    if self.mDiagnose:
+                        prints("Whole key found: {0}".format(packet.addr3));
 
                     folder_path = ("pcaps/");
                     filename = ("{0}_{1}.pcap").format(self.mAPs[packet.addr3].mSSID.encode('utf-8'), packet.addr3[-5:].replace(":", ""));
@@ -726,9 +763,9 @@ class Access_Point:
 
         self.mBeacons = 1;              # Int
 
-        self.frame2 = False;            # Bool
-        self.frame3 = False;            # Bool
-        self.frame4 = False;            # Bool
+        self.frame2 = None;            # Bool
+        self.frame3 = None;            # Bool
+        self.frame4 = None;            # Bool
         self.replay_counter = None;     # Int
         self.packets = [packet];           # List
         return;
@@ -783,7 +820,7 @@ def clearConsole():
 # Print success
 def prints(*args, **kwargs):
 
-    stdout.write("[{4}] -> {0}[{1}+{2}]{3}: ".format(c.G, c.E, c.G, c.E, round(time() - gStartTime, 5)));
+    stdout.write("[{4:<3}] -> {0}[{1}+{2}]{3}: ".format(c.G, c.E, c.G, c.E, int(time() - gStartTime)));
     stdout.write(*args);
     stdout.write("\n");
 
@@ -793,7 +830,7 @@ def prints(*args, **kwargs):
 # Print failure
 def printf(*args, **kwargs):
 
-    stderr.write("[{4}] -> {0}[{1}!{2}]{3}: ".format(c.F, c.E, c.F, c.E, round(time() - gStartTime, 5)));
+    stderr.write("[  {4:<3}] -> {0}[{1}!{2}]{3}: ".format(c.F, c.E, c.F, c.E, int(time() - gStartTime)));
     stderr.write(*args);
     stderr.write("\n");
 
@@ -921,6 +958,15 @@ def parseArgs():
         dest="target",
         help="Command for targeting a specific network.");
 
+    # Arg for diagnostic mode.
+    parser.add_argument(
+        "-D",
+        "--Diagnose",
+        action="store_true",
+        default=False,
+        dest="diagnose",
+        help="Switch for diagnostic mode.");
+
     # return dict of args.
     return vars(parser.parse_args());
 
@@ -1009,9 +1055,10 @@ def main():
         # set channel and continue.
         pyw.chset(pyw.getcard(results['interface']), results['channel'], None);
 
-    printer_thread = Thread(target=sniffer.printer);
-    printer_thread.daemon = True;
-    printer_thread.start();
+    if not results['diagnose']:
+        printer_thread = Thread(target=sniffer.printer);
+        printer_thread.daemon = True;
+        printer_thread.start();
 
     try:
         sniffer.run();
