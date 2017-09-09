@@ -480,8 +480,11 @@ class Sniffer:
             # Get name of Access Point.
             if packet.info and u"\x00" not in "".join([x if ord(x) < 128 else "" for x in packet.info]):
 
-                # Encode it in case the asshole admin puts a damn emoji in the SSID.
-                name = packet.info.decode("utf-8"); # Cause dickheads exist.
+                try:
+                    # Encode it in case the asshole admin puts a damn emoji in the SSID.
+                    name = packet.info.decode("utf-8"); # Cause dickheads exist.
+                except:
+                    name = unicode(packet.info, errors='ignore')
 
             # If name is hidden.
             else:
@@ -532,6 +535,9 @@ class Sniffer:
 
                 # Increment payload
                 p = p.payload;
+
+            if channel == 0:
+                channel = self.mChannel;
 
             # Check if channel matches sniffing channel.
             if self.mHop and channel != self.mChannel:
