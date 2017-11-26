@@ -54,8 +54,8 @@ def installPackages(apt):
 def createCustomCommand():
 
     links = [
-        "/usr/local/bin/BoopSniff",
         "/usr/local/bin/BoopMon",
+        "/usr/local/bin/BoopSniff",
         "/usr/local/bin/BoopStrike"
     ];
 
