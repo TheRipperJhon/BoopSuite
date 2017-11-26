@@ -7,6 +7,7 @@ import random
 import string
 import subprocess
 
+from modules import arguments
 
 
 class bcolors:
@@ -18,13 +19,6 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
-
-def checkRoot():
-    if os.getuid() != 0:
-        print(bcolors.FAIL+"[-] Must be run as root.\n"+bcolors.ENDC)
-        sys.exit(0)
-    return 0
 
 
 def installPackages(apt):
@@ -60,23 +54,19 @@ def installPackages(apt):
 def createCustomCommand():
 
     links = [
-        "/usr/local/bin/boopsniff",
-        "/usr/local/bin/boopsniff_gui",
-        "/usr/local/bin/boop",
-        "/usr/local/bin/boopstrike"
+        "/usr/local/bin/BoopSniff",
+        "/usr/local/bin/BoopMon",
+        "/usr/local/bin/BoopStrike"
     ];
 
     new_links = [
-        "/usr/share/Packet-Sniffer/boopsniff.py",
-        "/usr/share/Packet-Sniffer/boopsniff_gui.py",
-        "/usr/share/Monitor/boop.py",
-        "/usr/share/Deauth/boopstrike.py"
+        "/usr/share/BoopMon.py",
+        "/usr/share/BoopSniff.py",
+        "/usr/share/BoopStrike.py"
     ];
 
     dirs = [
-        "/usr/share/Packet-Sniffer/",
-        "/usr/share/Monitor/",
-        "/usr/share/Deauth"
+        "/usr/share/core/",
     ];
 
     for dire in dirs:
@@ -88,21 +78,28 @@ def createCustomCommand():
 
         subprocess.check_output(
             [
-                "cp", "-r", "Packet-Sniffer/", "/usr/share/"
+                "cp", "-r", "core/BoopMon.py", "/usr/share/"
             ],
                 stderr=subprocess.STDOUT
         );
 
         subprocess.check_output(
             [
-                "cp", "-r", "Monitor/", "/usr/share/"
+                "cp", "-r", "core/BoopSniff.py", "/usr/share/"
             ],
                 stderr=subprocess.STDOUT
         );
 
         subprocess.check_output(
             [
-                "cp", "-r", "Deauth/", "/usr/share/"
+                "cp", "-r", "core/BoopStrike.py", "/usr/share/"
+            ],
+                stderr=subprocess.STDOUT
+        );
+
+        subprocess.check_output(
+            [
+                "cp", "-r", "modules/", "/usr/share/"
             ],
                 stderr=subprocess.STDOUT
         );
@@ -155,7 +152,7 @@ def welcomeText():
     print(
     """
     {0}Thanks for installing.
-    
+
     For suggestions or more info on the tool(s),
     contact me @ jayrad.security@protonmail.com.
     {1}""".format(bcolors.OKBLUE, bcolors.ENDC)
@@ -167,7 +164,7 @@ def welcomeText():
 def main():
 
     # Check for proper permissions.
-    checkRoot();
+    arguments.root_check();
 
     # Install proper packages.
     installPackages("apt-get");

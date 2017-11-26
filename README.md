@@ -31,7 +31,7 @@ would love to hear about it @ jayrad.security@protonmail.com
 
 I am going to add scripts to do the following:
 + BoopCoil   - Deauth attack detector
-+ BoopDate   - A script to update boopsuite
++ BoopDate   - A script to update BoopMonsuite
 
 More ideas are welcome.
 Email me @: jayrad.security@protonmail.com
@@ -42,77 +42,74 @@ Email me @: jayrad.security@protonmail.com
 
 #### To start sniffing:
 
-`boopsniff -i wlan1mon`
+`BoopSniff -i wlan1mon`
 
 #### To specify a channel:
 
-`boopsniff -i wlan1mon -c 6`
+`BoopSniff -i wlan1mon -c 6`
 
 #### Boop also works on the 5ghz spectrum if you have a supporting card:
 
-`boopsniff -i wlan1mon -f 5`
+`BoopSniff -i wlan1mon -f 5`
 
 #### If some processes are interfering then you can preemptively kill them with:
 
-`boopsniff -i wlan1mon -k`
+`BoopSniff -i wlan1mon -k`
 
 #### If you want to see unassociated clients:
 
-`boopsniff -i wlan1mon -u`
+`BoopSniff -i wlan1mon -u`
 
 #### If you want to filter by a specific AP mac address:
 
-`boopsniff -i wlan1mon -a xx:xx:xx:xx:xx:xx`
+`BoopSniff -i wlan1mon -a xx:xx:xx:xx:xx:xx`
 
 #### To launch a deauth attack:
 
-`boopstrike -i wlan1mon`
+`BoopStrike -i wlan1mon`
 
 #### Deauth the 5ghz spectrum:
 
-`boopstrike -i wlan1mon -f 5`
+`BoopStrike -i wlan1mon -f 5`
 
 #### Deauth a single AP:
 
-`boopstrike -i wlan1mon -a xx:xx:xx:xx:xx:xx`
+`BoopStrike -i wlan1mon -a xx:xx:xx:xx:xx:xx`
 
 #### Deauth everyone except one Access Point:
 
-`boopstrike -i wlan1mon -s xx:xx:xx:xx:xx:xx`
+`BoopStrike -i wlan1mon -s xx:xx:xx:xx:xx:xx`
 
-#### New Update includes a gui tool:
-
-`boopsniff_gui`
 
 #### Set card to monitor mode:
 
-`boop -i wlan1`
+`BoopMon -i wlan1`
 
 #### Set card to managed mode:
 
-`boop -i wlan1mon`
+`BoopMon -i wlan1mon`
 
 #### Set card to a specific name:
 
-`boop -i wlan1 -n boop1`
+`BoopMon -i wlan1 -n wlanmon1`
 
 note: will enable or disable monitor mode accordingly.
 
 #### Set channel on card:
 
-`boop -i wlan1 -c 11`
+`BoopMon -i wlan1 -c 11`
 
 Note: Will do error checking if you specify a channel the card doesnt support and is ready for cards supporting the 5GHz network.
 
 #### Kill any interfering tasks:
 
-`boop -i wlan1 -k`
+`BoopMon -i wlan1 -k`
 
 #### Put it all together:
 
-`boop -i wlan1 -n boop1 -c 11 -k`
+`BoopMon -i wlan1 -n BoopMon1 -c 11 -k`
 
-NOTE: boop will always switch the mode from managed to monitor and vice versa.
+NOTE: BoopMon will always switch the mode from managed to monitor and vice versa.
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/GUI.png "BoopSuite")
 
