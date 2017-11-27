@@ -2,3 +2,4 @@
 *.pcap
 test.py
 pcaps/
+__init__.py
