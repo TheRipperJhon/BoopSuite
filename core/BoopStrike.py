@@ -14,6 +14,8 @@ from modules import sniffer
 from modules import arguments
 from modules import taskkill
 
+__VERSION__ == "2.0.0"
+
 # Summary:
 #   Function to clean arguments from sys call
 # Args:
@@ -28,7 +30,7 @@ def clean_args(args):
         116, 132, 136, 140, 149, 153,
         157, 161, 165]
 
-    if args['freq'] == "7":
+    if args['freq'] == "all":
         channels = [int(x) for x in args['channel'] if int(x) in xrange(12)]
         channels += [int(x) for x in args['channel'] if int(x) in five_hertz]
 
@@ -69,7 +71,7 @@ def main():
 
     signal.signal(signal.SIGINT, arguments.signal_handler)
 
-    args = arguments.deauth_args()
+    args = arguments.args_parser("deauth")
     channels = clean_args(args)
 
     sniffer_object = sniffer.Sniffer(

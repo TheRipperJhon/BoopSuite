@@ -27,7 +27,7 @@ __VERSION__ = "2.0.0"
 def welcome():
     os.system("clear")
 
-    print("BoopMon "+__VERSION__)
+    print("BoopSniff "+__VERSION__)
 
     return 0
 
@@ -56,7 +56,7 @@ def clean_args(args):
         116, 132, 136, 140, 149, 153,
         157, 161, 165]
 
-    if args['freq'] == "7":
+    if args['freq'] == "all":
         channels = [int(x) for x in args['channel'] if int(x) in xrange(12)]
         channels += [int(x) for x in args['channel'] if int(x) in five_hertz]
 
@@ -106,7 +106,7 @@ def main():
     # intercept ctrl+c key event
     signal.signal(signal.SIGINT, arguments.signal_handler)
 
-    args = arguments.sniffer_args()
+    args = arguments.args_parser("sniffer")
     channels = clean_args(args)
 
     sniffer_object = sniffer.Sniffer(

@@ -1,9 +1,11 @@
 import time
+import thread
 
 gALIVE = True
 gDEAUTH = False
 gSTARTTIME = time.time()
-gFILTERCHANNEL = None
+gFILTERCHANNEL = []
+gKILLTIME = 9999999
 
 gDEAUTHS = {
     1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [],
@@ -33,6 +35,10 @@ def get_elapsed_time():
     hour = (time_elapsed / 3600)
     mins = (time_elapsed % 3600) / 60
     secs = (time_elapsed % 60)
+
+    if secs > gKILLTIME:
+        gALIVE = False
+        thread.interrupt_main()
 
     if hour > 0:
         return "%d h %d m %d s" % (hour, mins, secs)

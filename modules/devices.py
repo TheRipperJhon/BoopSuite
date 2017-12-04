@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import time
+
 import pyric.pyw as pyw
 
 import globalsx
@@ -35,8 +37,13 @@ def get_channel(interface):
 
 
 def set_channel(card, channel):
-    return pyw.chset(card, channel, None)
-
+    while True:
+        try:
+            pyw.chset(card, channel, None)
+            return
+        except:
+            pass
+        time.sleep(1)
 
 def get_mac(card):
     return pyw.macget(card)
