@@ -1,6 +1,8 @@
 import time
 import thread
 
+__VERSION__ = "2.0.0"
+
 gALIVE = True
 gDEAUTH = False
 gSTARTTIME = time.time()
