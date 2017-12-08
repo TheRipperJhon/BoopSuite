@@ -4,6 +4,7 @@
 import os
 import re
 import sys
+import subprocess
 import requests
 import signal
 
@@ -62,9 +63,11 @@ def checkUpdate():
             update_file.write("rm -rf BoopSuite/\n")
             update_file.write("git clone https://github.com/MisterBianco/BoopSuite.git\n")
             update_file.write("BoopSuite/./install.py")
-            update_file.write("")
+            update_file.write("\n")
 
             os.system("sudo chmod +x ../../update.sh")
+            os.system("sudo ../.././update.sh")
+            sys.exit()
 
         else:
             pass
@@ -126,7 +129,7 @@ def clean_args(args):
 # Args:
 #   none
 def main():
-    checkUpdate()
+    #checkUpdate()
 
     welcome()
     arguments.root_check()
