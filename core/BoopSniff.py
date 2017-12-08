@@ -3,6 +3,8 @@
 
 import os
 import re
+import sys
+import requests
 import signal
 
 # Add Parent Directory to path
@@ -16,7 +18,9 @@ from modules import sniffer
 from modules import clients
 from modules import networks
 
-__VERSION__ = "2.0.0"
+version_file = open("../VERSION", 'r')
+__VERSION__ = version_file.read().strip()
+version_file.close()
 
 # Add Color classes somewhere
 
@@ -41,6 +45,29 @@ def pcap_dir_create():
         os.makedirs("pcaps")
 
     return 0
+
+def checkUpdate():
+    gitlink = "https://github.com/MisterBianco/BoopSuite/raw/master/VERSION"
+    page = requests.get(gitlink)
+    version = page.text.strip()
+
+    if version != __VERSION__:
+        os.system("clear")
+        update = raw_input("[Update Available] > (Y/n): ")
+
+        if update.lower() == "y":
+
+            update_file = open("../../../update.sh", 'w')
+            update_file.write("#!/bin/sh\n")
+            update_file.write("rm -rf Boop/\n")
+            update_file.write("git clone https://github.com/MisterBianco/BoopSuite.git\n")
+            update_file.write("cd Boop/")
+            update_file.write("./install.py")
+            update_file.write("")
+            
+        else:
+            pass
+    sys.exit(0)
 
 # Summary:
 #   Function to clean arguments from sys call
@@ -98,6 +125,7 @@ def clean_args(args):
 # Args:
 #   none
 def main():
+    checkUpdate()
 
     welcome()
     arguments.root_check()
