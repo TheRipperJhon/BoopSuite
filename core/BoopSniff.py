@@ -61,8 +61,7 @@ def checkUpdate():
             update_file.write("#!/bin/sh\n")
             update_file.write("rm -rf BoopSuite/\n")
             update_file.write("git clone https://github.com/MisterBianco/BoopSuite.git\n")
-            update_file.write("cd BoopSuite/")
-            update_file.write("./install.py")
+            update_file.write("./BoopSuite/install.py")
             update_file.write("")
 
             os.system("sudo chmod +x ../../update.sh")
