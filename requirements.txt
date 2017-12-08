@@ -1,3 +1,4 @@
 pyric
 netaddr
+requests
 scapy==2.3.3
