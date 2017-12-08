@@ -57,14 +57,16 @@ def checkUpdate():
 
         if update.lower() == "y":
 
-            update_file = open("../../../update.sh", 'w')
+            update_file = open("../../update.sh", 'w')
             update_file.write("#!/bin/sh\n")
-            update_file.write("rm -rf Boop/\n")
+            update_file.write("rm -rf BoopSuite/\n")
             update_file.write("git clone https://github.com/MisterBianco/BoopSuite.git\n")
-            update_file.write("cd Boop/")
+            update_file.write("cd BoopSuite/")
             update_file.write("./install.py")
             update_file.write("")
-            
+
+            os.system("sudo chmod +x ../../update.sh")
+
         else:
             pass
     sys.exit(0)
