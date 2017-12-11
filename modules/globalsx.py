@@ -1,8 +1,6 @@
 import time
 import thread
 
-__VERSION__ = "2.0.0"
-
 gALIVE = True
 gDEAUTH = False
 gSTARTTIME = time.time()
@@ -17,7 +15,6 @@ gDEAUTHS = {
     60: [], 64: [], 100: [], 104: [], 108: [], 112: [],
     116: [], 132: [], 136: [], 140: [], 149: [], 153: [],
     157: [], 161: [], 165: []
-
 }      # int Channel, list of lists
 
 gIGNORE = [

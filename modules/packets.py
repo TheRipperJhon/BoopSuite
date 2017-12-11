@@ -120,10 +120,8 @@ def get_security(packet):
 
 def get_vendor(addr3):
     try:
-        oui = (EUI(addr3)).oui.registration().org
+        return (EUI(addr3)).oui.registration().org
 
     # if not in mac database.
     except NotRegisteredError:
-        oui = "-"
-
-    return oui
+        return "-"

@@ -56,9 +56,7 @@ def clean_args(args):
         taskkill.kill_blocking_tasks()
 
     # Check if target mac is of valid length.
-    if args['target'] and not re.match(mac_regex, args['target'].lower()):
-        print("Invalid Target Selected.")
-        exit(102)
+    args['target'] = [x for x in args['target'] if re.match(mac_regex, x.lower())]
 
     channels = [x for x in channels if x != 0]
 

@@ -10,8 +10,6 @@ import argparse
 import devices
 import globalsx
 
-__VERSION__ = "1.1.4"
-
 # Summary:
 #   Function to check for root on linux
 # Args:

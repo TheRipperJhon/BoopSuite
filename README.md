@@ -10,8 +10,7 @@ BoopSuite a wireless pentesting suite designed to emulate aircrack-ng functional
 ## This suite includes:
 
 + A wireless sniffer
-+ Two gui's for the wireless sniffer (old/new)
-+ A wireless deauthentication script
++ A wireless deauthentication script <- Being revamped!
 + A monitor mode enabler
 
 ### Note:
@@ -26,12 +25,8 @@ would love to hear about it @ jayrad.security@protonmail.com
 
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=43LHEBX448Y48&lc=US&item_name=M1ND%2dB3ND3R&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
 
-
-## What else is coming?
-
-I am going to add scripts to do the following:
-+ BoopCoil   - Deauth attack detector
-+ BoopDate   - A script to update BoopMonsuite
+Bitcoin Address: 1Mncxgzf9246VGd8ckQ2EkKgdqidT5Uo8c
+Ethereum Address: 0x692762f768D28e15F9c8eDa371B6a46824eEc7A5
 
 More ideas are welcome.
 Email me @: jayrad.security@protonmail.com
@@ -80,7 +75,6 @@ Email me @: jayrad.security@protonmail.com
 
 `BoopStrike -i wlan1mon -s xx:xx:xx:xx:xx:xx`
 
-
 #### Set card to monitor mode:
 
 `BoopMon -i wlan1`
@@ -110,8 +104,6 @@ Note: Will do error checking if you specify a channel the card doesnt support an
 `BoopMon -i wlan1 -n BoopMon1 -c 11 -k`
 
 NOTE: BoopMon will always switch the mode from managed to monitor and vice versa.
-
-![This Used To Be An Image But Now It Is Not. :(](Images/GUI.png "BoopSuite")
 
 Note: all pcap files will be saved in the directory ~/pcaps
 

@@ -45,6 +45,7 @@ def set_channel(card, channel):
             pass
         time.sleep(1)
 
+
 def get_mac(card):
     return pyw.macget(card)
 
