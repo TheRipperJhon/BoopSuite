@@ -19,6 +19,7 @@ getLogger("scapy.runtime").setLevel(ERROR)
 
 conf.iface = "wlan1mon"         # NEED TO IMPLEMENT FIX FOR DEAUTH ISSUE
 
+__VERSION__ = "2.0.0"
 
 class Sniffer:
 

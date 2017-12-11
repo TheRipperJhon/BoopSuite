@@ -18,9 +18,7 @@ from modules import sniffer
 from modules import clients
 from modules import networks
 
-version_file = open("../VERSION", 'r')
-__VERSION__ = version_file.read().strip()
-version_file.close()
+__VERSION__ = "2.0.0"
 
 # Add Color classes somewhere
 

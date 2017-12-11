@@ -10,6 +10,8 @@ import argparse
 import devices
 import globalsx
 
+__VERSION__ = "2.0.0"
+
 # Summary:
 #   Function to check for root on linux
 # Args:
@@ -45,10 +47,6 @@ def signal_handler(*args):
 
 # Function to gather all arguments passed by CLI
 def args_parser(caller):
-
-    version_file = open("../VERSION", 'r')
-    __VERSION__ = version_file.read().strip()
-    version_file.close()
 
     # Instantiate parser object
     parser = argparse.ArgumentParser()

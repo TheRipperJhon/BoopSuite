@@ -14,9 +14,7 @@ from modules import devices
 from modules import arguments
 from modules import taskkill
 
-version_file = open("../VERSION", 'r')
-__VERSION__ = version_file.read().strip()
-version_file.close()
+__VERSION__ = "2.0.0"
 
 # Moved reused code to WeeHelper
 
