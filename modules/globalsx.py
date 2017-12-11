@@ -5,7 +5,7 @@ gALIVE = True
 gDEAUTH = False
 gSTARTTIME = time.time()
 gFILTERCHANNEL = []
-gKILLTIME = 9999999
+gKILLTIME = None
 
 gDEAUTHS = {
     1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [],
@@ -35,7 +35,7 @@ def get_elapsed_time():
     mins = (time_elapsed % 3600) / 60
     secs = (time_elapsed % 60)
 
-    if time_elapsed > gKILLTIME:
+    if gKILLTIME and time_elapsed > gKILLTIME:
         gALIVE = False
         thread.interrupt_main()
 
