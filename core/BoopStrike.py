@@ -42,7 +42,7 @@ def clean_args(args):
             channels = list(xrange(12))
 
     elif args['freq'] == "5":
-        channels = [int(x) for x in args['channel'] if int(x) in five_herts]
+        channels = [int(x) for x in args['channel'] if int(x) in five_hertz]
 
         if not channels:
             channels = five_hertz
