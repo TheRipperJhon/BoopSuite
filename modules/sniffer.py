@@ -54,8 +54,6 @@ class Sniffer:
         self.mDeauthPackets = packets
         self.mSkip = skip
 
-        print(channels)
-
         globalsx.gDEAUTH = deauth
 
         self.mTime = kill_time
