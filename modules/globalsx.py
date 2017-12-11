@@ -35,7 +35,7 @@ def get_elapsed_time():
     mins = (time_elapsed % 3600) / 60
     secs = (time_elapsed % 60)
 
-    if secs > gKILLTIME:
+    if time_elapsed > gKILLTIME:
         gALIVE = False
         thread.interrupt_main()
 

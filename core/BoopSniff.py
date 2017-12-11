@@ -138,6 +138,7 @@ def main():
     args = arguments.args_parser("sniffer")
     channels = clean_args(args)
 
+
     sniffer_object = sniffer.Sniffer(
         args['interface'],
         channels,
