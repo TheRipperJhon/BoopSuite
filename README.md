@@ -26,6 +26,7 @@ would love to hear about it @ jayrad.security@protonmail.com
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=43LHEBX448Y48&lc=US&item_name=M1ND%2dB3ND3R&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
 
 Bitcoin Address: 1Mncxgzf9246VGd8ckQ2EkKgdqidT5Uo8c
+
 Ethereum Address: 0x692762f768D28e15F9c8eDa371B6a46824eEc7A5
 
 More ideas are welcome.
