@@ -164,9 +164,8 @@ def welcomeText():
 def main():
 
     os.system("git clone https://github.com/secdev/scapy")
-    os.system("python scapy/setup.py install")
 
-    print("Please notice that scapy requires the latest dev branch @: https://github.com/secdev/scapy")
+    print("Downloaded dev branch of scapy.")
     # Check for proper permissions.
     arguments.root_check();
 
@@ -175,6 +174,9 @@ def main():
 
     # Create custom commands for the tools.
     createCustomCommand()
+
+    os.chdir("scapy")
+    os.system("sudo python setup.py build install")
 
     return 0;
 
