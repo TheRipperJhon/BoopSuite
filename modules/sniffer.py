@@ -17,8 +17,6 @@ import networks
 
 getLogger("scapy.runtime").setLevel(ERROR)
 
-conf.iface = "wlan1mon"         # NEED TO IMPLEMENT FIX FOR DEAUTH ISSUE
-
 __VERSION__ = "2.0.0"
 
 class Sniffer:
@@ -48,6 +46,8 @@ class Sniffer:
         self.mTarget = target
         self.mOpen = open_network
         self.mMAC = mac
+
+        conf.iface = interface
 
         if kill_time:
             globalsx.gKILLTIME = kill_time
