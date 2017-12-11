@@ -57,7 +57,6 @@ def pymon(interface, name, mac, kill, ch=None):
     devices.card_down(card)
 
     if mode == "managed":
-        print("managed")
         newcard = devices.set_monitor_mode(card, name)
 
     elif mode == "monitor":

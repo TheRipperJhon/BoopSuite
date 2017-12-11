@@ -163,8 +163,9 @@ def welcomeText():
 
 def main():
 
-    # os.system("git clone https://github.com/secdev/scapy")
-    # os.system("scapy/./scapy")
+    os.system("git clone https://github.com/secdev/scapy")
+    os.system("python scapy/setup.py install")
+
     print("Please notice that scapy requires the latest dev branch @: https://github.com/secdev/scapy")
     # Check for proper permissions.
     arguments.root_check();
