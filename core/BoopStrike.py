@@ -80,7 +80,8 @@ def main():
         None,
         None,
         args['time'],
-        True
+        True,
+        args['packets']
     )
 
     sniffer_object.run()
