@@ -32,6 +32,11 @@ Ethereum Address: 0x692762f768D28e15F9c8eDa371B6a46824eEc7A5
 More ideas are welcome.
 Email me @: jayrad.security@protonmail.com
 
+# Requirements:
+
++ Kali linux or Parrot linux
++ dev version of scapy
+
 # Examples:
 
 ![This Used To Be An Image But Now It Is Not. :(](Images/Running.png "BoopSuite")
@@ -59,6 +64,10 @@ Email me @: jayrad.security@protonmail.com
 #### If you want to filter by a specific AP mac address:
 
 `BoopSniff -i wlan1mon -a xx:xx:xx:xx:xx:xx`
+
+#### If you want to filter by a list of AP mac address:
+
+`BoopSniff -i wlan1mon -a xx:xx:xx:xx:xx:xx yy:yy:yy:yy:yy:yy`
 
 #### To launch a deauth attack:
 
