@@ -10,7 +10,7 @@ BoopSuite a wireless pentesting suite designed to emulate aircrack-ng functional
 ## This suite includes:
 
 + A wireless sniffer
-+ A wireless deauthentication script <- Being revamped!
++ A wireless deauthentication script
 + A monitor mode enabler
 
 ### Note:
@@ -25,7 +25,7 @@ would love to hear about it @ jayrad.security@protonmail.com
 
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=43LHEBX448Y48&lc=US&item_name=M1ND%2dB3ND3R&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted)
 
-Bitcoin Address: 1FcciaEEMCae9Qx6VdQ9ZqFfZ5zzR1AoD7
+Bitcoin Address: 1KJizmcsb7xRy9UwyYbgsy9NzSGdXMdaKy
 
 Ethereum Address: 0xadd48827c47e809670737600f1456873bac31201
 
