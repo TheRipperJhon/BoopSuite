@@ -15,6 +15,8 @@ import packets
 import clients
 import networks
 
+from pyric.lib import libnl as nl
+
 getLogger("scapy.runtime").setLevel(ERROR)
 
 __VERSION__ = "2.0.0"
@@ -126,9 +128,12 @@ class Sniffer:
 
         interface = devices.get_device(self.mInterface)
 
+        s = nl.nl_socket_alloc(timeout=1)
+
         # Repeat until program exits.
         while globalsx.gALIVE:
 
+            start = time.time()
             try:
 
                 if len(globalsx.gFILTERCHANNEL) != len(self.mTarget):
@@ -144,7 +149,7 @@ class Sniffer:
                     else:
                         channel = choice(self.mChannels)
 
-                    devices.set_channel(interface, channel)
+                    devices.set_channel(interface, channel, s)
                     self.mChannel = channel
 
                     if len(globalsx.gFILTERCHANNEL) == 1:
@@ -157,8 +162,13 @@ class Sniffer:
                 print("Error on interpreter shutdown. Disregard.")
                 sys.exit(0)
 
+            except:
+                print("Error")
+
+            print(time.time() - start)
             time.sleep(2.75)
 
+        nl.nl_socket_free(s)
         # Exit hopper.
         return
 
